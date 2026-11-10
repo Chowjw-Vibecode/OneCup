@@ -1,0 +1,197 @@
+/* Geometry and original artwork matched to the approved 1586 × 992 boards.
+   Telemetry, names and controls stay live; no screenshot is used as a UI. */
+:root{--paper:#fcfbf8;--panel:#fcfbf8;--raised:#fffefa;--input:#faf8f4;--ink:#082c46;--muted:#526f87;--green:#268239;--blue:#0785f4;--red:#ff4d3d;--brown:#85431e;--purple:#9145b0}
+.brand svg{stroke:var(--ink)!important;fill:none;width:3.8vw;height:3vw}.brand strong{font-size:2.7vw;font-weight:700}.brand-note{font-size:1.25vw!important;letter-spacing:.2em}.topbar{padding:0 1vw}.connection{font-size:1.5vw}.ceramic-stage-title h2{font-size:1.9vw;font-weight:700}
+body[data-ceramic-screen=ready] .ceramic-stage-title{display:none}
+body[data-ceramic-screen=ready] #ceramicCupArt{left:-2.4vw;top:-.5vh;width:50.5vw;height:78vh;background-size:100vw auto;background-position:0 -6.05vw;border-radius:0;mask-image:linear-gradient(to right,#000 94%,transparent),linear-gradient(to bottom,transparent,#000 1.5%,#000 98.5%,transparent);mask-composite:intersect}
+body[data-ceramic-screen=ready] #ceramicCupArt::after{display:none}
+body[data-ceramic-screen=ready] .recipe-rail{right:1%;top:8%;width:42.5%;height:86%}
+body[data-ceramic-screen=ready] #recipeName{font-size:5.7vw;font-weight:700;max-width:83%}
+body[data-ceramic-screen=ready] #recipeName[data-long-name=true]{font-size:3.3vw}
+body[data-ceramic-screen=ready] .ceramic-beans-link strong{font-size:3vw;font-weight:650}
+body[data-ceramic-screen=ready] .ceramic-recipe-values strong{font-size:3.6vw}
+/* Finished cup: keep the same summary ribbon, five-series plot and tasting card. */
+body[data-ceramic-screen=taste] .recipe-rail{left:-2.4vw;top:-2.4vh;width:66.1vw;height:20.9vh;padding:4.4vh 4.1vw 0;border-radius:0 25% 28% 0/0 55% 45% 0;background:#def3fc}
+body[data-ceramic-screen=taste] .recipe-head{width:24%;min-width:0}
+body[data-ceramic-screen=taste] #recipeName{font-size:4.5vw;font-weight:700;line-height:1.1}
+body[data-ceramic-screen=taste] #recipeName[data-long-name=true]{font-size:2.15vw;line-height:1.12}
+body[data-ceramic-screen=taste] #ceramicBeans{left:4.1vw;bottom:2.6vh;width:22%}
+body[data-ceramic-screen=taste] #ceramicBeanName{font-size:1.45vw;font-weight:400}
+body[data-ceramic-screen=taste] .ceramic-recipe-values{left:29.6%;right:2%;top:27%}
+body[data-ceramic-screen=taste] .ceramic-recipe-values strong{font-size:3.4vw;font-weight:650}
+body[data-ceramic-screen=taste] .ceramic-recipe-values small{font-size:1.75vw}
+body[data-ceramic-screen=taste] .ceramic-recipe-values span{font-size:1.45vw;margin-top:.65vw}
+body[data-ceramic-screen=taste] .brew-stage{top:24%;height:73%;width:66%;display:grid;grid-template-rows:minmax(0,1fr)}
+body[data-ceramic-screen=taste] .brew-stage,
+body[data-ceramic-screen=taste] .chart-panel{grid-template-columns:minmax(0,1fr)}
+body[data-ceramic-screen=taste] :is(.chart-panel,.chart-wrap,#ceramicChartReadout){min-width:0}
+body[data-ceramic-screen=taste] .chart-panel{display:grid;grid-template-rows:minmax(0,1fr) 5.3vh 5.6vh;gap:1.5vh}
+body[data-ceramic-screen=taste] .chart-wrap{grid-row:1}
+body[data-ceramic-screen=taste] .chart-header{grid-row:2;align-self:center}
+body[data-ceramic-screen=taste] .chart-caption{display:none}
+body[data-ceramic-screen=taste] #ceramicChartReadout{grid-row:3;display:flex;white-space:nowrap;justify-content:space-between;gap:.55vw;padding:.5vw 1vw;font-size:1.1vw;flex-wrap:nowrap}
+body[data-ceramic-screen=taste] #ceramicChartReadout strong{font-size:1.8vw}
+body[data-ceramic-screen=taste] #ceramicTastePanel{display:block;right:-.1vw;top:-1.6vh;width:31.8vw;height:88.4vh;padding:0;border-radius:2vw;background:linear-gradient(135deg,#fffefa,#faf8f4);box-shadow:inset 0 2px 4px white,0 .3vw .9vw #534a3620}
+#ceramicTastePanel>header,#ceramicLike,.ceramic-sensory,.ceramic-note-label,#ceramicNote,.ceramic-taste-actions{box-sizing:border-box}
+body[data-ceramic-screen=taste] #ceramicTastePanel>header{position:absolute;left:7%;right:6%;top:5.4%;height:6%}
+body[data-ceramic-screen=taste] #ceramicTastePanel h2{font-size:2.5vw;font-weight:700}
+body[data-ceramic-screen=taste] #ceramicTastePanel header small{font-size:1.3vw}
+body[data-ceramic-screen=taste] #ceramicLike{position:absolute;left:7%;right:6%;top:13%;height:8.8%;padding:.3vw;background:#fcfaf6;border:1px solid #d4dbe0;box-shadow:inset 0 2px 2px white,0 .3vw .4vw #283c4a24}
+.ceramic-segmented button{font-size:1.6vw;border-radius:0;box-shadow:none!important}.ceramic-segmented button+button{border-left:1px solid var(--line)}
+.ceramic-segmented button.selected{border-radius:.8vw;background:#f9d1b2}
+body[data-ceramic-screen=taste] .ceramic-sensory{position:absolute;left:6.5%;right:6%;top:24.7%;height:38.5%;padding:0;display:flex;justify-content:space-around;gap:0}
+.ceramic-sensory label{position:relative;min-height:56px;gap:1.5vw!important}
+.ceramic-sensory label>span{font-size:2vw;font-weight:600;margin:0}
+.ceramic-sensory small{font-size:1.4vw}
+.ceramic-sensory label>small:last-of-type{position:absolute;right:0;top:calc(50% + 18px)}
+.ceramic-sensory [data-ceramic-clear]{position:absolute;right:-1.7vw;top:calc(50% - 15px);opacity:0;min-width:24px;font-size:1.1vw}
+.ceramic-sensory label:focus-within [data-ceramic-clear],.ceramic-sensory label:hover [data-ceramic-clear]{opacity:1}
+.ceramic-sensory input[type=range]{height:48px;min-height:48px}
+.ceramic-sensory input[type=range]::-webkit-slider-runnable-track{height:18px;border-radius:0;background:repeating-linear-gradient(90deg,#1b4a70 0 1px,transparent 1px 10%) 0 0/100% 11px no-repeat,linear-gradient(#e8f0f1,#c5dbe6) 0 10px/100% 8px no-repeat;box-shadow:none}
+.ceramic-sensory input[type=range]::-webkit-slider-thumb{width:2.8vw;height:2.8vw;min-width:30px;min-height:30px;margin-top:-.8vw;border:0;border-radius:50%;transform:none;box-shadow:none;background-image:url('./assets/ceramic/taste-reference.png');background-size:3604.55% 2254.55%;background-position:80.74% 35.34%}
+#ceramicSweet::-webkit-slider-thumb{background-position:88.98% 46.31%}
+#ceramicBitter::-webkit-slider-thumb{background-position:80.48% 57.28%}
+body[data-ceramic-screen=taste] .ceramic-note-label{position:absolute;left:7%;right:6%;top:63%;height:7.5%;padding-top:2vh;border-top:1px solid var(--line);font-size:1.8vw;font-weight:600}
+body[data-ceramic-screen=taste] #ceramicFlavors{position:absolute;right:6%;top:64.1%;height:6%;margin:0;font-size:1.5vw;background:none}
+#ceramicFlavors::before{width:3.4vw;height:3.6vw;min-width:0;min-height:0;mask:none;border-radius:50%;background-image:url('./assets/ceramic/taste-reference.png');background-size:2883.64% 1710.34%;background-position:91.7% 68.84%}
+body[data-ceramic-screen=taste] #ceramicNote{position:absolute;left:7%;width:87%;top:70.5%;height:12%;min-height:0;font-size:1.5vw;padding:1vw 1.3vw;background:#fcfaf6;box-shadow:inset 0 2px 5px #645c4220;border:1px solid #d4d2cb}
+body[data-ceramic-screen=taste] .ceramic-taste-actions{position:absolute;left:7%;right:5%;top:85.5%;height:10.2%;gap:.7vw}
+body[data-ceramic-screen=taste] .ceramic-taste-actions .button{font-size:2.4vw;min-height:44px;border-radius:1.2vw;font-weight:650}
+body[data-ceramic-screen=taste] .control-bar{border:0}
+body[data-ceramic-screen=taste] .ceramic-next-actions button{font-size:1.7vw;min-height:48px;height:8vh;padding:.8vw 1.2vw}
+body[data-ceramic-screen=taste] #ceramicRepeat{flex:1.3;border-radius:4vw;background:linear-gradient(145deg,#f1fbff,#d9f0fc)}
+body[data-ceramic-screen=taste] #ceramicTasteSteam{border-radius:4vw}
+body[data-ceramic-screen=taste] #ceramicTweak,body[data-ceramic-screen=taste] #ceramicChangeProfile{flex:.8}
+/* Ceramic instruments: dimensional rim, fine inner face, matching live hand. */
+.gauge{background:radial-gradient(circle at 50% 50%,#fcfaf4 0 66%,#d3cec3 67%,#fffef9 69%,#f8f5ee 72%,#c6c1b5 74%,#fffefa 76%);box-shadow:inset .1vw .2vw .3vw white,0 .7vw .8vw #233c4d30}
+.gauge .dial-hand{stroke:#d0cabb;stroke-width:.7;filter:drop-shadow(1px 2px 1.3px #293b4e55)}
+.gauge .dial-hand circle{fill:#f4f0e6;stroke:#d4cfc3;stroke-width:1.4}
+.gauge .dial-ticks path{stroke-width:.6}.gauge .dial-ticks text{font-size:13px}
+@media(max-aspect-ratio:13/10){#app{min-width:960px}.ceramic-steam-dialog,.ceramic-adjust-dialog{min-width:960px}}
+/* The original lockup is one image: icon, Chinese wordmark and English spacing. */
+.brand,.gp-brand,.beans-brand{display:block!important;width:22.2vw!important;height:4vw!important;flex:none!important;line-height:0!important}
+.brand svg.thiscup-brand-art,.gp-brand svg.thiscup-brand-art,.beans-brand svg.thiscup-brand-art{width:100%!important;height:100%!important;display:block!important;fill:none!important;stroke:none!important;filter:none!important;overflow:hidden}
+.brand svg.thiscup-brand-art image,.gp-brand svg.thiscup-brand-art image,.beans-brand svg.thiscup-brand-art image{width:1586px;height:992px}
+.ceramic-adjust-dialog>.dialog-header,.ceramic-steam-dialog>.dialog-header{height:10.5vh;min-height:60px;position:relative;padding:0 3.2vw;display:flex;align-items:center}
+.ceramic-adjust-dialog>.dialog-header h2,.ceramic-steam-dialog>.dialog-header h2{position:absolute;left:35%;width:30%;margin:0;text-align:center;font-size:2.1vw}
+.ceramic-adjust-dialog>.dialog-header .close-button,.ceramic-steam-dialog>.dialog-header .close-button{margin-left:auto}
+/* Steam photograph keeps the original milk surface and wand. Only the clock is live. */
+.ceramic-steam-art{background-image:url('./assets/ceramic/steam-clean.png');background-size:100vw auto;background-position:0 -10.5vh;border-radius:0;overflow:hidden}
+.ceramic-steam-clock{left:25%;top:34%;width:52%;height:42%;padding:0;background:none;box-shadow:none;border-radius:0;gap:.6vh}
+.ceramic-steam-clock>strong{font-size:8.7vw!important;line-height:1.08;margin:1.2vh 0 1.3vh}
+.ceramic-steam-clock>span{font-size:1.8vw}.ceramic-steam-clock>b{font-size:3.3vw!important}
+.ceramic-steam-clock>span:nth-of-type(2){border-top:1px solid #9babb1;padding-top:2vh;min-width:13vw;text-align:center}
+.ceramic-steam-progress{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 1px 2px #a6693640)}
+#ceramicSteamArc{transition:stroke-dasharray .3s linear}
+.ceramic-steam-right{padding:6vh 3.3vw 10vh 2vw;justify-content:flex-start;gap:3vh}
+.ceramic-steam-params{height:52vh;padding:2.5vh 1.7vw;border-radius:4.5vw;background:linear-gradient(120deg,#fefdf9,#faf8f2);box-shadow:inset 0 0 0 .25vw #fffefa,0 .65vw 1vw #6456412a}
+.ceramic-steam-param{position:relative;height:30%;padding:2.4vh 0;grid-template-columns:minmax(0,1.15fr) minmax(44px,.65fr) minmax(0,1.7fr) minmax(44px,.65fr);gap:.65vw}
+.ceramic-steam-param:first-child{height:40%;padding-bottom:6.4vh;align-items:start}
+.ceramic-steam-param label{font-size:1.9vw;font-weight:600}.ceramic-steam-param:first-child label{align-self:start;padding-top:2.3vh}.ceramic-steam-param button[data-ceramic-steam-edit]{min-height:10vh;border-radius:1.2vw}
+#ceramicSteamActual{position:absolute;left:34%;right:5%;bottom:1.6vh;margin:0;text-align:center;font-size:1.7vw}
+#ceramicSteamStop{height:15.3vh;font-size:3.6vw;margin-top:0;border-radius:1.8vw}
+#ceramicSteamStop::before{content:'■';font-size:3vw;margin-right:2vw}
+/* A single baseline for labels, not a different font for each screen. */
+.legend{font-size:1.1vw;gap:1.1vw}.legend i{width:3vw;height:3px}
+body[data-ceramic-screen=taste] .recipe-rail{background:none;border-radius:0;isolation:isolate}
+body[data-ceramic-screen=taste] .recipe-rail::before{content:'';position:absolute;inset:0;z-index:-1;background:#dff2fa;clip-path:ellipse(95% 63% at 5% 39%)}
+body[data-ceramic-screen=taste] .recipe-head{padding-top:1.9vh}
+body[data-ceramic-screen=taste] #ceramicTastePanel{right:-.3vw;width:31.8vw}
+body[data-ceramic-screen=taste] #ceramicChartReadout{font-size:1.08vw}
+body[data-ceramic-screen=taste] #ceramicBeans{bottom:2.4vh}
+/* Exact Decent GHC outlines, shared by shortcuts and physical-start hints. */
+.ghc-start-hint{display:flex;align-items:center;justify-content:center;gap:1.3vw}
+.ghc-start-hint .ghc-button-icon{display:block;flex:none;width:3.4vw;height:3.4vw;min-width:32px;min-height:32px;fill:currentColor;stroke:none;color:var(--ink)}
+.ghc-start-hint>span{text-align:left}
+#stateDetail.ghc-start-hint{justify-content:flex-start;padding-left:.8vw;gap:1.7vw}
+#stateDetail .ghc-button-icon{width:4vw;height:4vw}
+#hotWaterStartHint.ghc-start-hint{justify-content:flex-start}
+.ceramic-adjust-dialog>.dialog-header>.brand,.ceramic-steam-dialog>.dialog-header>.brand{position:absolute;left:3.2vw;top:2.65vh}
+.brand,.gp-brand,.beans-brand{mix-blend-mode:multiply}
+.brand svg.thiscup-brand-art,.gp-brand svg.thiscup-brand-art,.beans-brand svg.thiscup-brand-art{filter:none!important}
+:root[data-theme=dark] :is(.brand,.gp-brand,.beans-brand){mix-blend-mode:normal}
+:root[data-theme=dark] :is(.brand,.gp-brand,.beans-brand) svg.thiscup-brand-art{filter:brightness(0) invert(.94)!important}
+:root[data-theme=dark] body[data-ceramic-screen=ready] #ceramicCupArt{border-radius:0 50% 46% 0/0 35% 32% 0}
+#hotWaterStartHint.ghc-start-hint{font:400 clamp(14px,1.15vw,19px)/1.5 var(--font-ui);gap:14px}
+#hotWaterStartHint .ghc-button-icon{width:38px;height:38px}
+/* Icon defaults must not outline the dial's ceramic surfaces and texture. */
+.gauge>svg{stroke:none}
+.gauge .dial-ceramic,.gauge .dial-hub{stroke:none}
+.gauge{background:none;box-shadow:0 .75vw .8vw #233c4d26}
+.gauge .dial-ticks text{fill:var(--ink)}
+body[data-ceramic-screen=brew] .gauge-reading strong,
+body[data-ceramic-screen=brew] #liveTemperature{font-size:clamp(28px,3.2vw,52px);line-height:1}
+.legend i.target-color{height:0;border-top:2px dashed var(--blue);background:none}
+body[data-ceramic-screen=ready] #ceramicBeans.unlinked #ceramicBeanName{font:400 1.55vw/1.5 var(--font-ui);color:var(--muted)}
+.ceramic-next-actions #ceramicTweak,.ceramic-next-actions #ceramicChangeProfile{display:flex;align-items:center;justify-content:center;gap:.8vw}
+.ceramic-next-actions #ceramicTweak svg,.ceramic-next-actions #ceramicChangeProfile svg{width:2.3vw;height:2.3vw;flex:none}
+
+body[data-ceramic-screen=taste] .ceramic-next-actions{transform:translateY(-1.8vh)}
+
+body[data-ceramic-screen=brew] #connectionDot.online{background:#f7a77e}
+body[data-ceramic-screen=brew] #powerButton{visibility:hidden}
+body[data-ceramic-screen=brew] .chart-caption{display:none}
+body[data-ceramic-screen=brew] .chart-panel{grid-template-rows:minmax(0,1fr) auto}
+body[data-ceramic-screen=brew] .control-bar{border:0;background:none}
+body[data-ceramic-screen=brew] #tareButton{display:none}
+body[data-ceramic-screen=brew] .control-bar .ceramic-brew-actions{justify-content:flex-end}
+body[data-ceramic-screen=brew] #stopButton{height:10.2vh;max-height:none;transform:translateY(-6.5vh);border-radius:1.2vw}
+
+.ceramic-adjust-eyebrow{position:absolute;top:15.5vh;left:5vw;font:400 1.5vw/1.4 var(--font-caption);color:var(--muted);z-index:1}
+.ceramic-adjust-dialog #ceramicAdjustName{top:20vh}
+.ceramic-adjust-dialog #ceramicAdjustName[data-long-name=true]{font-size:clamp(24px,3.1vw,50px);right:30vw;line-height:1.13}
+.ceramic-adjust-dialog .parameters{top:31.2vh;height:40.3vh;padding-top:6vh;border-radius:9% 8% 10% 9%/30% 32% 24% 31%}
+.ceramic-adjust-dialog .save-options button{color:var(--ink)}
+
+/* Gauge geometry follows the three 330 px faces on the approved board. */
+body[data-ceramic-screen=brew] .brew-stage{grid-template-rows:51% minmax(0,1fr);gap:3.2%}
+body[data-ceramic-screen=brew] .instruments{height:auto;padding:1.5vh 2vw .5vh;gap:2.1%}
+body[data-ceramic-screen=brew] .instruments:before{inset:-3.4vh -.2vw -1.8vh -2.4vw;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1100 450' preserveAspectRatio='none'%3E%3Cpath fill='%23d7edf5' d='M0 0C340 70 650 15 900 50C1060 70 1100 140 1100 235C1100 355 1065 405 920 435C650 480 240 435 0 360Z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+body[data-ceramic-screen=brew] .recipe-rail{width:27.2%;top:3.4%;padding-left:3vw;border:0}
+body[data-ceramic-screen=brew] #recipeName{font-size:4.15vw}
+body[data-ceramic-screen=brew] .ceramic-live-side{top:0;width:27.2%;height:108%;padding:0;border-left:1px solid var(--line);pointer-events:none}
+body[data-ceramic-screen=brew] .ceramic-live-side>.eyebrow{position:absolute;left:3vw;top:28.3vh}
+body[data-ceramic-screen=brew] .weight-reading{position:absolute;left:3vw;top:32.4vh;margin:0;line-height:1.1}
+body[data-ceramic-screen=brew] .weight-reading strong{font-size:4.9vw}
+body[data-ceramic-screen=brew] .weight-reading>span{font-size:2.2vw}
+body[data-ceramic-screen=brew] #weightNote{display:none}
+body[data-ceramic-screen=brew] #ceramicCupFlow{position:absolute;left:3vw;top:41.7vh;margin:0}
+body[data-ceramic-screen=brew] .progress-track{position:absolute;left:3vw;right:4.5vw;top:48.2vh;margin:0;height:1.5vh}
+#ceramicWeightPercent{display:none}
+body[data-ceramic-screen=brew] #ceramicWeightPercent{display:block;position:absolute;right:0;top:47.1vh;font:500 1.8vw/1.4 var(--font-number)}
+body[data-ceramic-screen=brew] .ceramic-time{position:absolute;left:3vw;right:.5vw;top:52.4vh;padding-top:3.8vh;gap:1.2vh}
+.ceramic-stage-title{left:31.5%;right:31.5%;top:3.7vh}
+.ceramic-stage-title h2{line-height:1.25}
+.ceramic-stage-title #phaseName{display:block;margin-top:.7vh}
+.keypad-display{padding:1.5vw 1.1vw;text-align:center}
+.keypad-display #keypadValue{font-size:clamp(36px,4.3vw,68px);min-height:0}
+.keypad-display #keypadUnit{margin:.5vw 0 1.5vw}
+.keypad-display #keypadError{margin:.6vw 0 0;min-height:1.5em;overflow-wrap:anywhere}
+.ceramic-steam-param button[data-ceramic-steam-edit]:disabled{opacity:1}
+/* Non-coffee operations show their own state, never a coffee recipe or trace. */
+body[data-ceramic-screen=operation] :is(#ceramicCupArt,.recipe-rail,.brew-stage,.ceramic-live-side,#ceramicTastePanel,#powerButton){display:none}
+body[data-ceramic-screen=operation] #ceramicStateArt{inset:0;width:100%;gap:1vh}
+body[data-ceramic-screen=operation] #ceramicStateArt img{max-width:80%;max-height:86%}
+body[data-ceramic-screen=operation] #ceramicStateArt p{font-size:clamp(20px,2vw,32px)}
+body[data-ceramic-screen=operation] .control-bar>:is(.aux-button,.device-shortcut,#settingsButton){display:none}
+body[data-ceramic-screen=operation] .control-bar .ceramic-brew-actions{display:flex;width:100%;justify-content:flex-end}
+body[data-ceramic-screen=operation] #tareButton{display:none}
+body[data-ceramic-screen=operation] #stopButton{width:27%;height:9vh;min-height:44px;transform:none}
+/* Editable figures keep the small pen cue from the approved adjustment board. */
+.ceramic-adjust-dialog .number-button:after{content:'';display:inline-block;flex:none;width:1.25vw;height:1.25vw;min-width:14px;min-height:14px;margin-left:.6vw;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='m4 16-1 5 5-1L21 7a2.8 2.8 0 0 0-4-4L4 16Zm11-11 4 4M4 16l4 4'/%3E%3C/svg%3E") center/contain no-repeat}
+.ceramic-adjust-dialog #profileDetails{display:flex;align-items:center;gap:1.3vw}
+.ceramic-adjust-dialog #profileDetails:before{content:'';width:6.5vw;height:4vw;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath fill='none' stroke='black' stroke-width='1.5' d='M8 49C28 18 31 13 45 30S62 46 91 9'/%3E%3Ccircle cx='8' cy='49' r='4' fill='white' stroke='black' stroke-width='1.5'/%3E%3Ccircle cx='91' cy='9' r='4' fill='white' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") center/contain no-repeat}
+/* Hot water uses the same paper, ceramic relief and blue field as the steam page. */
+#ceramicStateArt.water-running{background:transparent;display:block}
+#ceramicStateArt.water-running>p{display:none}
+#ceramicWaterRunning{height:100%;width:100%;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:7vw;padding:4vh 5vw;box-sizing:border-box}
+#ceramicWaterRunning .water-clock{border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--paper);box-shadow:inset 3px 4px 5px #fff, inset -3px -4px 8px #d9d5ca, 8px 15px 22px #082c4620;position:relative}
+#ceramicWaterRunning .water-clock:before{content:'';position:absolute;inset:-5%;z-index:-1;border-radius:43% 57% 54% 46%;background:#def3fc}
+#ceramicWaterRunning .water-clock svg{width:18%;height:20%;color:var(--muted);margin-bottom:2vh}
+#ceramicWaterRunning span{font-size:2vw;color:var(--muted)}
+#ceramicWaterRunning .water-clock strong{font-size:9vw;font-weight:600;line-height:1.1}
+#ceramicWaterRunning small{font-size:2vw}
+#ceramicWaterRunning .water-readings{padding:3vh 3vw;border-radius:3vw;background:var(--paper);box-shadow:inset 2px 3px 4px #fff, 5px 8px 14px #082c461a}
+#ceramicWaterRunning .water-readings>div{display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:1vw;padding:3vh 0;border-bottom:1px solid var(--line)}
+#ceramicWaterRunning .water-readings>div:last-child{border-bottom:0}
+#ceramicWaterRunning .water-readings strong{font-size:4vw;font-weight:600}

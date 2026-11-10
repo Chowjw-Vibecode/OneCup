@@ -1,0 +1,43 @@
+{
+  "sleep": [
+    "assets/sleep/1280x800/Black Steel.jpg",
+    "assets/sleep/1280x800/Cozy-Home.jpg",
+    "assets/sleep/1280x800/Floral.jpg",
+    "assets/sleep/1280x800/Lomen.jpg",
+    "assets/sleep/1280x800/apartment.jpg",
+    "assets/sleep/1280x800/aztec.jpg",
+    "assets/sleep/1280x800/black_saver.jpg",
+    "assets/sleep/1280x800/cafe_girls.jpg",
+    "assets/sleep/1280x800/cities.jpg",
+    "assets/sleep/1280x800/cups.jpg",
+    "assets/sleep/1280x800/dark_choices.jpg",
+    "assets/sleep/1280x800/emmyart1.jpg",
+    "assets/sleep/1280x800/graffiti_1.jpg",
+    "assets/sleep/1280x800/graffiti_2.jpg",
+    "assets/sleep/1280x800/graffiti_wall.jpg",
+    "assets/sleep/1280x800/green-cup.jpg",
+    "assets/sleep/1280x800/jim_shaw.jpg",
+    "assets/sleep/1280x800/minimalism.jpg",
+    "assets/sleep/1280x800/photomanipulation.jpg",
+    "assets/sleep/1280x800/rainbow_dj.jpg",
+    "assets/sleep/1280x800/splash_noir.jpg",
+    "assets/sleep/1280x800/splotch.jpg",
+    "assets/sleep/1280x800/steampunk_espresso.jpg",
+    "assets/sleep/1280x800/steampunk_latte.jpg",
+    "assets/sleep/1280x800/three_women.jpg"
+  ],
+  "waterNeeded": "assets/classic/fill_tank.jpg",
+  "filling": "assets/classic/filling_tank.jpg",
+  "classic": [
+    "assets/classic/cleaning.jpg",
+    "assets/classic/descale_prepare.jpg",
+    "assets/classic/descalewarning.jpg",
+    "assets/classic/descaling.jpg",
+    "assets/classic/fill_tank.jpg",
+    "assets/classic/filling_tank.jpg",
+    "assets/classic/firmware_upgrade.jpg",
+    "assets/classic/sleep.jpg",
+    "assets/classic/travel_do.jpg",
+    "assets/classic/travel_prepare.jpg"
+  ]
+}

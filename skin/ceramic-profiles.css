@@ -1,0 +1,363 @@
+/* Full-screen profile chooser, measured against the approved 1586 × 992 board.
+   The browser, filtering, preview and apply action retain their existing logic. */
+#profileDialog {
+  inset: 0;
+  padding: 0;
+  background: var(--paper);
+  backdrop-filter: none;
+}
+#profileDialog .profile-dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 10.3vh minmax(0, 1fr) 14vh;
+  position: relative;
+  isolation: isolate;
+}
+#profileDialog .dialog-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 0;
+  padding: 0 3.5vw;
+}
+#profileDialog .dialog-header .brand {
+  position: absolute;
+  left: 3.2vw;
+  top: 2.65vh;
+}
+#profileDialogTitle {
+  margin: 0;
+  font: 650 clamp(25px, 2.45vw, 39px)/1.15 var(--font-ui);
+}
+#profileDialog .dialog-header .close-button {
+  position: absolute;
+  right: 3vw;
+  top: 2.2vh;
+  min-width: 44px;
+  min-height: 44px;
+}
+#profileDialog .profile-body {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 36.7fr) minmax(0, 63.3fr);
+  gap: 2.5vw;
+  padding: 2.4vh 2.4vw 3.6vh;
+  min-height: 0;
+  background: transparent;
+}
+#profileDialog .profile-body::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -.5vh 0 1.2vh;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1586 750' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='b'%3E%3Cstop stop-color='%23d6f0fa'/%3E%3Cstop offset='.46' stop-color='%23e7f6fc'/%3E%3Cstop offset='1' stop-color='%23d3effa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23b)' d='M0 0 C240 2 385 18 575 112 C738 191 953 0 1402 0 Q1500 0 1586 30 L1586 681 C1400 770 1101 727 834 688 C662 660 599 658 538 691 C410 757 204 761 0 745 Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+#profileDialog .profile-browser {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 3.3vh;
+  padding: 10.9vh .9vw 0 1.1vw;
+  border: 0;
+}
+#profileDialog .profile-filters {
+  position: absolute;
+  top: 1.1vh;
+  left: 1.6vw;
+  right: 1vw;
+  height: 7.5vh;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 3.6vw;
+  background: transparent;
+  padding: 0;
+  z-index: 1;
+}
+#profileDialog .profile-filters button {
+  flex: 0 1 auto;
+  min-height: 44px;
+  padding: .6vh .45vw 1vh;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 500 clamp(22px, 2.05vw, 33px)/1.3 var(--font-ui);
+  position: relative;
+  white-space: nowrap;
+}
+#profileDialog .profile-filters [data-filter="favorites"] { order: -1; }
+#profileDialog .profile-filters button.active { font-weight: 700; }
+#profileDialog .profile-filters button.active::after {
+  content: '';
+  position: absolute;
+  left: .2vw;
+  right: .2vw;
+  bottom: .3vh;
+  height: 3px;
+  border-radius: 3px;
+  background: #087bfb;
+}
+#profileDialog #profileSearch {
+  width: 100%;
+  min-height: 48px;
+  height: 7.6vh;
+  border: 1px solid #e0ddd4;
+  border-radius: 5vw;
+  padding: 1vh 1.6vw 1vh 5.3vw;
+  font: 400 clamp(19px, 1.85vw, 30px)/1.3 var(--font-caption);
+  color: var(--ink);
+  box-shadow: inset 0 2px 3px #fff, inset 0 -2px 4px #ded8cc8c, 0 .35vw .5vw #344d5b24;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='10' fill='none' stroke='%230b2c4a' stroke-width='2'/%3E%3Cpath d='m21 21 8 8' fill='none' stroke='%230b2c4a' stroke-width='2.3' stroke-linecap='round'/%3E%3C/svg%3E") 2.1vw center / 2.2vw 2.2vw no-repeat, linear-gradient(145deg, #fffefa, #f8f6f1);
+}
+#profileDialog .profile-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 1vw 0 0;
+  scrollbar-width: thin;
+  scrollbar-color: #9db5c7 #b3cbd642;
+}
+#profileDialog .profile-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .6vh;
+  min-height: 10.5vh;
+  width: 100%;
+  padding: 1.5vh 3.1vw 1.5vh .8vw;
+  border: 0;
+  border-bottom: 1px solid #8dabbc66;
+  border-radius: 0;
+  text-align: left;
+  background: transparent;
+}
+#profileDialog .profile-item::after {
+  content: '';
+  position: absolute;
+  right: 1.1vw;
+  top: calc(50% - .55vw);
+  width: 1.1vw;
+  height: 1.1vw;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+#profileDialog .profile-item strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-height: 2.5em;
+  overflow-wrap: anywhere;
+  font: 650 clamp(24px, 2.75vw, 44px)/1.2 var(--font-ui);
+  color: var(--ink);
+}
+#profileDialog .profile-item small {
+  margin: 0;
+  font: 400 clamp(13px, 1.1vw, 18px)/1.4 var(--font-caption);
+  color: var(--muted);
+}
+#profileDialog .profile-item.selected,
+#profileDialog .profile-item.selected:hover {
+  background: linear-gradient(120deg, #c8eafb, #c5e8fb);
+  box-shadow: inset .55vw 0 #087bfb;
+  border-bottom-color: transparent;
+  border-radius: 1.3vw;
+  padding-left: 1.6vw;
+}
+#profileDialog .profile-item:not(.selected):hover { background: #ffffff42; }
+#profileDialog .profile-preview {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 3.2vh 4.2vw 2.5vh;
+  border: 1px solid #e7e0d4;
+  border-radius: 10% 9% 12% 10% / 19% 18% 15% 17%;
+  background: radial-gradient(ellipse at 30% 15%, #fffefa, #faf8f4 75%, #f4f0e8);
+  box-shadow: inset 0 2px 4px #fff, inset 0 0 .35vw .2vw #fffdf8, inset 0 -.25vw .4vw #d4cabb4d, 0 .8vw 1.1vw #5a65502a;
+  scrollbar-width: thin;
+  scrollbar-color: #b3c4cb transparent;
+}
+#profileDialog .preview-eyebrow {
+  margin: 0 0 1.2vh;
+  font: 400 clamp(17px, 1.6vw, 25px)/1.3 var(--font-caption);
+  color: #7b7e80;
+}
+#profileDialog .preview-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1vw;
+}
+#profileDialog .preview-heading h3 {
+  min-width: 0;
+  margin: 0;
+  font: 650 clamp(34px, 4.45vw, 71px)/1.13 var(--font-ui);
+  overflow-wrap: anywhere;
+  max-height: none;
+}
+#profileDialog .preview-heading h3.long-name {
+  font-size: clamp(26px, 3vw, 48px);
+}
+#profileDialog .favorite-star {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: clamp(25px, 2.3vw, 37px);
+  color: #9b846a;
+}
+#profileDialog .preview-summary {
+  margin: 1vh 0 1.8vh;
+  font: 400 clamp(19px, 1.9vw, 30px)/1.4 var(--font-ui);
+  color: var(--muted);
+}
+#profileDialog .meta {
+  margin: 1.7vh 0;
+  padding: 1.8vh 0;
+  border-bottom: 1px solid var(--line);
+  font: 400 clamp(17px, 1.6vw, 25px)/1.5 var(--font-caption);
+}
+#profileDialog .preview-recipe-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 2.2vh 0;
+  margin: 2vh 0 0;
+}
+#profileDialog .preview-recipe-values > div {
+  min-width: 0;
+  text-align: center;
+}
+#profileDialog .preview-recipe-values > div + div { border-left: 1px solid #9bafbc; }
+#profileDialog .preview-recipe-values strong {
+  font: 600 clamp(34px, 3.9vw, 62px)/1.12 var(--font-number);
+  color: var(--ink);
+}
+#profileDialog .preview-recipe-values small {
+  margin-left: .2em;
+  font: 500 clamp(18px, 1.9vw, 30px)/1.2 var(--font-number);
+}
+#profileDialog .preview-recipe-values span {
+  display: block;
+  margin-top: .8vh;
+  font: 400 clamp(16px, 1.5vw, 24px)/1.3 var(--font-ui);
+  color: var(--muted);
+}
+#profileDialog .mini-chart {
+  height: 25vh;
+  min-height: 145px;
+  width: 100%;
+  margin: 2vh 0 1.5vh;
+}
+#profileDialog .mini-chart svg text { font-size: clamp(13px, 1.25vw, 20px) !important; }
+#profileDialog .profile-step-details {
+  margin-top: 1.5vh;
+  border-top: 1px solid var(--line);
+  padding-top: 1vh;
+}
+#profileDialog .profile-step-details > summary {
+  min-height: 44px;
+  padding: .5vh 0;
+  font: 500 clamp(16px, 1.5vw, 24px)/1.5 var(--font-ui);
+  cursor: pointer;
+}
+#profileDialog .step-list {
+  margin: 1vh 0;
+  gap: .3vh;
+}
+#profileDialog .step-list li {
+  padding: 1vh 0;
+  gap: 1vw;
+  font: 400 clamp(15px, 1.25vw, 20px)/1.5 var(--font-ui);
+}
+#profileDialog .step-list li small {
+  display: block;
+  font: 400 clamp(13px, 1.05vw, 17px)/1.5 var(--font-caption);
+  color: var(--muted);
+}
+#profileDialog .description {
+  font: 400 clamp(14px, 1.1vw, 18px)/1.5 var(--font-caption);
+  color: var(--muted);
+}
+#profileDialog .dialog-footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1vw;
+  margin: 0 2vw;
+  padding: 1vh .5vw 2.4vh;
+  border-top: 1px solid var(--line);
+}
+#profileDialog .dialog-footer > [data-close] {
+  order: -1;
+  display: flex;
+  align-items: center;
+  gap: 1.7vw;
+  padding: 1.5vh 1.8vw;
+  min-height: 44px;
+  font: 500 clamp(22px, 2vw, 32px)/1.2 var(--font-ui);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#profileDialog .dialog-footer > [data-close]::before {
+  content: '';
+  width: 1.2vw;
+  height: 1.2vw;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+#profileDialog #applyProfile {
+  min-width: 31.8vw;
+  min-height: 54px;
+  height: 9.4vh;
+  padding: 1vh 3vw;
+  border-radius: 1.3vw;
+  font: 650 clamp(25px, 2.65vw, 42px)/1.2 var(--font-ui);
+}
+#profileDialog #applyProfile::before { content: '✓'; margin-right: 1.2vw; }
+#profileDialog #profileSelectionNote {
+  flex: 1;
+  max-width: 42vw;
+  font: 400 clamp(13px, 1.1vw, 18px)/1.45 var(--font-caption);
+  color: var(--muted);
+}
+#profileDialog .empty-message {
+  font: 400 clamp(18px, 1.65vw, 26px)/1.6 var(--font-caption);
+  color: var(--muted);
+}
+html:lang(en) #profileDialog .profile-filters { gap: 1.8vw; }
+html:lang(en) #profileDialog .profile-filters button { font-size: clamp(18px, 1.7vw, 27px); }
+html:lang(en) #profileDialog .preview-recipe-values span { font-size: clamp(14px, 1.3vw, 21px); }
+html:lang(en) #profileDialog #applyProfile { font-size: clamp(22px, 2.2vw, 35px); }
+:root[data-theme="dark"] #profileDialog .profile-body::before { background: #294953; }
+:root[data-theme="dark"] #profileDialog .profile-preview { background: var(--raised); }
+:root[data-theme="dark"] #profileDialog #profileSearch { background-color: var(--input); background-image: none; padding-left: 2vw; }
+:root[data-theme="dark"] #profileDialog .profile-item.selected { background: #365c69; }
+@media (max-width: 750px), (max-aspect-ratio: 1/1) {
+  #profileDialog .profile-dialog { min-width: 750px; }
+}
+/* A small discovery entry sits with the existing local filters. */
+#profileDialog .profile-filters{gap:2vw}
+#profileDialog .profile-filters button[data-online-profiles],
+html:lang(en) #profileDialog .profile-filters button[data-online-profiles]{margin-left:auto;min-height:44px;font:400 clamp(14px,1.25vw,20px)/1.4 var(--font-caption);color:var(--muted);white-space:nowrap}

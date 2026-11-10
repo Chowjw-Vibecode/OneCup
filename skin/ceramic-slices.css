@@ -1,0 +1,157 @@
+/* Original-board material, separated from live content. All visible labels,
+   values, needles, targets and chart paths remain real interactive elements. */
+@media(min-width:751px){
+ :root:not([data-theme=dark]) .ceramic-adjust-dialog .parameters{
+  left:1.13vw;right:1.13vw;top:29.94vh;height:44.46vh;
+  padding:7vh 4.05vw 10vh;gap:2vw;border:0;border-radius:0;
+  background:url('./assets/ceramic/slices/adjust-panel.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;
+ }
+ .ceramic-adjust-dialog .parameter-label{font-size:2.15vw;line-height:1.25;margin-bottom:2.4vh}
+ .ceramic-adjust-dialog .parameter-control{gap:.8vw}
+ .ceramic-adjust-dialog .parameter+.parameter{padding-left:1.5vw}
+ .ceramic-adjust-dialog .number-button{height:10.1vh;padding:1vh .35vw;align-items:center}
+ .ceramic-adjust-dialog .number-button strong{font-size:3.65vw}
+ .ceramic-adjust-dialog .number-button span{font-size:1.9vw}
+ .ceramic-adjust-dialog .parameter-control>button:not(.number-button){width:6vw;height:6.3vw;flex:none;font-size:3.2vw}
+ .ceramic-adjust-dialog #ceramicAdjustRatio{top:60.8vh;left:8vw;width:53vw;font-size:1.8vw;margin:0;display:flex;align-items:center;justify-content:center;gap:2.6vw}
+ .ceramic-adjust-dialog #ceramicAdjustRatio::before,.ceramic-adjust-dialog #ceramicAdjustRatio::after{content:'';height:1.2vh;flex:1;border-bottom:1px solid var(--line)}
+ .ceramic-adjust-dialog #ceramicAdjustRatio::before{border-left:1px solid var(--line);border-radius:0 0 0 .5vw}
+ .ceramic-adjust-dialog #ceramicAdjustRatio::after{border-right:1px solid var(--line);border-radius:0 0 .5vw}
+ .ceramic-adjust-dialog .save-options{top:61.2vh}
+ :root:not([data-theme=dark]) .ceramic-adjust-dialog .number-button,
+ :root:not([data-theme=dark]) .gp-dialog .gp-parameter,
+ :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-edit]{background:url('./assets/ceramic/slices/number-well.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .ceramic-adjust-dialog .parameter-control>button:not(.number-button),
+ :root:not([data-theme=dark]) .gp-dialog .gp-round,
+ :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-step]{background:url('./assets/ceramic/slices/round-button.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .gp-dialog .gp-parameters{background:url('./assets/ceramic/slices/grinder-panel.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ :root:not([data-theme=dark]) .beans-stage .beans-card{background:url('./assets/ceramic/slices/beans-panel.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0;overflow:visible}
+ :root:not([data-theme=dark]) body[data-ceramic-screen=taste] #ceramicTastePanel{background:url('./assets/ceramic/slices/taste-panel.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .ceramic-steam-params{background:url('./assets/ceramic/slices/steam-panel.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) :is(#applyDraft,#applyProfile,#ceramicSaveNote,#ceramicSteamStop,#ceramicSteamApply,.gp-dialog .gp-primary,.beans-stage .beans-primary){background:url('./assets/ceramic/slices/orange-button.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ :root:not([data-theme=dark]) .gp-dialog [data-gp=apply]{background:url('./assets/ceramic/slices/soft-button.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ body[data-ceramic-screen=ready] .ceramic-beans-link{min-height:15%}
+ body[data-ceramic-screen=ready] .ceramic-recipe-values{height:10.1vh;min-height:0}
+ body[data-ceramic-screen=ready] #ceramicAdjust{height:10.68vh;min-height:0;padding:1vh 3.6vw;font:500 2.5vw/1.2 var(--font-caption)}
+ body[data-ceramic-screen=ready] .control-bar :is(.aux-button,.device-shortcut,#settingsButton){font-family:var(--font-caption);font-weight:400}
+ body :is(.gauge-label,.gauge-reading span){font-family:var(--font-caption)!important}
+ body[data-ceramic-screen=brew] .gauge-reading strong,body[data-ceramic-screen=brew] #liveTemperature{font-size:2.95vw}
+ body[data-ceramic-screen=brew] .gauge-label{bottom:7.2%;font-size:1.27vw}
+ body[data-ceramic-screen=brew] .gauge-reading{bottom:17%;gap:.1vh}
+ body[data-ceramic-screen=taste] #ceramicResultSummary strong{font-size:3vw}
+ body[data-ceramic-screen=taste] #ceramicTastePanel{right:-1.5vw;width:32.5vw}
+ body[data-ceramic-screen=taste] .ceramic-sensory{top:26.8%;gap:3.7vh}
+ body[data-ceramic-screen=brew] .chart-header{padding-top:4.2vh;min-height:10.1vh;align-items:flex-start}
+ body[data-ceramic-screen=brew] .legend{row-gap:1.6vh;font-size:1.05vw}
+ body[data-ceramic-screen=brew] .chart-panel{overflow:visible}
+ body[data-ceramic-screen=brew] .legend #ceramicWeightLegend{flex-basis:100%}
+ #ceramicSteamElapsed small{font-size:36%;margin-left:.1em}
+ #ceramicSteamDurationNote small{font-size:65%;margin-left:.2em}
+}
+.gallery-grid{grid-auto-rows:max-content;align-content:start}
+
+#profileDialog .dialog-hint{display:none}
+@media(min-width:751px){
+ body[data-ceramic-screen=brew] .brew-stage{height:108.8%;grid-template-rows:39.93vh minmax(0,1fr);gap:2.5vh}
+ body[data-ceramic-screen=brew] .legend>span:has(.cupweight-color){order:9;flex-basis:100%}
+ body[data-ceramic-screen=brew] .gauge-label,body[data-ceramic-screen=brew] .gauge-reading span{font-family:var(--font-caption)!important}
+ body[data-ceramic-screen=brew] .gauge-label{bottom:5.8%}
+ .gp-dialog .gp-burr-art{left:0;top:9.677%;width:45.27%;height:75.907%;object-fit:fill;mask-image:none;-webkit-mask-image:none;z-index:-1}
+ .gp-dialog:before{display:block}
+ .gp-dialog .gp-parameters{margin-top:.25cqw;margin-left:-.75cqw;width:calc(100% + 1.9cqw);height:33.29cqw;padding:3cqw 6cqw 1.5cqw 4.85cqw}
+ .gp-dialog .gp-parameter strong{font-size:3.65cqw;font-weight:600}
+ .gp-dialog .gp-save-actions{margin-top:.75cqw}
+ body[data-ceramic-screen=taste] .chart-wrap{margin-left:-2.4vw;width:calc(100% + 3.55vw)}
+ body[data-ceramic-screen=taste] .ceramic-sensory{top:26.5%;height:28.2vh;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));grid-template-columns:minmax(0,1fr);justify-content:stretch;gap:3.5vh}
+ .ceramic-steam-right{padding:5.2vh 2.3vw 8vh 0;gap:1vh}
+ .ceramic-steam-params{height:55vh;flex-shrink:0;padding:3vh 2vw}
+ #ceramicSteamMessage:empty{display:none}
+ #ceramicSteamStop{height:19.15vh;flex-shrink:0}
+ #ceramicSteamState{margin-left:auto;display:flex;align-items:center;gap:.8vw;font:400 1.5vw var(--font-caption)}
+ #ceramicSteamState:before{content:'';width:1.2vw;height:1.2vw;border-radius:50%;background:#f8a57e}
+ #ceramicSteamDialog.is-running [data-close]{display:none}
+}
+
+/* A single continuous surface behind each illustration. */
+@media(min-width:751px){
+ :root:not([data-theme=dark]) :is(.ceramic-adjust-dialog .parameters,.gp-dialog .gp-parameters,.beans-stage .beans-card,.ceramic-steam-params){filter:drop-shadow(0 .65vw .7vw #394a5319)}
+ .gp-dialog .gp-burr-art{filter:drop-shadow(0 1vw .8vw #35556830)}
+ .beans-art{background:url('./assets/ceramic/slices/beans-art.png?v=0.2.29-rc.5r1') center/100% 100% no-repeat;mix-blend-mode:normal;mask-image:none}
+ .beans-art>image{visibility:hidden}
+ #ceramicCupArt{mask-image:linear-gradient(to right,#000 88%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 96%,transparent);mask-composite:intersect}
+ .ceramic-steam-art{background-image:url('./assets/ceramic/slices/steam-art.png?v=0.2.29-rc.5r1');mask-image:none;width:calc(100% + 1.5vw)}
+}
+@media(min-width:751px){
+ #ceramicSteamStop{position:relative}
+ #ceramicSteamStop:focus-visible{outline:none}
+ #ceramicSteamStop:focus-visible::after{content:'';position:absolute;inset:6% 2% 14% 1.2%;border:2px solid #a96039;border-radius:2vw;pointer-events:none}
+}
+
+@media(min-width:751px){
+ body .gp-dialog:before{inset:0;width:100%;height:100%;border-radius:0;background:url('./assets/ceramic/slices/grinder-wave.svg') center/100% 100% no-repeat}
+ body .gp-dialog:after{display:none}
+}
+
+/* Keep keyboard focus following the rounded physical controls. */
+@media(min-width:751px){
+ :root:not([data-theme=dark]) :is(#applyDraft,#applyProfile,#ceramicSaveNote,#ceramicSteamStop,#ceramicSteamApply,.gp-dialog .gp-primary,.beans-stage .beans-primary){border-radius:1.5vw!important;outline-offset:-.5vw}
+ :root:not([data-theme=dark]) :is(.ceramic-adjust-dialog .number-button,.gp-dialog .gp-parameter,.ceramic-steam-param button[data-ceramic-steam-edit]){border-radius:1.2vw}
+}
+
+/* All exposed white page areas use one continuous paper stock. Ceramic
+   controls retain their own raised surface; artwork has transparent margins. */
+:root:not([data-theme=dark]){--paper:#faf9f5;--panel:#faf9f5;--paper-image:url('./assets/ceramic/paper.webp?v=0.2.29-rc.5r1')}
+:root:not([data-theme=dark]) :is(body,#app,.dialog,.gp-overlay,.gp-dialog,.gp-subview,.gp-keypad,.beans-overlay,.beans-sheet){background-color:var(--paper);background-image:var(--paper-image);background-size:cover;background-position:center;background-attachment:fixed}
+:root:not([data-theme=dark]) :is(.topbar,.control-bar,.dialog-header,.dialog-footer,.gp-header,.gp-footer){background:transparent}
+body[data-ceramic-screen=ready] #ceramicCupArt{background-image:url('./assets/ceramic/slices/cup-art.png?v=0.2.29-rc.5r1');background-size:contain;background-position:left center;background-repeat:no-repeat;mask-image:none}
+/* The jug and its live ring share the source board's coordinates. Neither
+   aspect ratio nor the wider artwork column can distort their alignment. */
+.ceramic-steam-art{--steam-art-width:min(100vw,159.879vh);background:none!important}
+.ceramic-steam-progress{inset:auto;left:0;top:-10.5vh;width:var(--steam-art-width);height:auto;aspect-ratio:1586/992;filter:none}
+.ceramic-steam-clock{left:calc(var(--steam-art-width)*484/1586);top:calc(var(--steam-art-width)*500/1586 - 10.5vh);width:calc(var(--steam-art-width)*470/1586);height:calc(var(--steam-art-width)*360/1586);transform:translate(-50%,-50%)}
+@media(min-width:751px){
+ .beans-overlay:lang(zh) .beans-card-actions .beans-weigh-actions button{font-size:1.55cqw;padding:.65cqw!important}
+ .beans-overlay:lang(zh) .beans-weigh-actions .beans-action-label{white-space:nowrap}
+ .beans-overlay:lang(zh) .beans-weigh-actions .beans-icon{width:2.2cqw;height:2.2cqw;margin-right:.45cqw}
+}
+/* Shorter landscape windows must reserve space for each value's caption. */
+@media(min-width:751px) and (min-aspect-ratio:17/10){
+ body[data-ceramic-screen=ready] .ceramic-recipe-values{flex-shrink:0;height:auto;min-height:11.8vh;margin:2vh 0 1.6vh}
+ body[data-ceramic-screen=ready] #stateDetail{padding:1.5vh 0}
+}
+
+/* Keep the live readout available in both chart scenes. */
+body[data-ceramic-screen=brew] #ceramicChartReadout{display:flex;flex:none;min-height:24px;font-size:1vw;padding:.35vw .6vw;gap:.7vw}
+body[data-ceramic-screen=brew] #ceramicChartReadout strong{font-size:1.15vw}
+
+/* Modal hit areas cover the entire viewport, including the next-cup footer. */
+.overlay.ceramic-message{inset:0;z-index:1500}
+.toast{z-index:1600}
+
+/* Bound names independently of the fixed preparation actions. */
+body[data-ceramic-screen=ready] .recipe-head{flex:none;min-height:0;padding-right:0}
+body[data-ceramic-screen=ready] #recipeName{width:68%;max-width:68%;white-space:nowrap;display:block;min-height:0;max-height:1.3em;overflow:hidden;text-overflow:ellipsis}
+body[data-ceramic-screen=ready] #chooseProfile{max-width:30%;font-size:clamp(14px,1.4vw,22px);text-align:right;white-space:normal}
+body[data-ceramic-screen=ready] .ceramic-beans-link{flex:0 0 15%;min-height:0;overflow:hidden}
+body[data-ceramic-screen=ready] .ceramic-beans-link>span{flex:none}
+body[data-ceramic-screen=ready] .ceramic-beans-link strong{min-width:0;white-space:nowrap;display:block;overflow:hidden;text-overflow:ellipsis}
+body[data-ceramic-screen=ready] .ceramic-recipe-values{flex:none}
+body[data-ceramic-screen=ready] #ceramicAdjust{flex:none}
+body[data-ceramic-screen=ready] #stateDetail{min-height:0;padding-top:1.4vw;padding-bottom:.4vw}
+
+/* Dark surfaces use the same local palette as their labels. Photographic
+   objects retain dark ink, because their physical surface remains white. */
+:root[data-theme=dark] .ceramic-steam-params{background:var(--raised);box-shadow:none}
+:root[data-theme=dark] .ceramic-steam-clock{color:#082c46}
+:root[data-theme=dark] .ceramic-adjust-dialog>.dialog-content:before{background:var(--accent-soft)}
+:root[data-theme=dark] :is(.gp-brand,.beans-brand) svg.thiscup-brand-art{filter:none!important}
+:root[data-theme=dark] body[data-ceramic-screen=taste] #ceramicTastePanel{background:var(--panel);box-shadow:none}
+:root[data-theme=dark] body[data-ceramic-screen=taste] :is(#ceramicLike,#ceramicNote){background:var(--input);box-shadow:none}
+:root[data-theme=dark] body[data-ceramic-screen=taste] .recipe-rail::before{background:var(--accent-soft)}
+:root[data-theme=dark] body[data-ceramic-screen=taste] #ceramicRepeat{background:var(--accent-soft);color:var(--ink)}
+:root[data-theme=dark] .gauge{--ink:#082c46}
+/* The linked bean row already renders this context; the legacy duplicate
+   must not insert an unbounded second block into the preparation layout. */
+#beanInfo{display:none}
+:root[data-theme=dark] .ceramic-adjust-dialog .parameters{background:var(--raised);box-shadow:none}
+body[data-ceramic-screen=brew] #ceramicChartReadout{font-size:clamp(12px,1vw,16px)}

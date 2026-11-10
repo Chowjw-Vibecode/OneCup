@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f4f3ef" />
+    <link rel="icon" href="data:," />
+    <title>这一杯 · Decaid</title>
+    <link rel="stylesheet" href="./style.css?v=0.2.29-rc.5" /><link rel="stylesheet" href="./beans.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic-functional.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./profile-editor.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic-reference.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./typography.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic-profiles.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic-slices.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./ceramic-refinements.css?v=0.2.29-rc.5" />
+    <link rel="stylesheet" href="./chart-palette.css?v=0.2.29-rc.5" />
+  </head>
+  <body data-ceramic-screen="ready">
+    <svg class="symbols" aria-hidden="true">
+      <defs>
+        <symbol id="i-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"
+          />
+        </symbol>
+        <symbol id="i-history" viewBox="0 0 24 24">
+          <path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v6l4 2" />
+        </symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+          <circle cx="9" cy="6" r="2" />
+          <circle cx="16" cy="12" r="2" />
+          <circle cx="8" cy="18" r="2" />
+        </symbol>
+        <symbol id="i-cup" viewBox="0 0 48 48"><g transform="translate(24 24) scale(6 -6) translate(-184.49555 -375.18170)" style="fill:currentColor;stroke:none" fill-rule="evenodd"><path d="M181.8912 377.1551 C181.7023 377.1551 181.6260 377.0740 181.6374 376.8854 C181.6639 376.4496 181.7498 376.0314 181.8622 375.6118 C182.0207 375.1170 182.2179 374.6718 182.5635 374.2691 C182.6177 374.2060 182.6733 374.1804 182.7564 374.1804 C183.5264 374.1804 184.2963 374.1804 185.0662 374.1804 C185.1493 374.1804 185.2050 374.2060 185.2591 374.2691 C185.6047 374.6718 185.8019 375.1170 185.9604 375.6118 C185.9648 375.6281 185.9691 375.6443 185.9733 375.6606 C186.3207 374.9997 187.3062 375.1445 187.4487 375.8774 C187.5912 376.6103 186.7318 377.1139 186.1621 376.6313 C186.1720 376.7158 186.1800 376.8005 186.1852 376.8854 C186.1967 377.0740 186.1203 377.1551 185.9315 377.1551 C184.5847 377.1551 183.2379 377.1551 181.8912 377.1551 Z M182.5550 376.5740 C182.3463 376.5740 182.2656 376.4760 182.3055 376.2712 C182.3331 376.1297 182.3661 375.9844 182.4022 375.8433 C182.4377 375.7048 182.5055 375.6522 182.6485 375.6522 C183.4904 375.6522 184.3323 375.6522 185.1742 375.6522 C185.3171 375.6522 185.3849 375.7048 185.4204 375.8433 C185.4566 375.9844 185.4895 376.1297 185.5171 376.2712 C185.5570 376.4760 185.4763 376.5740 185.2676 376.5740 C184.3634 376.5740 183.4592 376.5740 182.5550 376.5740 Z M186.6729 376.2376 C186.5249 376.2376 186.4636 376.1763 186.4636 376.0283 C186.4636 375.8803 186.5249 375.8190 186.6729 375.8190 C186.8209 375.8190 186.8822 375.8803 186.8822 376.0283 C186.8822 376.1763 186.8209 376.2376 186.6729 376.2376 Z M186.4233 373.5352 C186.4233 373.7149 186.3488 373.7894 186.1691 373.7894 C184.6641 373.7894 183.1591 373.7894 181.6541 373.7894 C181.4744 373.7894 181.3999 373.7149 181.3999 373.5352 C181.3999 373.5110 181.3999 373.4868 181.3999 373.4625 C181.3999 373.2828 181.4744 373.2083 181.6541 373.2083 C183.1591 373.2083 184.6641 373.2083 186.1691 373.2083 C186.3488 373.2083 186.4233 373.2828 186.4233 373.4625 C186.4233 373.4868 186.4233 373.5110 186.4233 373.5352 Z"/></g></symbol>
+        <symbol id="i-drop" viewBox="0 0 48 48"><g transform="translate(24 24) scale(6 -6) translate(-183.98370 -429.48535)" style="fill:currentColor;stroke:none" fill-rule="evenodd"><path d="M184.0316 432.6756 C184.3202 432.3438 184.6089 432.0120 184.8975 431.6803 C185.5795 430.8964 185.0227 429.6741 183.9837 429.6741 C182.9447 429.6741 182.3880 430.8964 183.0699 431.6803 C183.3586 432.0120 183.6472 432.3438 183.9358 432.6756 C183.9687 432.7134 183.9987 432.7134 184.0316 432.6756 Z M183.9837 431.8454 C184.1422 431.6632 184.3007 431.4811 184.4592 431.2989 C184.8140 430.8911 184.5243 430.2551 183.9837 430.2551 C183.4432 430.2551 183.1535 430.8911 183.5083 431.2989 C183.6668 431.4811 183.8252 431.6632 183.9837 431.8454 Z M183.7167 427.1545 C183.8475 427.4549 184.1199 427.4549 184.2508 427.1545 C184.6416 426.2573 185.9863 426.5825 185.9240 427.5591 C185.9109 427.7641 185.8205 427.8436 185.6155 427.8305 C185.4105 427.8174 185.3310 427.7271 185.3441 427.5221 C185.3683 427.1441 184.9347 427.0392 184.7835 427.3865 C184.6180 427.7665 184.3982 427.9105 183.9837 427.9105 C183.5693 427.9105 183.3495 427.7665 183.1840 427.3865 C183.0327 427.0392 182.5992 427.1441 182.6233 427.5221 C182.6364 427.7271 182.5569 427.8174 182.3519 427.8305 C182.1469 427.8436 182.0566 427.7641 182.0435 427.5591 C181.9811 426.5825 183.3259 426.2573 183.7167 427.1545 Z M183.7167 428.6040 C183.8475 428.9045 184.1199 428.9045 184.2508 428.6040 C184.6416 427.7068 185.9863 428.0320 185.9240 429.0087 C185.9109 429.2137 185.8205 429.2932 185.6155 429.2801 C185.4105 429.2670 185.3310 429.1766 185.3441 428.9716 C185.3683 428.5936 184.9347 428.4888 184.7835 428.8361 C184.6180 429.2160 184.3982 429.3600 183.9837 429.3600 C183.5693 429.3600 183.3495 429.2160 183.1840 428.8361 C183.0327 428.4888 182.5992 428.5936 182.6233 428.9716 C182.6364 429.1766 182.5569 429.2670 182.3519 429.2801 C182.1469 429.2932 182.0566 429.2137 182.0435 429.0087 C181.9811 428.0320 183.3259 427.7068 183.7167 428.6040 Z"/></g></symbol>
+        <symbol id="i-steam" viewBox="0 0 48 48"><g transform="translate(24 24) scale(6 -6) translate(-210.58785 -402.82455)" style="fill:currentColor;stroke:none" fill-rule="evenodd"><path d="M212.1758 403.3485 C212.0380 403.8558 211.9002 404.3630 211.7624 404.8702 C211.6935 405.1235 211.7028 405.3882 211.5431 405.6262 C211.3336 405.9384 210.9174 405.7641 211.0166 405.3989 C211.1544 404.8916 211.2923 404.3844 211.4301 403.8771 C211.4989 403.6239 211.4897 403.3592 211.6493 403.1212 C211.8588 402.8090 212.2751 402.9833 212.1758 403.3485 Z M209.0039 403.3485 C209.1417 403.8558 209.2795 404.3630 209.4174 404.8702 C209.4862 405.1235 209.4770 405.3882 209.6366 405.6262 C209.8461 405.9384 210.2624 405.7641 210.1631 405.3989 C210.0253 404.8916 209.8875 404.3844 209.7496 403.8771 C209.6808 403.6239 209.6900 403.3592 209.5304 403.1212 C209.3209 402.8090 208.9047 402.9833 209.0039 403.3485 Z M210.8922 402.4633 C210.8922 403.1310 210.8922 403.7987 210.8922 404.4664 C210.8922 404.8003 210.8922 405.1343 210.8922 405.4682 C210.8922 405.8557 210.3112 405.9966 210.3112 405.5995 C210.3112 404.9315 210.3112 404.2635 210.3112 403.5956 C210.3112 403.2616 210.3112 402.9276 210.3112 402.5936 C210.3112 402.2062 210.8922 402.0663 210.8922 402.4633 Z M208.7385 403.9856 C208.9170 404.0874 208.9487 404.2035 208.8470 404.3819 C208.7452 404.5604 208.6291 404.5921 208.4507 404.4904 C207.0151 403.6717 207.3073 401.5215 208.9093 401.1157 C209.5526 399.6525 211.6285 399.6531 212.2711 401.1165 C213.8707 401.5249 214.1606 403.6725 212.7264 404.4904 C212.5480 404.5921 212.4319 404.5604 212.3302 404.3819 C212.2284 404.2035 212.2602 404.0874 212.4386 403.9856 C213.5526 403.3504 213.1090 401.6504 211.8266 401.6405 C211.5863 400.2527 209.5938 400.2527 209.3534 401.6405 C208.0695 401.6474 207.6232 403.3496 208.7385 403.9856 Z"/></g></symbol>
+        <symbol id="i-flush" viewBox="0 0 48 48">
+          <g transform="translate(24 24) scale(6 -6) translate(-156.713 -402.936)" stroke="currentColor" stroke-width=".3" fill="none" stroke-linejoin="round">
+            <path d="M154.9155 402.5145 C154.9155 402.7669 154.9900 402.8414 155.1697 402.8414 H158.2566 C158.4364 402.8414 158.5108 402.7669 158.5108 402.5872 V402.5145 C158.5108 402.3348 158.4364 402.2603 158.2566 402.2603 H155.1697 C154.9900 402.2603 154.9155 402.3348 154.9155 402.5145 Z" fill="currentColor" stroke="none"/>
+            <path d="M157.3537 400.8446 L156.7762 401.8333 C156.7394 401.8963 156.6876 401.8963 156.6508 401.8333 L156.0732 400.8446 C155.8085 400.3587 156.1602 399.7667 156.7135 399.7667 C157.2668 399.7667 157.6184 400.3587 157.3537 400.8446 Z"/>
+            <path d="M159.1274 405.2016 C159.1274 405.4953 158.9010 405.7015 158.6547 405.8541 C158.4084 406.0067 158.1421 406.1056 157.6939 406.1056 H155.7325 C155.2843 406.1056 155.0180 406.0067 154.7717 405.8541 C154.5253 405.7015 154.2990 405.4953 154.2990 405.2016 V403.6682 C154.2990 403.3600 154.4266 403.2324 154.7347 403.2324 H158.6911 C158.9992 403.2324 159.1269 403.3600 159.1269 403.6682 Z"/>
+          </g>
+        </symbol>
+        <symbol id="i-back" viewBox="0 0 24 24">
+          <path d="m14 5-7 7 7 7M7 12h14" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+        <symbol id="i-power" viewBox="0 0 24 24">
+          <path d="M12 2v10M6 5a9 9 0 1 0 12 0" />
+        </symbol>
+      </defs>
+    </svg>
+    <div id="app">
+<header class="topbar">
+<div class="brand"><svg class="thiscup-brand-art" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="thiscup-brand-ink-1" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="./assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#thiscup-brand-ink-1)"/></svg></div>
+<div class="ceramic-stage-title"><h2 id="stageTitle">准备这一杯</h2><span id="phaseName"></span></div>
+<button id="connectionButton" class="connection" aria-label="连接状态"><i id="connectionDot"></i><span id="connectionText">正在连接</span><span id="deviceName" hidden></span></button>
+<button id="powerButton" class="icon-label power-button" aria-label="休眠或唤醒"><svg viewBox="0 0 24 24"><path d="M20 16A9 9 0 0 1 8 4a9 9 0 1 0 12 12Z"/></svg><span data-i18n="wake">唤醒</span></button>
+</header>      <div
+        id="connectionAlert"
+        class="connection-alert"
+        role="status"
+        hidden
+      ></div>
+<main class="workspace">
+<div id="ceramicCupArt" aria-hidden="true"></div>
+<div id="ceramicStateArt" hidden><img alt=""><p></p></div>
+<aside class="recipe-rail">
+<div class="recipe-head"><span class="eyebrow" data-i18n="currentRecipe">当前方案</span><button type="button" id="recipeName" class="ceramic-recipe-title" aria-label="查看当前方案介绍">—</button><button id="chooseProfile" class="text-button" data-i18n="chooseProfile">换方案　›</button></div>
+<div id="ceramicRecipeSummary"></div>
+<button id="ceramicBeans" class="ceramic-beans-link"><span data-ceramic-i18n="coffee">咖啡</span><strong id="ceramicBeanName">关联咖啡豆 ＋</strong></button><div id="beanInfo" hidden></div>
+<div class="ceramic-recipe-values"><div><strong id="ceramicDose">—</strong><small>g</small><span data-i18n="dose">粉量</span></div><div><strong id="ceramicYield">—</strong><small>g</small><span data-i18n="yieldTarget">出液目标</span></div><div><strong id="ceramicTemp">—</strong><small>°C</small><span data-i18n="temperature">冲煮温度</span></div></div>
+<div id="ceramicResultSummary"><div><strong id="ceramicFinalDose">—</strong><small>g</small><span data-ceramic-i18n="dose">粉量</span></div><div><strong id="ceramicFinalYield">—</strong><small>g</small><span data-ceramic-i18n="actualYield">实际出液</span></div><div><strong id="ceramicFinalDuration">—</strong><small>s</small><span data-ceramic-i18n="totalTime">总时间</span></div><div><strong id="ceramicFinalRatio">—</strong><small></small><span data-ceramic-i18n="ratio">粉液比</span></div></div>
+<button id="ceramicAdjust" class="button primary"><span data-ceramic-i18n="adjustCup">调整这一杯</span><svg><use href="#i-settings"/></svg></button>
+<div id="stateDetail" class="state-detail"></div><button id="startButton" class="button start-button" disabled><svg><use href="#i-cup"/></svg><span data-i18n="start">开始萃取</span></button>
+</aside>
+<section class="brew-stage">
+<div class="instruments">
+<div id="pressureGauge" class="gauge" aria-label="压力"><svg viewBox="0 0 220 220" role="img"></svg><div class="gauge-reading"><strong>—</strong><span>bar</span></div><span class="gauge-label" data-i18n="pressure">压力</span></div>
+<div id="flowGauge" class="gauge" aria-label="机器流量"><svg viewBox="0 0 220 220" role="img"></svg><div class="gauge-reading"><strong>—</strong><span>mL/s</span></div><span class="gauge-label" data-i18n="machineFlow">流速</span></div>
+<div id="temperatureGauge" class="gauge temperature-instrument" aria-label="咖啡温度"><svg viewBox="0 0 220 220" role="img"></svg><div class="gauge-reading"><strong id="liveTemperature">—</strong><span>°C</span></div><span class="gauge-label" data-ceramic-i18n="coffeeTemperature">咖啡温度</span><small id="temperatureNote" hidden></small></div>
+</div>          <div class="chart-panel">
+            <div class="chart-header">
+              <button
+                id="chartDetails"
+                class="chart-title"
+                data-i18n="profileOverview"
+              >
+                方案预览
+              </button>
+              <div class="legend">
+                <span><i class="pressure-color"></i><span data-ceramic-i18n="pressureLegend">压力 · bar</span></span>
+                <span><i class="flow-color"></i><span data-ceramic-i18n="flowLegend">流速 · mL/s</span></span>
+                <span><i class="temperature-color"></i><span data-ceramic-i18n="temperatureLegend">咖啡温度 · °C</span></span>
+                <span><i class="weight-color"></i><span data-ceramic-i18n="cupFlowLegend">杯流 · g/s</span></span>
+                <span><i class="cupweight-color"></i><span data-ceramic-i18n="cupWeight">杯重 · g</span></span>
+                <span><i class="target-color"></i><span data-ceramic-i18n="targetLegend">目标 / 限制</span></span>
+              </div>
+            </div>
+            <div class="chart-wrap" id="chartWrap">
+              <svg
+                id="chart"
+                role="img"
+                aria-label="压力、机器流量、咖啡温度、杯流及杯重曲线"
+              ></svg>
+              <div id="chartEmpty" class="chart-empty" data-i18n="waitingData">
+                等待设备数据
+              </div>
+              <div id="chartTooltip" class="chart-tooltip" hidden></div>
+            </div>
+            <div class="chart-caption">
+              <span id="chartCaption"> </span><span id="stopWeight"></span>
+            </div>
+          </div>
+</section>
+<aside class="ceramic-live-side"><span id="weightTitle" class="eyebrow" data-i18n="liveWeight">当前出液</span><div class="weight-reading"><strong id="liveWeight">—</strong><span>g</span></div><span id="weightNote"></span><span id="ceramicCupFlow"></span><div class="progress-track"><i id="weightProgress"></i></div><div class="ceramic-time"><span data-ceramic-i18n="elapsed">经过时间</span><strong id="liveTime">—<small>s</small></strong></div></aside>
+<section id="ceramicTastePanel"><header><h2 data-ceramic-i18n="cupFeeling">这一杯的感受</h2><small data-ceramic-i18n="optional">选填</small><button id="ceramicRetryInventory" class="text-button" hidden>重试扣豆</button><button id="ceramicRetryShot" class="text-button" hidden>重新读取记录</button></header><div id="ceramicLike" class="ceramic-segmented"><button data-ceramic-like="like">喜欢</button><button data-ceramic-like="neutral">还好</button><button data-ceramic-like="dislike">不喜欢</button></div><div class="ceramic-sensory"><label><span data-ceramic-i18n="acid">酸</span><small>弱</small><input id="ceramicAcid" type="range" min="1" max="5" step="1" aria-label="酸强度"><small>强</small><button data-ceramic-clear="acid" aria-label="清除酸记录">×</button></label><label><span data-ceramic-i18n="sweet">甜</span><small>弱</small><input id="ceramicSweet" type="range" min="1" max="5" step="1" aria-label="甜强度"><small>强</small><button data-ceramic-clear="sweet" aria-label="清除甜记录">×</button></label><label><span data-ceramic-i18n="bitter">苦</span><small>弱</small><input id="ceramicBitter" type="range" min="1" max="5" step="1" aria-label="苦强度"><small>强</small><button data-ceramic-clear="bitter" aria-label="清除苦记录">×</button></label></div><label class="ceramic-note-label" for="ceramicNote" data-ceramic-i18n="oneNote">一句笔记</label><textarea id="ceramicNote" placeholder="记下此刻的感受…"></textarea><div class="ceramic-taste-actions"><button id="ceramicSaveTaste" class="button primary" data-ceramic-i18n="saveReview">保存评价</button><button id="ceramicEnd" class="button secondary" data-ceramic-i18n="finish">结束</button></div></section>
+</main>
+<footer class="control-bar">
+<button id="hotWaterButton" class="aux-button hot-water-shortcut"><svg><use href="#i-drop"/></svg><span><b data-ceramic-i18n="hotWater">热水</b><small id="hotWaterSummary" hidden></small></span></button>
+<button class="aux-button" data-command="steam"><svg><use href="#i-steam"/></svg><span data-i18n="steam">蒸汽</span></button>
+<button id="grinderButton" class="device-shortcut"><svg viewBox="0 0 24 26"><path d="M7 2h10l-3 7h-4L7 2Zm3 7v5m4-5v5M6 14h12v10H6zM12 2V0h7"/></svg><span data-ceramic-i18n="grinding">研磨</span><i></i></button>
+<button id="scaleButton" class="device-shortcut"><svg viewBox="0 0 24 26"><path d="M5 3h14l-3 5H8L5 3ZM8 8 4 23h16L16 8M10 13h4"/></svg><span data-i18n="scale">蓝牙秤</span><i></i></button>
+<button id="settingsButton" class="icon-label" aria-label="设置"><svg><use href="#i-settings"/></svg><span data-ceramic-i18n="settings">设置</span></button>
+<div class="ceramic-brew-actions"><button id="tareButton" class="button secondary tare"><span data-i18n="tare">秤清零</span><span id="tareWeight">— g</span></button><button id="stopButton" class="button stop-button"><i></i><span data-i18n="stop">停止</span></button></div>
+<div class="ceramic-next-actions"><button id="ceramicTasteSteam" class="button secondary"><svg><use href="#i-steam"/></svg><span data-i18n="steam">蒸汽</span></button><button id="ceramicRepeat" class="button secondary" data-ceramic-i18n="repeat">照这杯再做</button><button id="ceramicTweak"><svg aria-hidden="true"><use href="#i-settings"/></svg><span data-ceramic-i18n="tweak">微调这杯</span></button><button id="ceramicChangeProfile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="13" height="16" rx="2"/><path d="M9 2h10a2 2 0 0 1 2 2v13M8 10h7M8 14h5"/></svg><span data-ceramic-i18n="changeProfile">换个方案</span></button></div>
+<div class="action-status" id="actionStatus" role="status"></div>
+</footer>
+    </div>
+    <div class="overlay" id="hotWaterDialog" hidden role="dialog" aria-modal="true" aria-labelledby="hotWaterTitle">
+      <section class="dialog hot-water-dialog">
+        <header class="dialog-header"><h2 id="hotWaterTitle" data-i18n="addHotWater">加热水</h2><button class="close-button" data-close aria-label="关闭">×</button></header>
+        <div class="dialog-content">
+          <p id="hotWaterMode" class="hot-water-mode"></p>
+          <div class="hot-water-parameters">
+            <button class="hot-water-parameter" data-hot-water-edit="targetTemperature"><span data-i18n="waterTemperature">水温</span><strong><b id="hotWaterTemperature">—</b><small>°C</small></strong></button>
+            <button class="hot-water-parameter" data-hot-water-edit="volume"><span data-i18n="waterAmount">出水量</span><strong><b id="hotWaterAmount">—</b><small id="hotWaterUnit">mL</small></strong></button>
+          </div>
+          <details id="hotWaterMore" class="hot-water-more"><summary data-i18n="moreSettings">更多设置</summary><div>
+            <button class="setting-value" data-hot-water-edit="duration"><span data-i18n="durationSetting">最长时间</span><strong><b id="hotWaterDuration">—</b><small>s</small></strong></button>
+            <button class="setting-value" data-hot-water-edit="flow"><span data-i18n="flowSetting">流量</span><strong><b id="hotWaterFlow">—</b><small>mL/s</small></strong></button>
+          </div></details>
+          <p id="hotWaterStartHint" class="hot-water-hint"></p>
+          <p id="hotWaterMessage" class="hot-water-message" role="status"></p>
+        </div>
+        <footer class="dialog-footer"><button class="button secondary" data-close data-i18n="cancel">取消</button><button id="hotWaterReset" class="text-button" data-i18n="discard">还原</button><span class="spacer"></span><button id="hotWaterApply" class="button primary" data-i18n="applyHotWater">应用参数</button><button id="hotWaterStart" class="button primary" data-i18n="startHotWater" hidden>开始加热水</button></footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="profileDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profileDialogTitle"
+    >
+      <section class="dialog profile-dialog">
+        <header class="dialog-header">
+          <div class="brand"><svg class="thiscup-brand-art" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="thiscup-profile-brand-ink-1" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="./assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#thiscup-profile-brand-ink-1)"/></svg></div>
+          <h2 id="profileDialogTitle" data-i18n="chooseProfileTitle">
+            换个方案
+          </h2>
+          <span class="dialog-hint" data-i18n="previewHint"
+            >先看一眼，再应用</span
+          ><button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div class="profile-body">
+          <div class="profile-browser">
+            <input
+              id="profileSearch"
+              type="search"
+              placeholder="搜索方案"
+              aria-label="搜索方案"
+            />
+            <div id="profileList" class="profile-list"></div>
+          </div>
+          <div id="profilePreview" class="profile-preview"></div>
+        </div>
+        <footer class="dialog-footer">
+          <span id="profileSelectionNote"></span
+          ><button class="button secondary" data-close data-i18n="back">
+            返回</button
+          ><button
+            id="applyProfile"
+            class="button primary"
+            disabled
+            data-i18n="applyProfile"
+          >
+            应用此方案
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="keypadDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="keypadTitle"
+    >
+      <section class="dialog keypad-dialog">
+        <header class="dialog-header">
+          <h2 id="keypadTitle">粉量</h2>
+          <span class="dialog-hint" data-i18n="draftOnly">只修改草稿</span
+          ><button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div class="keypad-body">
+          <div class="keypad-display">
+            <div id="keypadValue">0</div>
+            <span id="keypadUnit">g</span><small id="keypadRange"></small>
+            <p id="keypadError" role="alert"></p>
+          </div>
+          <div id="keypadKeys" class="keypad-keys">
+            <button data-key="7">7</button><button data-key="8">8</button
+            ><button data-key="9">9</button><button data-key="4">4</button
+            ><button data-key="5">5</button><button data-key="6">6</button
+            ><button data-key="1">1</button><button data-key="2">2</button
+            ><button data-key="3">3</button><button data-key=".">·</button
+            ><button data-key="0">0</button
+            ><button data-key="delete" aria-label="退格">⌫</button>
+          </div>
+        </div>
+        <footer class="dialog-footer">
+          <button id="keypadClear" class="text-button" data-i18n="clear">
+            清空</button
+          ><span class="spacer"></span
+          ><button class="button secondary" data-close data-i18n="cancel">
+            取消</button
+          ><button id="keypadDone" class="button primary" data-i18n="done">
+            完成
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="historyDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="historyTitle"
+    >
+      <section class="dialog history-dialog">
+        <header class="dialog-header">
+          <h2 id="historyTitle" data-i18n="history">历史</h2>
+          <button id="refreshHistory" class="text-button" data-i18n="refresh">
+            刷新</button
+          ><button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div class="history-body">
+          <div id="historyList" class="history-list"></div>
+          <div id="historyDetail" class="history-detail"></div>
+        </div>
+        <footer class="dialog-footer">
+          <span id="historyMessage"></span
+          ><button class="button secondary" data-close data-i18n="back">
+            返回
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="detailDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detailTitle"
+    >
+      <section class="dialog detail-dialog">
+        <header class="dialog-header">
+          <h2 id="detailTitle" data-i18n="profileDetails">曲线详情</h2>
+          <button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div id="detailContent" class="dialog-content"></div>
+        <footer class="dialog-footer">
+          <button class="button secondary" data-close data-i18n="back">
+            返回
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="saveDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="saveTitle"
+    >
+      <section class="dialog save-dialog">
+        <header class="dialog-header">
+          <h2 id="saveTitle" data-i18n="saveAs">另存方案</h2>
+          <button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div class="dialog-content">
+          <label for="saveName" data-i18n="profileName">方案名称</label
+          ><input id="saveName" maxlength="100" autocomplete="off" />
+          <p id="saveError" class="error-text" role="alert"></p>
+        </div>
+        <footer class="dialog-footer">
+          <button class="button secondary" data-close data-i18n="cancel">
+            取消</button
+          ><button id="saveConfirm" class="button primary" data-i18n="save">
+            保存
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div
+      class="overlay"
+      id="settingsDialog"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settingsTitle"
+    >
+      <section class="dialog settings-dialog">
+        <header class="dialog-header">
+          <h2 id="settingsTitle" data-i18n="settings">设置</h2>
+          <button class="close-button" data-close aria-label="关闭">×</button>
+        </header>
+        <div class="dialog-content">
+          <div class="setting-row">
+            <span data-i18n="language">语言</span
+            ><button id="settingsLanguage" class="button secondary">
+              中文 / English
+            </button>
+          </div>
+          <div class="setting-row">
+            <span data-i18n="appearance">外观</span
+            ><button
+              id="settingsTheme"
+              class="button secondary"
+              data-i18n="toggleTheme"
+            >
+              浅色 / 深色
+            </button>
+          </div>
+          <section class="display-settings" aria-labelledby="displayTitle">
+            <h3 id="displayTitle" data-i18n="displayTitle">显示</h3>
+            <div class="brightness-grid">
+              <label for="activeBrightness"><span data-i18n="activeBrightness">使用亮度</span><output id="activeBrightnessValue" for="activeBrightness">80%</output><input id="activeBrightness" type="range" min="0" max="100" step="1" value="80" disabled></label>
+              <label for="sleepBrightness"><span data-i18n="sleepBrightness">待机亮度</span><output id="sleepBrightnessValue" for="sleepBrightness">40%</output><input id="sleepBrightness" type="range" min="0" max="100" step="1" value="40" disabled></label>
+            </div>
+            <div class="setting-row"><label for="rotationMinutes" data-i18n="displayRotation">图片轮播</label><select id="rotationMinutes" disabled><option value="10" data-i18n="displayTenMinutes">10 分钟</option><option value="20" data-i18n="displayTwentyMinutes" selected>20 分钟</option></select><button id="galleryButton" class="text-button" data-i18n="displayPictures">待机图片 ↗</button></div>
+            <p id="displayActual" class="display-note" role="status"></p>
+            <div class="display-save"><p id="displayMessage" class="display-note" role="status"></p><button id="retryDisplay" class="button secondary" data-i18n="retry" hidden>重试</button><button id="saveDisplay" class="button secondary" data-i18n="displaySave" disabled>保存显示设置</button></div>
+          </section>
+          <div class="setting-row">
+            <label for="serverUrl" data-i18n="serverAddress">Decaid 地址</label
+            ><input
+              id="serverUrl"
+              type="url"
+              spellcheck="false"
+              placeholder="http://127.0.0.1:8080"
+            /><button
+            id="connectButton"
+            class="button primary"
+            data-i18n="connect"
+          >
+            连接
+          </button>
+          </div>
+          <div id="deviceDetails" class="device-details"></div>
+          <p id="settingsError" class="error-text" role="alert"></p>
+        </div>
+        <footer class="dialog-footer">
+          <button
+            id="nativeSettings"
+            class="text-button"
+            data-i18n="nativeSettings"
+          >
+            Decaid 设置 ↗</button
+          ><button
+            id="returnDashboard"
+            class="text-button"
+            data-i18n="returnDashboard"
+            hidden
+            disabled
+          >
+            返回 Decaid 主界面</button
+          ><span class="spacer"></span
+          ><button class="button secondary" data-close data-i18n="back">
+            返回</button>
+        </footer>
+      </section>
+    </div>
+<div class="overlay" id="ceramicAdjustDialog" hidden role="dialog" aria-modal="true" aria-labelledby="ceramicAdjustTitle"><section class="dialog ceramic-adjust-dialog"><header class="dialog-header"><div class="brand"><svg class="thiscup-brand-art" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="thiscup-brand-ink-2" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="./assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#thiscup-brand-ink-2)"/></svg></div><h2 id="ceramicAdjustTitle" data-ceramic-i18n="adjustCup">调整这一杯</h2><button data-close class="close-button" aria-label="返回">×</button></header><div class="dialog-content"><span class="ceramic-adjust-eyebrow" data-i18n="currentRecipe">当前方案</span><h3 id="ceramicAdjustName"></h3>          <div class="parameters" id="parameters">
+            <div class="parameter">
+              <span class="parameter-label" data-i18n="dose">粉量</span>
+              <div class="parameter-control">
+                <button data-step="dose:-1" aria-label="减少粉量">−</button
+                ><button data-edit="dose" class="number-button">
+                  <strong id="doseValue">—</strong><span>g</span></button
+                ><button data-step="dose:1" aria-label="增加粉量">+</button>
+              </div>
+            </div>
+            <div class="parameter">
+              <span
+                class="parameter-label"
+                id="targetLabel"
+                data-i18n="yieldTarget"
+                >杯重目标</span
+              >
+              <div class="parameter-control">
+                <button data-step="target:-1" aria-label="减少杯重目标">
+                  −</button
+                ><button data-edit="target" class="number-button">
+                  <strong id="targetValue">—</strong><span>g</span></button
+                ><button data-step="target:1" aria-label="增加杯重目标">
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="parameter">
+              <span class="parameter-label" data-i18n="temperature"
+                >设定温度</span
+              >
+              <div class="parameter-control">
+                <button data-step="temperature:-1" aria-label="降低温度">
+                  −</button
+                ><button data-edit="temperature" class="number-button">
+                  <strong id="temperatureValue">—</strong
+                  ><span>°C</span></button
+                ><button data-step="temperature:1" aria-label="升高温度">
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="draft-area">
+            <span id="draftStatus" class="draft-status" role="status"> </span
+            ><button
+              id="applyDraft"
+              class="button primary"
+              disabled
+              data-i18n="applyDraft"
+            >
+              应用本杯参数
+            </button>
+            <div class="save-options">
+              <button id="resetDraft" class="text-button" data-i18n="discard">
+                还原</button
+              ><button id="saveProfile" class="text-button" data-i18n="saveAs">
+                另存方案
+              </button>
+            </div>
+          </div>
+</div><footer class="dialog-footer"><button data-close class="button secondary" data-i18n="cancel">取消</button>          <button id="profileDetails" class="detail-link">
+            <span data-i18n="profileDetails">曲线详情</span><span>↗</span>
+          </button>
+          <button id="lastShotButton" class="last-shot">
+            <span class="eyebrow" data-i18n="lastShot">上一杯</span
+            ><strong id="lastShotTitle">—</strong
+            ><small id="lastShotSummary" data-i18n="noHistory">暂无记录</small>
+          </button>
+</footer></section></div>
+    <div class="ceramic-tools"><button id="historyButton" class="icon-label"><svg><use href="#i-history"/></svg><span data-i18n="history">历史</span></button><button id="themeButton" class="icon-button" aria-label="切换明暗主题"><svg><use href="#i-sun"/></svg></button><button id="languageButton" class="icon-button language" aria-label="Switch language">EN</button><button class="aux-button" data-command="flush"><svg><use href="#i-flush"/></svg><span data-i18n="flush">冲洗</span></button></div>
+<div class="overlay" id="ceramicSteamDialog" hidden role="dialog" aria-modal="true" aria-labelledby="ceramicSteamTitle"><section class="dialog ceramic-steam-dialog"><header class="dialog-header"><div class="brand"><svg class="thiscup-brand-art" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="thiscup-brand-ink-3" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="./assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#thiscup-brand-ink-3)"/></svg></div><h2 id="ceramicSteamTitle" data-i18n="steam">蒸汽</h2><span id="ceramicSteamState" hidden></span><button data-close class="close-button" aria-label="返回">×</button></header><div class="ceramic-steam-body"><div class="ceramic-steam-art"><svg class="ceramic-steam-progress" viewBox="0 0 1586 992" aria-hidden="true"><defs><linearGradient id="steam-progress-shade" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa66d"/><stop offset=".5" stop-color="#ffbb80"/><stop offset="1" stop-color="#f4a16a"/></linearGradient><mask id="steam-wand-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1586" height="992"><rect width="1586" height="992" fill="white"/><path d="M815 169 C787 188 762 213 746 240 C716 269 696 315 683 367 C679 383 684 401 699 410 C715 422 735 413 744 397 L759 351 C774 308 794 284 812 269 L852 246 Z" fill="black"/></mask></defs><image href="./assets/ceramic/slices/steam-art.png" width="1586" height="992"/><g mask="url(#steam-wand-mask)"><path id="ceramicSteamArc" d="M484 229 A278 271 0 1 1 484 771 A278 271 0 1 1 484 229" pathLength="100" fill="none" stroke="url(#steam-progress-shade)" stroke-width="25" stroke-linecap="round"/></g></svg><div class="ceramic-steam-clock"><span data-ceramic-i18n="elapsed">经过时间</span><strong id="ceramicSteamElapsed">—<small>s</small></strong><span data-ceramic-i18n="setDuration">设定时长</span><b id="ceramicSteamDurationNote">— s</b></div></div><div class="ceramic-steam-right"><div class="ceramic-steam-params"><div class="ceramic-steam-param"><label data-ceramic-i18n="steamTemperature">蒸汽温度</label><button data-ceramic-steam-step="temperature:-1" aria-label="减少蒸汽温度">−</button><button data-ceramic-steam-edit="temperature"><strong id="ceramicSteamTemperature">—</strong><small>°C</small></button><button data-ceramic-steam-step="temperature:1" aria-label="增加蒸汽温度">+</button><p id="ceramicSteamActual"></p></div><div class="ceramic-steam-param"><label data-ceramic-i18n="steamFlow">蒸汽流量</label><button data-ceramic-steam-step="flow:-1" aria-label="减少蒸汽流量">−</button><button data-ceramic-steam-edit="flow"><strong id="ceramicSteamFlow">—</strong><small>mL/s</small></button><button data-ceramic-steam-step="flow:1" aria-label="增加蒸汽流量">+</button></div><div class="ceramic-steam-param"><label data-ceramic-i18n="steamDuration">设定时长</label><button data-ceramic-steam-step="duration:-1" aria-label="减少设定时长">−</button><button data-ceramic-steam-edit="duration"><strong id="ceramicSteamDuration">—</strong><small>s</small></button><button data-ceramic-steam-step="duration:1" aria-label="增加设定时长">+</button></div></div><p id="ceramicSteamMessage" role="status"></p><button id="ceramicSteamApply" class="button primary" data-ceramic-i18n="applySteam">应用参数</button><button id="ceramicSteamStop" class="button stop-button active" data-i18n="stop" hidden>停止</button><button id="ceramicSteamStart" class="button primary" hidden data-ceramic-i18n="startSteam">开始蒸汽</button></div></div></section></div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <div id="grinderHost"></div>
+    <script type="module" src="./app.js?v=0.2.29-rc.5"></script>
+    <script type="module" src="./grinder-panel.js?v=0.2.29-rc.5"></script>
+  </body>
+</html>

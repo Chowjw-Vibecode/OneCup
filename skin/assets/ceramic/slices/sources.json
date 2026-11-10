@@ -1,0 +1,126 @@
+{
+  "adjust-panel": {
+    "source": "adjust-reference.png",
+    "crop": [
+      18,
+      297,
+      1568,
+      738
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "grinder-panel": {
+    "source": "grinder-reference.png",
+    "crop": [
+      693,
+      207,
+      1563,
+      735
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "beans-panel": {
+    "source": "beans-reference.png",
+    "crop": [
+      23,
+      123,
+      1055,
+      831
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "taste-panel": {
+    "source": "taste-reference.png",
+    "crop": [
+      1048,
+      79,
+      1583,
+      979
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "steam-panel": {
+    "source": "steam-reference.png",
+    "crop": [
+      880,
+      156,
+      1557,
+      714
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "number-well": {
+    "source": "adjust-reference.png",
+    "crop": [
+      188,
+      427,
+      427,
+      527
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "round-button": {
+    "source": "adjust-reference.png",
+    "crop": [
+      79,
+      427,
+      178,
+      531
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "orange-button": {
+    "source": "adjust-reference.png",
+    "crop": [
+      1137,
+      851,
+      1554,
+      961
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "soft-button": {
+    "source": "grinder-reference.png",
+    "crop": [
+      789,
+      735,
+      1085,
+      836
+    ],
+    "surface": "continuous fitted blank ceramic; original rim"
+  },
+  "steam-art": {
+    "source": "steam-clean.png",
+    "method": "transparent unused margins; opaque wand"
+  },
+  "grinder-art": {
+    "source": "grinder-reference.png",
+    "crop": [
+      0,
+      96,
+      718,
+      849
+    ],
+    "method": "transparent blue background"
+  },
+  "beans-art": {
+    "source": "beans-reference.png",
+    "crop": [
+      65,
+      465,
+      590,
+      780
+    ],
+    "method": "transparent paper background"
+  },
+  "cup-art": {
+    "source": "cup-reference.png",
+    "method": "original RGB; transparent outside paper",
+    "crop": [
+      0,
+      96,
+      805,
+      880
+    ]
+  }
+}

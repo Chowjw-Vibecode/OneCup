@@ -1,0 +1,14 @@
+/* Official Streamline demo main chart, verified 2026-11-03:
+ * https://decentespresso.com/download/streamline_demo/src/modules/chart.js
+ * Its "weight" trace is weight FLOW (g/s), not cumulative grams.
+ * Cumulative weight is additional here: use Decaid native Colors.purpleAccent
+ * from lib/src/util/shot_chart.dart (b9f9d055), #e040fb in Flutter Material.
+ * One shared palette for all charts, legends, readouts and dial targets.
+ */
+:root,:root[data-theme=light]{--green:#17c29a;--blue:#0358cf;--red:#ff97a1;--brown:#d8bda8;--purple:#e040fb;--target-pressure:#bde2d5;--target-flow:#cdd9f5;--target-temperature:#f9ebec;--brown-text:#806e61}
+:root[data-theme=dark]{--green:#17c29a;--blue:#0358cf;--red:#ae6d73;--brown:#695f57;--purple:#e040fb;--target-pressure:#bde2d5;--target-flow:#23416c;--target-temperature:#3e3233;--brown-text:#d8bda8}
+.cupweight-color{background:var(--purple)}
+.weight-color{background:var(--brown);border:0}
+#ceramicCupFlow{color:var(--brown-text)}
+.chart-end-label text[fill="var(--brown)"],.chart-end-label-layer text[fill="var(--brown)"]{fill:var(--brown-text)}
+.history-chart-legend .target-color,.legend i.target-color{border:0;background:linear-gradient(to right,var(--target-pressure) 0 33%,var(--target-flow) 33% 66%,var(--target-temperature) 66%);height:3px;mask-image:repeating-linear-gradient(to right,#000 0 5px,transparent 5px 8px)}

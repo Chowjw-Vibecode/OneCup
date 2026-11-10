@@ -1,0 +1,64 @@
+[
+  {
+    "family": "Noto Serif SC ExtraLight",
+    "version": "Version 2.003-H1;hotconv 1.1.1;makeotfexe 2.6.0",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+    "file": "notoserifsc/NotoSerifSC-Variable.woff2",
+    "bytes": 11032512,
+    "glyphs": 31058,
+    "unicodeCodepoints": 30928,
+    "axes": {
+      "wght": {
+        "min": 200.0,
+        "default": 200.0,
+        "max": 900.0
+      }
+    },
+    "source_sha256": "050080d9255a86808f2945bffac582b31ef32bc36411ce29563b4961670c66f9",
+    "woff2_sha256": "0ed79428aef18c1be3781545b2450a44628572d1837e82526b6681daa5cd0d77",
+    "license": "notoserifsc/OFL.txt"
+  },
+  {
+    "family": "Source Serif 4",
+    "version": "Version 4.004;hotconv 1.0.116;makeotfexe 2.5.65601",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4%5Bopsz,wght%5D.ttf",
+    "file": "sourceserif4/SourceSerif4-Variable.woff2",
+    "bytes": 427640,
+    "glyphs": 1463,
+    "unicodeCodepoints": 918,
+    "axes": {
+      "wght": {
+        "min": 200.0,
+        "default": 400.0,
+        "max": 900.0
+      },
+      "opsz": {
+        "min": 8.0,
+        "default": 20.0,
+        "max": 60.0
+      }
+    },
+    "source_sha256": "97b2d4da6e3cb494b5a1e66ae176914d852ccabef49e0c02c0df25f3e39aca0b",
+    "woff2_sha256": "ac8fedbda522741e190fa14819ca9817dae0646affa9af8ce05c169558ebc906",
+    "license": "sourceserif4/OFL.txt"
+  },
+  {
+    "family": "Noto Sans SC Thin",
+    "version": "Version 2.004-H2;hotconv 1.0.118;makeotfexe 2.5.65603",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+    "file": "notosanssc/NotoSansSC-Variable.woff2",
+    "bytes": 7782052,
+    "glyphs": 31036,
+    "unicodeCodepoints": 30890,
+    "axes": {
+      "wght": {
+        "min": 100.0,
+        "default": 100.0,
+        "max": 900.0
+      }
+    },
+    "source_sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+    "woff2_sha256": "2b80434697b5d4bbbcc2f4a45ce2bc1a41b532b821a061b17fe685ed1c07fb38",
+    "license": "notosanssc/OFL.txt"
+  }
+]

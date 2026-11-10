@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"test":"node --test 验证/*.test.mjs"}}

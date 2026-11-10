@@ -1,0 +1,64 @@
+{
+  "id": "thiscup-crystal.reaplugin",
+  "name": "This Cup · 小方",
+  "author": "Chowjw’s Vibe Coding Lab",
+  "description": "CRYSTAL grinder driver ported from our classic de1app controller. Connect only reads; settings and starts require explicit actions.",
+  "version": "0.1.6",
+  "apiVersion": 1,
+  "permissions": [
+    "transport.ble",
+    "api",
+    "emit",
+    "pluginStorage",
+    "events.workflow"
+  ],
+  "drivers": [
+    {
+      "id": "crystal",
+      "type": "grinder",
+      "capabilities": [
+        "startStop",
+        "grindSetting",
+        "rpmControl"
+      ],
+      "observations": [
+        "setting",
+        "rpm"
+      ],
+      "ble": {
+        "match": {
+          "name": {
+            "contains": "crystal"
+          }
+        }
+      },
+      "controls": {
+        "grindSetting": {
+          "kind": "numeric",
+          "min": 1,
+          "max": 1500,
+          "step": 1
+        },
+        "rpmControl": {
+          "kind": "numeric",
+          "min": 1,
+          "max": 1500,
+          "step": 10
+        }
+      }
+    }
+  ],
+  "settings": {},
+  "api": [
+    {
+      "id": "ui",
+      "type": "http",
+      "data": {}
+    },
+    {
+      "id": "changed",
+      "type": "websocket",
+      "data": {}
+    }
+  ]
+}

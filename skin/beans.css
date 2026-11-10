@@ -1,0 +1,117 @@
+/* Scoped ceramic bean inventory. Text and controls remain native HTML. */
+.beans-overlay{position:fixed;inset:0;z-index:1400;background:#f9faf7;color:#082842;display:grid;place-items:center;font-family:'Songti SC','Noto Serif CJK SC',Georgia,serif;--bean-blue:#d8f2ff;--bean-line:#13394c2b;--bean-paper:#fbfaf7}
+.beans-overlay *{box-sizing:border-box}.beans-overlay button,.beans-overlay input{font:inherit;color:inherit}.beans-overlay button{cursor:pointer;border:0;background:transparent;min-height:44px;padding:8px 16px;border-radius:0;line-height:1.25}.beans-overlay button:disabled{opacity:.45;cursor:default}.beans-overlay button:focus-visible,.beans-overlay input:focus-visible{outline:2px solid #087dd8;outline-offset:3px}.beans-stage{width:min(100vw,159.88dvh);height:min(62.55vw,100dvh);position:relative;container-type:inline-size;display:grid;grid-template-rows:10% 76% 14%;padding:0 2%;isolation:isolate}.beans-stage:before{content:'';position:absolute;left:0;right:-2%;top:9%;height:76%;background:linear-gradient(100deg,#e1f4fc,#c6ecfb);border-radius:0 25% 12% 0/0 6% 9% 0;z-index:-1}.beans-stage header{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:2cqw;padding:0 1.6%}.beans-brand{font-size:2.6cqw;display:flex;align-items:center;gap:.6cqw;white-space:nowrap}.beans-brand small{font:1.2cqw sans-serif;letter-spacing:.18em}.beans-stage h1{font-size:2.5cqw;margin:0;text-align:center;white-space:nowrap}.beans-stage header>button{justify-self:end;font-size:1.7cqw}.beans-stage main{display:grid;grid-template-columns:66.8% 32%;gap:1.2%;padding-top:2%;padding-bottom:2%;min-height:0}.beans-card{background:radial-gradient(ellipse at 30% 20%,#fffefa,#f8f7f2);box-shadow:inset 3px 3px 5px #fff,inset -3px -3px 5px #dedbd2,0 7px 12px #34566a20;border-radius:10% 10% 8% 9%/11% 9% 10% 9%;position:relative;padding:6% 6% 0;overflow:hidden;min-width:0}.beans-card h2{font-size:4.8cqw;line-height:1.15;letter-spacing:.025em;font-weight:700;max-width:87%;margin:2% 0 2%;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.beans-edit{position:absolute;right:5.5%;top:9%;font-size:1.5cqw!important;color:#526e85!important;padding:0!important;min-height:36px!important}.beans-description{font-size:2.6cqw;color:#5d85a8;margin:0 0 2%;min-height:1.2em}.beans-date{font-size:1.8cqw;margin:0;border-top:1px solid var(--bean-line);padding-top:2%;color:#345879}.beans-art{position:absolute;left:3.3%;top:48.4%;width:51.65%;height:auto;aspect-ratio:525/315;display:block;overflow:hidden;pointer-events:none;mix-blend-mode:multiply}.beans-remaining{position:absolute;top:47%;left:59%;width:35%;display:flex;flex-direction:column;align-items:flex-start}.beans-remaining>span{font-size:2cqw}.beans-remaining>strong{font-size:9cqw;line-height:1.1;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}.beans-remaining>strong small{font-size:3.6cqw;font-weight:400}.beans-remaining>small{font-size:1.2cqw}.beans-weigh-actions{position:absolute;right:2.5%;bottom:8.5%;display:flex;gap:1.4cqw}.beans-weigh-actions button{font-size:1.6cqw;padding:1.5cqw;white-space:nowrap;min-width:12.5cqw;min-height:6.8cqw}.beans-soft{background:linear-gradient(140deg,#fffefa,#f7f5f0)!important;box-shadow:inset 2px 2px 3px #fff,inset -2px -2px 3px #d8d4ca,0 4px 7px #273d4b17;border-radius:3cqw!important;padding:.9cqw 1.8cqw!important}.beans-stage aside{display:grid;grid-template-rows:auto auto 1fr;gap:0;min-height:0;padding:2.8cqw 0 3%}.beans-stage aside h2{font-size:2.4cqw;line-height:1.2;margin:0 0 .8cqw}.beans-search{height:5cqw;font-size:1.7cqw;border:0;border-radius:4cqw;min-width:0;padding:.9cqw 2cqw;box-shadow:inset 2px 2px 3px #fff,inset -2px -2px 4px #d1d3d0,0 4px 7px #34566a20;background:#fffdf9;width:100%}.beans-list{margin-top:2cqw;overflow:auto;scrollbar-color:#9dbfcf transparent;scrollbar-width:thin}.beans-list>button{position:relative;display:flex;gap:1cqw;align-items:center;text-align:left;width:100%;padding:2cqw 1.2cqw;border-bottom:1px solid var(--bean-line);min-height:8cqw}.beans-list>button.selected{background:#bde7fa;border-radius:1.3cqw}.beans-list>button.selected:before{position:absolute;content:'';left:0;top:10%;height:80%;width:.35cqw;background:#1682e0;border-radius:1cqw}.beans-list b{font-size:2.1cqw;font-weight:600;display:block;overflow-wrap:anywhere}.beans-list small{display:block;font-size:1.6cqw;font-weight:400;color:#44759d;margin-top:.4cqw}.beans-list-weight{font-size:1.9cqw;white-space:nowrap;margin-left:auto}.beans-list-weight small{display:inline;font-size:1.2cqw}.beans-list i{font-size:2.4cqw;font-style:normal}.beans-stage footer{border-top:1px solid var(--bean-line);display:flex;align-items:flex-start;gap:1cqw;margin-top:0;padding:.8cqw 1% 0}.beans-stage footer>button{font-size:1.8cqw}.beans-stage footer>.beans-primary{margin-left:auto;min-width:33.2%;font-size:2.5cqw}.beans-primary{background:linear-gradient(150deg,#ffbd93,#ffa16b)!important;box-shadow:inset 1px 2px 3px #ffe0cb,inset -1px -2px 3px #e48a55,0 4px 8px #7543251c;border-radius:1.5cqw!important;padding:1.3cqw 2.5cqw!important}.beans-empty{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2cqw}.beans-empty h2{font-size:2.6cqw}.beans-error{position:fixed;z-index:1410;left:25%;bottom:3%;max-width:50%;background:#fff5ed;color:#963f1c;border:1px solid #bd754b;border-radius:10px;padding:10px 18px;font:16px/1.4 sans-serif;box-shadow:0 5px 20px #0002}.beans-busy{position:absolute;right:3%;top:10%;font:14px sans-serif;color:#40576a;z-index:5}.beans-modal{position:absolute;inset:0;z-index:4;background:#122d433d;backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px}.beans-sheet{background:#fbfaf7;border-radius:28px;box-shadow:inset 2px 2px 3px white,0 15px 50px #1235;padding:28px;max-width:min(650px,94vw);max-height:94dvh;overflow:auto;width:100%;font-family:inherit}.beans-sheet h2{margin:0 0 20px;font-size:28px;line-height:1.3}.beans-sheet label{display:flex;flex-direction:column;gap:8px;font-size:18px;margin-bottom:14px}.beans-sheet input{border:1px solid #b4c4ce;border-radius:12px;padding:12px 16px;background:#fffdfa;font-size:22px;min-height:48px;width:100%}.beans-sheet input#beanWeight{font-size:46px;font-variant-numeric:tabular-nums}.beans-dialog-actions,.beans-choice{display:flex;gap:16px;align-items:center;justify-content:flex-end;margin-top:20px}.beans-sheet button{font-size:18px;padding:12px 20px!important;border-radius:14px!important}.beans-choice{justify-content:center;margin-bottom:24px}.beans-choice button{flex:1;min-height:90px}.beans-sheet p{font:16px/1.5 sans-serif;color:#466375}@media(max-width:700px){.beans-stage{width:100vw;height:100dvh;grid-template-rows:9% 80% 11%}.beans-stage main{grid-template-columns:60% 38%;}.beans-stage header{grid-template-columns:1fr 1fr}.beans-brand{display:none}.beans-stage h1{font-size:22px}.beans-stage header>button{font-size:16px}.beans-weigh-actions{flex-direction:column;gap:12px;bottom:4%}.beans-weigh-actions button{font-size:14px;min-height:44px;min-width:0}.beans-card h2{font-size:30px;margin-top:24%}.beans-description{font-size:18px}.beans-date{font-size:14px}.beans-edit{font-size:14px!important}.beans-stage footer>button{font-size:14px}.beans-stage footer>.beans-primary{font-size:16px;min-width:25%}.beans-remaining{top:50%;left:auto;right:10%;width:55%}.beans-remaining>span{font-size:16px}.beans-remaining>strong{font-size:55px}.beans-art{display:none}.beans-list b{font-size:18px}.beans-list small,.beans-list-weight{font-size:14px}.beans-search{font-size:16px;height:44px}.beans-stage aside{grid-template-rows:auto 44px 1fr;gap:12px}.beans-stage aside h2{font-size:20px}.beans-error{left:5%;max-width:90%}}
+
+.beans-brand svg{width:3cqw;height:3cqw;fill:none;stroke:currentColor;stroke-width:1.4}
+
+/* Match the source artwork edge and preserve readable search at tablet size. */
+.beans-art{mask-image:linear-gradient(to right,transparent,#000 3%,#000 97%,transparent),linear-gradient(to bottom,transparent,#000 4%,#000 96%,transparent);mask-composite:intersect}
+.beans-overlay .beans-search{font-size:1.7cqw}
+.beans-weigh-actions .beans-icon{display:inline-block;width:2.3cqw;height:2.3cqw;vertical-align:middle;margin-right:.6cqw;fill:none;stroke:currentColor;stroke-width:1.5}
+.beans-card-actions .beans-weigh-actions button{display:flex;align-items:center;justify-content:center;white-space:normal}
+.beans-weigh-actions .beans-action-label{min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:center}
+.beans-weigh-actions .beans-icon{flex-shrink:0}
+.beans-overlay:lang(en) .beans-card-actions .beans-weigh-actions button{font-size:1.45cqw;line-height:1.2;letter-spacing:0;padding:.6cqw!important}
+
+/* Keep the optional weight caption above the action row at both tablet sizes.
+   The action row retains the original right/bottom anchors and height. */
+@media(min-width:701px){
+ .beans-card-actions{position:absolute;top:47%;right:2.5%;bottom:8.5%;width:42.2%;display:grid;grid-template-rows:minmax(0,1fr) 6.8cqw;row-gap:max(8px,.8cqw)}
+ .beans-card-actions .beans-remaining{position:static;width:auto;min-height:0;margin-left:8.8%}
+ .beans-card-actions .beans-remaining>span{line-height:1.25}
+ .beans-card-actions .beans-remaining>small{line-height:1.3;margin-top:.35cqw}
+ .beans-card-actions .beans-remaining.is-unmeasured>strong,
+ .beans-card-actions .beans-remaining:has(>small)>strong{font-size:7.7cqw;line-height:1}
+ .beans-card-actions .beans-weigh-actions{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.4cqw;min-width:0}
+ .beans-card-actions .beans-weigh-actions button{min-width:0;width:100%;min-height:0;height:100%;white-space:normal;line-height:1.15}
+}
+
+/* Source-board alignment at 1586 × 992, scaled with the landscape canvas.
+   All titles, inventory values and weighing actions remain real elements. */
+@media(min-width:751px){
+ .beans-overlay{background:#fdfcf9;color:#082b46}
+ .beans-stage{padding:0 2%;grid-template-rows:10% 76% 14%}
+ .beans-stage:before{top:9.8%;height:75.8%;right:-2%;background:linear-gradient(115deg,#e0f5fd,#c6edfb);border-radius:0 24% 12% 0 / 0 5% 9% 0}
+ .beans-stage header{padding:0 1.6%;align-items:center}
+ .beans-stage h1{font-size:2.7cqw;line-height:1.15}
+ .beans-stage header>button{font-size:1.85cqw;padding:1cqw 1.8cqw!important;min-height:4.5cqw}
+ .beans-stage main{grid-template-columns:66.5% 32.1%;gap:1.4%;padding-top:1.8%;padding-bottom:2%;}
+ .beans-card{padding:6% 6.3% 0;border:1px solid #eeeae1;border-radius:11% 10% 9% 10% / 12% 11% 9% 11%;background:radial-gradient(ellipse at 45% 5%,#fffefa,#fbf9f5 70%,#f4f0e7);box-shadow:inset .18cqw .22cqw .3cqw #fff,inset 0 -.25cqw .35cqw #c8c0b266,0 .55cqw .85cqw #40534d27,0 1.2cqw 1.7cqw #34566a0c}
+ .beans-card h2{font-size:4.85cqw;line-height:1.15;letter-spacing:.025em;max-width:87%;margin:1.2% 0 1.4%;padding-right:0}
+ .beans-edit{right:4.8%;top:8.7%;font-size:1.65cqw!important;line-height:1.2}
+ .beans-description{font-size:2.85cqw;line-height:1.3;margin:0 0 2.8%;color:#577fa5}
+ .beans-date{font-size:1.85cqw;line-height:1.35;padding-top:2.1%;color:#345879}
+ .beans-art{left:3.3%;top:48.4%;width:51.8%}
+ .beans-card-actions{top:47%;right:2.3%;bottom:9.5%;width:42.5%;grid-template-rows:minmax(0,1fr) 6.8cqw;row-gap:1cqw}
+ .beans-card-actions .beans-remaining{margin-left:8.5%}
+ .beans-remaining>span{font-size:2.1cqw;font-weight:400;line-height:1.25}
+ .beans-remaining>strong{font-size:9.1cqw;line-height:1.1;font-weight:600;letter-spacing:-.035em}
+ .beans-remaining>strong small{font-size:3.8cqw;margin-left:.25cqw}
+ .beans-weigh-actions button{font-size:1.9cqw;letter-spacing:.01em}
+ .beans-soft{border:1px solid #e8e2d7!important;background:radial-gradient(ellipse at 42% 10%,#fffefa,#faf7f0 78%,#f0ebe0)!important;box-shadow:inset 0 .15cqw .2cqw #fff,inset 0 -.17cqw .25cqw #c7bdab66,0 .25cqw .4cqw #51453425,0 .6cqw .8cqw #273d4b0b}
+ .beans-weigh-actions .beans-icon{width:2.75cqw;height:2.75cqw;margin-right:.6cqw}
+ .beans-stage aside{padding:2.6cqw 0 3%}
+ .beans-stage aside h2{font-size:2.65cqw;line-height:1.2;margin:0 0 1.3cqw;padding-left:1.6cqw}
+ .beans-overlay .beans-search{height:5cqw;font-size:1.85cqw;padding:.85cqw 1.8cqw .85cqw 5.1cqw;background-color:#fffdf9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40' fill='none' stroke='%23082b46' stroke-width='2.6'%3E%3Ccircle cx='17' cy='17' r='11.5'/%3E%3Cpath d='m25.5 25.5 10 10'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:1.8cqw center;background-size:2.4cqw;box-shadow:inset 0 .15cqw .2cqw #fff,inset 0 -.13cqw .22cqw #bfc8c766,0 .25cqw .4cqw #34566a21}
+ .beans-list{margin-top:2.6cqw;scrollbar-width:thin;scrollbar-color:#9dbfcf transparent}
+ .beans-list>button{padding:1.5cqw 1.1cqw 1.5cqw 2.2cqw;min-height:8.2cqw;gap:.65cqw;}
+ .beans-list>button>span:first-child{min-width:0}
+ .beans-list>button.selected{background:linear-gradient(110deg,#bfe8fb,#cceefd);border-radius:1.4cqw}
+ .beans-list>button.selected:before{top:1%;height:98%;width:.48cqw;border-radius:1cqw 0 0 1cqw}
+ .beans-list b{font-size:2.3cqw;line-height:1.25;font-weight:650}
+ .beans-list small{font-size:1.65cqw;line-height:1.3;margin-top:.4cqw;color:#497ca4}
+ .beans-list-weight{font-size:2.15cqw;line-height:1.2;flex:none}
+ .beans-list-weight small{font-size:1.35cqw}
+ .beans-list i{font-size:2.6cqw;font-weight:400}
+ .beans-stage footer{padding:.65cqw 1% 0;align-items:flex-start;gap:1.1cqw}
+ .beans-stage footer>button{height:5.9cqw;font-size:1.95cqw;display:flex;align-items:center;justify-content:center}
+ .beans-stage footer>.beans-primary{min-width:33.2%;font-size:2.55cqw;font-weight:600}
+ .beans-primary{background:linear-gradient(115deg,#ffbd92,#ffa16a)!important;border:1px solid #eea06d!important;box-shadow:inset 0 .16cqw .18cqw #ffe1cc,inset 0 -.13cqw .2cqw #d77b4155,0 .35cqw .6cqw #71503226;border-radius:1.4cqw!important}
+}
+
+/* Long names remain discoverable without pushing other beans off the screen. */
+.beans-list b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.beans-list>button>span:first-child{min-width:0;flex:1}
+.beans-list>button>span:first-child>small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.beans-list-weight{flex-shrink:0}
+
+/* Inventory qualifiers sit below the number, without squeezing the bean name. */
+.beans-list-weight .beans-stock-status{display:block;font-size:1.2cqw;line-height:1.25;white-space:nowrap}
+.beans-overlay[lang=en] .beans-remaining>span{white-space:nowrap;font-size:1.9cqw}
+/* Bean detail keeps metadata above the illustration, including long names. */
+.beans-overlay .beans-stage .beans-card{isolation:isolate}
+.beans-overlay .beans-stage .beans-edit{top:4%;right:5%;min-height:44px!important;padding:0 .5em!important}
+.beans-overlay .beans-stage .beans-name{max-width:100%;font-size:4.1cqw;line-height:1.2;margin:6% 0 1.5%;min-height:2.4em;max-height:2.4em;overflow:hidden;overflow-wrap:anywhere}
+.beans-overlay .beans-stage .beans-name.is-long{font-size:3.25cqw;min-height:2.4em;max-height:2.4em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.beans-overlay .beans-stage .beans-description{font-size:2.3cqw;line-height:1.3;margin:0 0 2%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.beans-overlay .beans-stage .beans-date{font-size:1.7cqw;margin:0;padding-top:2%;position:relative;z-index:1}
+.beans-overlay .beans-stage .beans-art{top:57%;left:4%;width:47%;pointer-events:none}
+.beans-overlay .beans-stage .beans-card-actions{top:56%;right:5%;bottom:8%;width:43%;grid-template-rows:minmax(0,1fr) minmax(44px,5.5cqw);gap:.8cqw}
+.beans-overlay .beans-stage .beans-remaining{margin-left:5%;align-self:center}
+.beans-overlay .beans-stage .beans-remaining strong{font-size:7cqw;line-height:1.1}
+.beans-overlay .beans-stage .beans-weigh-actions{gap:.8cqw;align-items:center}
+.beans-overlay .beans-stage .beans-weigh-actions button{min-height:44px;max-height:100%;font-size:1.35cqw}
+.beans-overlay .beans-weight-kind{font:inherit;font-size:1.35cqw;line-height:1.35;color:#536f76;text-align:center;padding:.5em;overflow-wrap:anywhere}
+.beans-overlay .beans-stage .beans-unlink{border:1px solid #aebfc7;border-radius:999px;padding:.5em 1em;min-height:44px;font-size:1.55cqw}
+.beans-overlay .beans-stage .beans-empty .beans-primary{font-size:clamp(18px,2cqw,28px);min-height:56px;padding:.6em 1.2em}
+.beans-overlay .beans-stage .beans-empty{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:24px}
+.beans-overlay .beans-list .beans-unknown-weight{font-size:1.15cqw;max-width:7em;line-height:1.3;display:block;white-space:normal}
+.beans-overlay .beans-choice button{display:flex;flex-direction:column;justify-content:center;gap:8px}
+.beans-overlay .beans-choice button small{font-size:14px;line-height:1.4;font-weight:400;color:#557086}
+.beans-overlay .beans-sheet button{min-height:44px}
+.beans-overlay .beans-reading-actions{justify-content:space-between;margin:14px 0 24px}
+.beans-overlay .beans-weight-entry input{font-variant-numeric:tabular-nums;appearance:textfield;-moz-appearance:textfield;font-size:46px;text-align:center}
+.beans-overlay .beans-weight-entry input::-webkit-inner-spin-button,.beans-overlay .beans-weight-entry input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.beans-overlay .beans-weight-preview{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 12px;background:#e7f1f5;border-radius:16px;margin-top:16px}
+.beans-overlay .beans-weight-preview span{display:grid;gap:7px;flex:1;text-align:center}
+.beans-overlay .beans-weight-preview small{font-size:14px;color:#527086}
+.beans-overlay .beans-weight-preview b{font-size:25px;font-weight:500;font-variant-numeric:tabular-nums}
+.beans-overlay .beans-weight-preview em{font-size:16px;font-style:normal}
+.beans-overlay .beans-weight-preview i{font-style:normal;font-size:24px;color:#527086}
+.beans-overlay .beans-net-result b{color:#164a58}
+@media(max-width:700px){.beans-overlay .beans-stage .beans-name,.beans-overlay .beans-stage .beans-name.is-long{font-size:25px;min-height:0;max-height:2.4em;margin-top:50px}.beans-overlay .beans-stage .beans-description{font-size:18px}.beans-overlay .beans-stage .beans-date,.beans-overlay .beans-weight-kind,.beans-overlay .beans-stage .beans-unlink{font-size:14px}.beans-overlay .beans-list .beans-unknown-weight{font-size:12px}}
+/* The empty card has no illustration cutout to expose along its edge. */
+:root:not([data-theme=dark]) .beans-overlay .beans-stage .beans-card.is-empty{background:var(--paper-image),#faf9f5;background-size:cover;border:1px solid #eee9df;border-radius:7% 8% 7% 7% / 10% 10% 9% 10%;box-shadow:inset 3px 3px 5px #fff,inset -3px -3px 5px #dedbd2,0 7px 12px #34566a20}
+
+.beans-overlay .beans-choice { align-items: stretch; }
+.beans-overlay .beans-choice button { min-height: 100px; height: 100%; }

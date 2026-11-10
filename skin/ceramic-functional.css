@@ -1,0 +1,21 @@
+.ceramic-flavors-button{font:inherit;font-size:1.1vw;align-self:end;justify-self:end;position:relative;margin-top:-2.1vw;margin-bottom:.5vw;color:var(--muted);background:none;border:0;min-height:28px;padding:0 .2vw}.ceramic-flavor-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.ceramic-flavor-choices [aria-pressed=true]{background:var(--orange,#f6ad82);color:var(--ink)}.ceramic-message .dialog>.button+.button{margin-left:12px}
+
+#ceramicChartReadout{order:4;display:flex;gap:1vw;align-items:center;flex-wrap:wrap;padding:.7vw 1vw;border-radius:.8vw;background:#e7f4fa;font-size:1.05vw}#ceramicChartReadout span{display:flex;align-items:center;gap:.3vw}#ceramicChartReadout i{display:inline-block;width:.8vw;height:.8vw;border-radius:50%}#ceramicChartReadout strong{color:#ae6034;font-size:1.3vw;margin-right:.3vw}body:not([data-ceramic-screen=taste]) #ceramicChartReadout{display:none}#ceramicAdjustRatio{font-size:2vw;text-align:center;margin:0;position:absolute;top:57%;left:12%;width:56%;z-index:3;pointer-events:none}#ceramicAdjustName[data-long-name=true]{font-size:clamp(28px,3.2vw,52px);max-width:64%}:root[data-theme=dark] #ceramicChartReadout{background:#284650}
+
+/* The settings rows already expose both controls. */
+#settingsDialog .ceramic-tools #languageButton,#settingsDialog .ceramic-tools #themeButton{display:none}
+
+/* Approved compact pitcher prompt: artwork and controls share one surface. */
+.steam-pitcher-overlay{position:fixed;inset:0;z-index:21000;display:grid;place-items:center;background:#122e413b;backdrop-filter:blur(5px)}
+.steam-pitcher-overlay[hidden]{display:none}
+.steam-pitcher-panel{position:relative;width:min(740px,86vw,116vh);aspect-ratio:4/3;overflow:hidden;border-radius:26px;background:#faf7f2;box-shadow:0 24px 90px #142e4145;isolation:isolate;color:#10374b}
+.steam-pitcher-panel>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.steam-pitcher-panel:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#fcfaf7ed 0%,#fcfaf790 12%,transparent 28%);pointer-events:none}
+.steam-pitcher-actions{display:flex;justify-content:space-between;padding:20px;gap:20px}
+.steam-pitcher-actions button{font:600 19px 'This Cup Noto Serif SC',Songti SC,serif;color:inherit;min-height:44px;border:0;cursor:pointer}
+.steam-pitcher-back{background:transparent;padding:9px 12px}
+.steam-pitcher-stop{border-radius:13px;padding:11px 19px;background:linear-gradient(130deg,#ffceaa,#f3ac80);box-shadow:inset 0 2px 2px #fff9,0 3px 7px #90562912}
+.steam-pitcher-panel h2{position:absolute;right:25px;bottom:58px;margin:0;font:600 clamp(24px,2.54vw,34px) 'This Cup Noto Serif SC',Songti SC,serif;letter-spacing:2px;text-shadow:0 1px 4px #fff5}
+.steam-pitcher-panel h2[lang=en]{font-size:24px;max-width:250px;letter-spacing:0;text-align:right}
+/* Command errors must remain visible above the pitcher prompt. */
+body:has(.steam-pitcher-overlay:not([hidden])) .toast{z-index:21010;pointer-events:none}
