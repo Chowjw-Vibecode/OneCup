@@ -1,15 +1,15 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.29-rc.5";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.29-rc.5";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.29-rc.5";
-import {telemetryPath} from "./chart-path.js?v=0.2.29-rc.5";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.29-rc.5";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.29-rc.5";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.29-rc.5";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.29-rc.5";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.29-rc.5";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.29-rc.5";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.29-rc.5";
+import {stageLabel} from "./stage-labels.js?v=0.2.29-rc.7";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.29-rc.7";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.29-rc.7";
+import {telemetryPath} from "./chart-path.js?v=0.2.29-rc.7";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.29-rc.7";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.29-rc.7";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.29-rc.7";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.29-rc.7";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.29-rc.7";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.29-rc.7";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.29-rc.7";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -1734,7 +1734,7 @@ function pointsOf(shot) {
 function pathFor(points, key, x, y, options = {}) {
   return telemetryPath(points, key, x, y, options);
 }
-function plot(svg, points, { preview = false, comparison = null, live = false, transition = null, stageLabels = true } = {}) {
+function plot(svg, points, { preview = false, comparison = null, live = false, transition = null } = {}) {
   const width = Math.max(220, svg.clientWidth || 700),
     height = Math.max(90, svg.clientHeight || 180),
     left = preview ? 34 : 78,
@@ -1784,13 +1784,11 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   for (let value = 0; value <= ymax; value += axisStep) {
     content += `<path d="M${left} ${y(value)}H${width - right}" stroke="var(--line)" stroke-width=".7" opacity=".7"/><text x="${left - 8}" y="${y(value) + 3}" text-anchor="end">${fmt(value, 0)}</text>`;
   }
-  const stageTimes = preview ? [] : points.filter((p,i)=>i>0&&p.frame!==null&&points[i-1].frame!==null&&p.frame!==points[i-1].frame).map(p=>p.time);
   const timeLabelY = live ? top - 8 : height - 5;
   for (let time = 0; time <= maxTime; time += interval) {
-    if((!live||time!==0)&&stageTimes.some(t=>Math.abs(x(t)-x(time))<Math.max(40,window.innerWidth*.037))) continue;
     content += `<path d="M${x(time)} ${top}V${height - bottom}" stroke="var(--line)" stroke-width=".7" opacity=".55"/><text x="${x(time)}" y="${timeLabelY}" text-anchor="middle">${fmt(time, 0)}${live&&time===0?' s':''}</text>`;
   }
-  if(maxTime%interval>interval*.35 && !stageTimes.some(t=>Math.abs(x(t)-x(maxTime))<Math.max(55,window.innerWidth*.055)))content+=`<text x="${x(maxTime)}" y="${timeLabelY}" text-anchor="middle">${fmt(maxTime,0)}</text>`;
+  if(maxTime%interval>interval*.35)content+=`<text x="${x(maxTime)}" y="${timeLabelY}" text-anchor="middle">${fmt(maxTime,0)}</text>`;
   content += `${live?'':`<text x="${width - 5}" y="${height - 5}" text-anchor="end">s</text>`}${!preview?'<text x="23" y="14" text-anchor="end" fill="var(--purple)">g</text>':""}`;
   content += `<path d="M${left} ${top}V${height-bottom}H${width-right}M${width-right} ${top}V${height-bottom}" stroke="var(--muted)" stroke-width="1"/>`;
   const lines = [
@@ -1807,13 +1805,9 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   }
   if(!preview && !(live && s.preparing)){
    for(const [key,color,scale] of [['targetPressure','var(--target-pressure)',y],['targetFlow','var(--target-flow)',y],['targetTemperature','var(--target-temperature)',yt]])content+=`<path d="${pathFor(points,key,x,scale,{smooth:false})}" stroke="${color}" stroke-width="1.2" stroke-dasharray="5 5"/>`;
-   let phaseLabelEdge=-Infinity;
    for(let i=1;i<points.length;i++)if(points[i].frame!==null&&points[i-1].frame!==null&&points[i].frame!==points[i-1].frame){
-    const px=x(points[i].time),label=`${fmt(points[i].time)} s ${s.language==='zh'?'切段':'stage'}`;
-    const labelWidth=label.length*Math.max(12,Math.min(20,window.innerWidth*.0126))*.7;
-    const show=stageLabels&&(!live||(px-labelWidth/2>=Math.max(phaseLabelEdge+5,left+25)));
-    content+=`<path d="M${px} ${top}V${height-bottom}" stroke="var(--blue)" stroke-dasharray="5 5"/>`+(show?`<text x="${px}" y="${timeLabelY}" text-anchor="middle" fill="var(--blue)" class="chart-phase-label">${label}</text>`:'');
-    if(show)phaseLabelEdge=px+labelWidth/2;
+    const px=x(points[i].time);
+    content+=`<path d="M${px} ${top}V${height-bottom}" stroke="var(--blue)" stroke-dasharray="5 5"/>`;
    }
    const last=points.at(-1);
    if(last){
@@ -2861,7 +2855,7 @@ window.thisCup = {
   renderIntroShot: (svg, shot) => {
     const points = pointsOf(shot);
     if (!svg || points.length < 2) return false;
-    plot(svg, points, {stageLabels:false});
+    plot(svg, points, {});
     return true;
   },
   render,

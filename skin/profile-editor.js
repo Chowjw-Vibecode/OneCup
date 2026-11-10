@@ -1,4 +1,4 @@
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.29-rc.5';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.29-rc.7';
 // Schema: Decaid lib/src/models/data/profile.dart, native DE1 frame encoding.
 // This module edits a detached draft only; it has no device or network adapter.
 const copy=v=>JSON.parse(JSON.stringify(v));

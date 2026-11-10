@@ -1,10 +1,10 @@
-import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.29-rc.5';
-import {stageLabel} from './stage-labels.js?v=0.2.29-rc.5';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.29-rc.5';
-import {mountBeans} from './beans.js?v=0.2.29-rc.5';
-import {paintGauge} from './instruments.js?v=0.2.29-rc.5';
-import {setGroupHeadHint} from './ghc-icons.js?v=0.2.29-rc.5';
-import {mountProfileEditor} from './profile-editor.js?v=0.2.29-rc.5';
+import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.29-rc.7';
+import {stageLabel} from './stage-labels.js?v=0.2.29-rc.7';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.29-rc.7';
+import {mountBeans} from './beans.js?v=0.2.29-rc.7';
+import {paintGauge} from './instruments.js?v=0.2.29-rc.7';
+import {setGroupHeadHint} from './ghc-icons.js?v=0.2.29-rc.7';
+import {mountProfileEditor} from './profile-editor.js?v=0.2.29-rc.7';
 export function mountCeramic(api){
  const $=id=>document.getElementById(id),s=api.state;
  const pitcherPrompt=mountSteamPitcher(api);
@@ -222,7 +222,7 @@ export function mountCeramic(api){
  const tools=document.querySelector('.ceramic-tools');if(tools)$('settingsDialog').querySelector('.dialog-content').append(tools);
  let waterSince=null,waterLastSeen=null,waterState=null,waterKnown=false;
  const waterPanel=document.createElement('div');waterPanel.id='ceramicWaterRunning';waterPanel.hidden=true;
- waterPanel.innerHTML=`<div class="water-clock"><svg class="water-operation-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-drop"/></svg><span class="water-elapsed-label"></span><strong id="ceramicWaterElapsed">—</strong><small>s</small></div><div class="water-readings"><div><span class="water-temp-label"></span><strong id="ceramicWaterTarget">—</strong><small>°C</small></div><div><span class="water-amount-label"></span><strong id="ceramicWaterAmount">—</strong><small id="ceramicWaterUnit">mL</small></div><div><span class="water-flow-label"></span><strong id="ceramicWaterFlow">—</strong><small>mL/s</small></div></div>`;
+ waterPanel.innerHTML=`<div class="water-clock"><svg class="water-operation-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-drop"/></svg><span class="water-elapsed-label"></span><strong id="ceramicWaterElapsed">—</strong><small>g</small></div><div class="water-readings"><div><span class="water-temp-label"></span><strong id="ceramicWaterTarget">—</strong><small>°C</small></div><div><span class="water-amount-label"></span><strong id="ceramicWaterAmount">—</strong><small id="ceramicWaterUnit">mL</small></div><div><span class="water-flow-label"></span><strong id="ceramicWaterFlow">—</strong><small>mL/s</small></div></div>`;
  $('ceramicStateArt').append(waterPanel);
  function renderWater(state,fresh){
   const flushing=['flush','rinse','hotwater_rinse'].includes(state),active=state==='hotwater'||flushing;waterPanel.hidden=!active;
@@ -230,11 +230,11 @@ export function mountCeramic(api){
   $('ceramicStateArt').classList.toggle('water-running',active);
   if(!active){waterSince=null;waterLastSeen=null;waterState=null;return}
   const now=Date.now();if(fresh){if(waterSince===null||waterState!==state){waterSince=now;waterKnown=lastReadyAt>0&&now-lastReadyAt<5000;}waterState=state;waterLastSeen=now;}
-  waterPanel.querySelector('.water-elapsed-label').textContent=waterKnown?text('经过时间','Elapsed'):text('接入后计时','Time since connection');
+  waterPanel.querySelector('.water-elapsed-label').textContent=text('杯重','Cup weight');
   waterPanel.querySelector('.water-temp-label').textContent=text('设定水温','Water temperature');
   waterPanel.querySelector('.water-amount-label').textContent=flushing?text('当前液重','Liquid weight'):text('目标水量','Target amount');
   waterPanel.querySelector('.water-flow-label').textContent=text('机器流量','Machine flow');
-  $('ceramicWaterElapsed').textContent=fmt(waterSince===null?null:(waterLastSeen-waterSince)/1000);
+  $('ceramicWaterElapsed').textContent=fmt(s.connection.scaleConnected===true&&!s.connection.scaleStale?s.snapshot.scale?.weight:null);
   $('ceramicWaterTarget').textContent=fmt(flushing?s.workflow?.rinseData?.targetTemperature:s.workflow?.hotWaterData?.targetTemperature);
   const scaleReady=s.connection.scaleConnected===true&&!s.connection.scaleStale;
   $('ceramicWaterAmount').textContent=fmt(flushing?(scaleReady?s.snapshot.scale?.weight:null):s.workflow?.hotWaterData?.volume);
