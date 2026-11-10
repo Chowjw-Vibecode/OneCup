@@ -1,4 +1,4 @@
-import {profileExecutionKey} from './client.js?v=0.2.29-rc.7';
+import {profileExecutionKey} from './client.js?v=0.2.29-rc.11';
 export const CATALOG_BASE='https://raw.githubusercontent.com/decentespresso/decaid/main/assets/defaultProfiles/';
 export class OnlineProfileError extends Error {constructor(code){super(code);this.code=code;}}
 const fail=code=>{throw new OnlineProfileError(code);};

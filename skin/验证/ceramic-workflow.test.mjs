@@ -5,8 +5,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import {DecaidClient} from '../client.js';
+import {stageLabel} from '../stage-labels.js';
 
 const ceramicSource=await readFile(new URL('../ceramic-ui.js',import.meta.url),'utf8');
+const pitcherSource=await readFile(new URL('../steam-pitcher.js',import.meta.url),'utf8');
 const appSource=await readFile(new URL('../app.js',import.meta.url),'utf8');
 const copy=value=>structuredClone(value);
 const flush=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
@@ -54,7 +56,8 @@ function ceramicFixture({language='zh',stored=null}={}){
   setWorkflow:w=>{state.workflow=copy(w);state.draft=copy(w);},updateAux:w=>{state.workflow=copy(w);},
   openDialog:id=>{state.modal=id;api.render();},closeDialog:()=>{ui.beforeClose(state.modal);state.modal=null;api.render();},
   openProfiles:()=>calls.push(['openProfiles']),command:action=>calls.push(['command',action])};
- const context=vm.createContext({document:dom.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;},mountProfileEditor(){}});
+ const context=vm.createContext({stageLabel,document:dom.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;},mountProfileEditor(){}});
+ vm.runInContext(pitcherSource.replace(/export function /g,'function '),context);
  vm.runInContext(ceramicSource.replace(/^import .*;\n/gm,'').replace('export function mountCeramic','function mountCeramic'),context);
  ui=context.mountCeramic(api);
  return {...dom,state,api,ui,calls,notices,storage,nativeShot,get beansOptions(){return beansOptions;}};

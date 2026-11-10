@@ -1,15 +1,15 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.29-rc.7";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.29-rc.7";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.29-rc.7";
-import {telemetryPath} from "./chart-path.js?v=0.2.29-rc.7";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.29-rc.7";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.29-rc.7";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.29-rc.7";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.29-rc.7";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.29-rc.7";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.29-rc.7";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.29-rc.7";
+import {stageLabel} from "./stage-labels.js?v=0.2.29-rc.11";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.29-rc.11";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.29-rc.11";
+import {telemetryPath} from "./chart-path.js?v=0.2.29-rc.11";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.29-rc.11";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.29-rc.11";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.29-rc.11";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.29-rc.11";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.29-rc.11";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.29-rc.11";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.29-rc.11";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -1734,7 +1734,7 @@ function pointsOf(shot) {
 function pathFor(points, key, x, y, options = {}) {
   return telemetryPath(points, key, x, y, options);
 }
-function plot(svg, points, { preview = false, comparison = null, live = false, transition = null } = {}) {
+function plot(svg, points, { preview = false, comparison = null, live = false, transition = null, stageLabels = true } = {}) {
   const width = Math.max(220, svg.clientWidth || 700),
     height = Math.max(90, svg.clientHeight || 180),
     left = preview ? 34 : 78,
@@ -1786,9 +1786,9 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   }
   const timeLabelY = live ? top - 8 : height - 5;
   for (let time = 0; time <= maxTime; time += interval) {
-    content += `<path d="M${x(time)} ${top}V${height - bottom}" stroke="var(--line)" stroke-width=".7" opacity=".55"/><text x="${x(time)}" y="${timeLabelY}" text-anchor="middle">${fmt(time, 0)}${live&&time===0?' s':''}</text>`;
+    content += `<path d="M${x(time)} ${top}V${height - bottom}" stroke="var(--line)" stroke-width=".7" opacity=".55"/><text class="chart-time-tick" x="${x(time)}" y="${timeLabelY}" text-anchor="middle">${fmt(time, 0)}${live&&time===0?' s':''}</text>`;
   }
-  if(maxTime%interval>interval*.35)content+=`<text x="${x(maxTime)}" y="${timeLabelY}" text-anchor="middle">${fmt(maxTime,0)}</text>`;
+  if(maxTime%interval>interval*.35)content+=`<text class="chart-time-tick" x="${x(maxTime)}" y="${timeLabelY}" text-anchor="middle">${fmt(maxTime)}</text>`;
   content += `${live?'':`<text x="${width - 5}" y="${height - 5}" text-anchor="end">s</text>`}${!preview?'<text x="23" y="14" text-anchor="end" fill="var(--purple)">g</text>':""}`;
   content += `<path d="M${left} ${top}V${height-bottom}H${width-right}M${width-right} ${top}V${height-bottom}" stroke="var(--muted)" stroke-width="1"/>`;
   const lines = [
@@ -1808,6 +1808,7 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
    for(let i=1;i<points.length;i++)if(points[i].frame!==null&&points[i-1].frame!==null&&points[i].frame!==points[i-1].frame){
     const px=x(points[i].time);
     content+=`<path d="M${px} ${top}V${height-bottom}" stroke="var(--blue)" stroke-dasharray="5 5"/>`;
+    if(stageLabels)content+=`<text class="chart-phase-label" x="${px}" y="${timeLabelY}" text-anchor="middle" fill="var(--blue)">${fmt(points[i].time)} s</text>`;
    }
    const last=points.at(-1);
    if(last){
@@ -1869,6 +1870,37 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
         tick.setAttribute('text-anchor', 'end');
         if (overlaps(tick.getBBox())) tick.setAttribute('x', width - right - 5);
       }
+    }
+  }
+  // Work in SVG coordinates after the endpoint and temperature labels are final.
+  // Give each phase its position on the time axis before placing ordinary ticks.
+  const phases = [...svg.querySelectorAll('.chart-phase-label')];
+  if (!preview) {
+    const fixed = [...svg.querySelectorAll('text:not(.chart-phase-label):not(.chart-time-tick), .chart-end-label-backing')]
+      .map(el => el.getBBox());
+    for (const label of [...phases, ...svg.querySelectorAll('.chart-time-tick')]) {
+      const box = label.getBBox(), gap = 2;
+      let best = null;
+      // Try successive rows inward. On each row free intervals start or end
+      // at existing labels; a tiny sideways nudge can avoid a whole axis.
+      for (let row = 0; row * (box.height + gap) < height; row++) {
+        const dy = row * (box.height + gap) * (live ? 1 : -1);
+        if (best && Math.abs(dy) >= best.cost) break;
+        const y = box.y + dy;
+        if (y < -1 || y + box.height > height + 1) continue;
+        const occupied = fixed.filter(other => y < other.y + other.height + gap && y + box.height + gap > other.y);
+        const candidates = [box.x];
+        for (const other of occupied) candidates.push(other.x - gap - box.width, other.x + other.width + gap);
+        for (const x of candidates) {
+          if (x < 0 || x + box.width > width) continue;
+          const dx = x - box.x, cost = Math.abs(dx) * 6 + Math.abs(dy);
+          if (best && cost >= best.cost) continue;
+          if (occupied.some(other => x < other.x + other.width + gap - .01 && x + box.width + gap > other.x + .01)) continue;
+          best = {dx, dy, cost};
+        }
+      }
+      if (best && (best.dx || best.dy)) label.setAttribute('transform', `translate(${best.dx} ${best.dy})`);
+      fixed.push({x:box.x + (best?.dx || 0), y:box.y + (best?.dy || 0), width:box.width, height:box.height});
     }
   }
   return { x, y, yt, yw, top, bottom, left, right, width, height, maxTime };
@@ -2855,7 +2887,7 @@ window.thisCup = {
   renderIntroShot: (svg, shot) => {
     const points = pointsOf(shot);
     if (!svg || points.length < 2) return false;
-    plot(svg, points, {});
+    plot(svg, points, {stageLabels:false});
     return true;
   },
   render,

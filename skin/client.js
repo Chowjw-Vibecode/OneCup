@@ -1,5 +1,5 @@
 // Decaid 0.9 REST/WS adapter. Commands are never replayed after a timeout.
-import {createGrinderClient} from './grinder.js?v=0.2.29-rc.7';
+import {createGrinderClient} from './grinder.js?v=0.2.29-rc.11';
 // Shared by the library preview and the actual selection write.
 export function selectedProfileContext(entry,currentContext={}) {
   const profile=entry?.profile||entry||{},context={...currentContext};
@@ -68,6 +68,7 @@ export class DecaidClient {
     this.snapshot = {machine:null, scale:null, shotState:null, water:null, devices:[]};
     this.connection = {connected:false,machineConnected:false,scaleConnected:false,stale:true,error:null};
     this.sockets = new Map(); this.reconnectTimers = new Set(); this.closed = true;
+    this.lastPrimaryScaleId = null;
     this.lastScaleTimestamp = null;
     // Host sampling-clock watermark survives transport reconnects/subscriptions.
     // A new client (explicit connection) establishes a new host-clock epoch.
@@ -226,8 +227,21 @@ export class DecaidClient {
     this.devicesRevision++;
     this.snapshot.devices=devices;
     this.connection.machineConnected=devices.some(d=>d.type==='machine'&&d.state==='connected');
-    this.connection.scaleConnected=devices.some(d=>d.type==='scale'&&d.state==='connected'&&d.connectionRole!=='auxiliary');
-    if(!this.connection.scaleConnected){this.snapshot.scale=null;this.lastScaleAt=0;}
+    const primary=devices.find(d=>d.type==='scale'&&d.state==='connected'&&d.connectionRole!=='auxiliary');
+    const primaryId=primary?.id ?? null;
+    this.connection.scaleConnected=Boolean(primary);
+    if(!primary || primaryId!==this.lastPrimaryScaleId){
+      this.snapshot.scale=null;
+      this.lastScaleAt=0;
+    }
+    if(primaryId!==null){
+      // A queued frame on the old socket has no device ID. A fresh native
+      // subscription receives status and future weight broadcasts, without replay.
+      if(this.lastPrimaryScaleId!==null && primaryId!==this.lastPrimaryScaleId){
+        this.sockets.get('/scale/snapshot')?.replaceForHandoff();
+      }
+      this.lastPrimaryScaleId=primaryId;
+    }
   }
   setScaleStatus(status){
     this.devicesRevision++;
@@ -293,6 +307,14 @@ export class DecaidClient {
         const timer=setTimeout(()=>{this.reconnectTimers.delete(timer);diagnostic.reconnects++;attach(path,handler);},2000);
         this.reconnectTimers.add(timer);
       };
+      if(path==='/scale/snapshot'){
+        socket.replaceForHandoff=()=>{
+          this.sockets.delete(path);
+          socket.onclose=null;
+          try{socket.close();}catch{}
+          attach(path,handler);
+        };
+      }
       socket.onclose=disconnected;
       socket.recoverStaleStream=()=>{socket.onclose=null;disconnected();try{socket.close();}catch{}};
     };
