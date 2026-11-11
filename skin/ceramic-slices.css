@@ -4,7 +4,7 @@
  :root:not([data-theme=dark]) .ceramic-adjust-dialog .parameters{
   left:1.13vw;right:1.13vw;top:29.94vh;height:44.46vh;
   padding:7vh 4.05vw 10vh;gap:2vw;border:0;border-radius:0;
-  background:url('./assets/ceramic/slices/adjust-panel.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;
+  background:url('./assets/ceramic/slices/adjust-panel.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;
  }
  .ceramic-adjust-dialog .parameter-label{font-size:2.15vw;line-height:1.25;margin-bottom:2.4vh}
  .ceramic-adjust-dialog .parameter-control{gap:.8vw}
@@ -20,16 +20,16 @@
  .ceramic-adjust-dialog .save-options{top:61.2vh}
  :root:not([data-theme=dark]) .ceramic-adjust-dialog .number-button,
  :root:not([data-theme=dark]) .gp-dialog .gp-parameter,
- :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-edit]{background:url('./assets/ceramic/slices/number-well.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-edit]{background:url('./assets/ceramic/slices/number-well.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
  :root:not([data-theme=dark]) .ceramic-adjust-dialog .parameter-control>button:not(.number-button),
  :root:not([data-theme=dark]) .gp-dialog .gp-round,
- :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-step]{background:url('./assets/ceramic/slices/round-button.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
- :root:not([data-theme=dark]) .gp-dialog .gp-parameters{background:url('./assets/ceramic/slices/grinder-panel.png?v=0.2.35r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
- :root:not([data-theme=dark]) .beans-stage .beans-card{background:url('./assets/ceramic/slices/beans-panel.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0;overflow:visible}
- :root:not([data-theme=dark]) body[data-ceramic-screen=taste] #ceramicTastePanel{background:url('./assets/ceramic/slices/taste-panel.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
- :root:not([data-theme=dark]) .ceramic-steam-params{background:url('./assets/ceramic/slices/steam-panel.png?v=0.2.35r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
- :root:not([data-theme=dark]) :is(#applyDraft,#applyProfile,#ceramicSaveNote,#ceramicSteamStop,#ceramicSteamApply,.gp-dialog .gp-primary,.beans-stage .beans-primary){background:url('./assets/ceramic/slices/orange-button.png?v=0.2.35r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
- :root:not([data-theme=dark]) .gp-dialog [data-gp=apply]{background:url('./assets/ceramic/slices/soft-button.png?v=0.2.35r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ :root:not([data-theme=dark]) .ceramic-steam-param button[data-ceramic-steam-step]{background:url('./assets/ceramic/slices/round-button.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .gp-dialog .gp-parameters{background:url('./assets/ceramic/slices/grinder-panel.png?v=0.2.36r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ :root:not([data-theme=dark]) .beans-stage .beans-card{background:url('./assets/ceramic/slices/beans-panel.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0;overflow:visible}
+ :root:not([data-theme=dark]) body[data-ceramic-screen=taste] #ceramicTastePanel{background:url('./assets/ceramic/slices/taste-panel.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) .ceramic-steam-params{background:url('./assets/ceramic/slices/steam-panel.png?v=0.2.36r1') center/100% 100% no-repeat;box-shadow:none;border:0;border-radius:0}
+ :root:not([data-theme=dark]) :is(#applyDraft,#applyProfile,#ceramicSaveNote,#ceramicSteamStop,#ceramicSteamApply,.gp-dialog .gp-primary,.beans-stage .beans-primary){background:url('./assets/ceramic/slices/orange-button.png?v=0.2.36r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+ :root:not([data-theme=dark]) .gp-dialog [data-gp=apply]{background:url('./assets/ceramic/slices/soft-button.png?v=0.2.36r1') center/100% 100% no-repeat!important;box-shadow:none!important;border:0!important;border-radius:0!important}
  body[data-ceramic-screen=ready] .ceramic-beans-link{min-height:15%}
  body[data-ceramic-screen=ready] .ceramic-recipe-values{height:10.1vh;min-height:0}
  body[data-ceramic-screen=ready] #ceramicAdjust{height:10.68vh;min-height:0;padding:1vh 3.6vw;font:500 2.5vw/1.2 var(--font-caption)}
@@ -76,10 +76,10 @@
 @media(min-width:751px){
  :root:not([data-theme=dark]) :is(.ceramic-adjust-dialog .parameters,.gp-dialog .gp-parameters,.beans-stage .beans-card,.ceramic-steam-params){filter:drop-shadow(0 .65vw .7vw #394a5319)}
  .gp-dialog .gp-burr-art{filter:drop-shadow(0 1vw .8vw #35556830)}
- .beans-art{background:url('./assets/ceramic/slices/beans-art.png?v=0.2.35r1') center/100% 100% no-repeat;mix-blend-mode:normal;mask-image:none}
+ .beans-art{background:url('./assets/ceramic/slices/beans-art.png?v=0.2.36r1') center/100% 100% no-repeat;mix-blend-mode:normal;mask-image:none}
  .beans-art>image{visibility:hidden}
  #ceramicCupArt{mask-image:linear-gradient(to right,#000 88%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 96%,transparent);mask-composite:intersect}
- .ceramic-steam-art{background-image:url('./assets/ceramic/slices/steam-art.png?v=0.2.35r1');mask-image:none;width:calc(100% + 1.5vw)}
+ .ceramic-steam-art{background-image:url('./assets/ceramic/slices/steam-art.png?v=0.2.36r1');mask-image:none;width:calc(100% + 1.5vw)}
 }
 @media(min-width:751px){
  #ceramicSteamStop{position:relative}
@@ -100,10 +100,10 @@
 
 /* All exposed white page areas use one continuous paper stock. Ceramic
    controls retain their own raised surface; artwork has transparent margins. */
-:root:not([data-theme=dark]){--paper:#faf9f5;--panel:#faf9f5;--paper-image:url('./assets/ceramic/paper.webp?v=0.2.35r1')}
+:root:not([data-theme=dark]){--paper:#faf9f5;--panel:#faf9f5;--paper-image:url('./assets/ceramic/paper.webp?v=0.2.36r1')}
 :root:not([data-theme=dark]) :is(body,#app,.dialog,.gp-overlay,.gp-dialog,.gp-subview,.gp-keypad,.beans-overlay,.beans-sheet){background-color:var(--paper);background-image:var(--paper-image);background-size:cover;background-position:center;background-attachment:fixed}
 :root:not([data-theme=dark]) :is(.topbar,.control-bar,.dialog-header,.dialog-footer,.gp-header,.gp-footer){background:transparent}
-body[data-ceramic-screen=ready] #ceramicCupArt{background-image:url('./assets/ceramic/slices/cup-art.png?v=0.2.35r1');background-size:contain;background-position:left center;background-repeat:no-repeat;mask-image:none}
+body[data-ceramic-screen=ready] #ceramicCupArt{background-image:url('./assets/ceramic/slices/cup-art.png?v=0.2.36r1');background-size:contain;background-position:left center;background-repeat:no-repeat;mask-image:none}
 /* The jug and its live ring share the source board's coordinates. Neither
    aspect ratio nor the wider artwork column can distort their alignment. */
 .ceramic-steam-art{--steam-art-width:min(100vw,159.879vh);background:none!important}

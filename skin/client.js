@@ -1,5 +1,5 @@
 // Decaid 0.9 REST/WS adapter. Commands are never replayed after a timeout.
-import {createGrinderClient} from './grinder.js?v=0.2.35';
+import {createGrinderClient} from './grinder.js?v=0.2.36';
 // Shared by the library preview and the actual selection write.
 export function selectedProfileContext(entry,currentContext={}) {
   const profile=entry?.profile||entry||{},context={...currentContext};

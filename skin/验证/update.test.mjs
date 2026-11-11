@@ -5,7 +5,7 @@ const flush=async()=>{for(let i=0;i<35;i++)await Promise.resolve();};
 function release(v,{draft=false,prerelease=v.includes('-'),url,name,state='uploaded',size=100}={}){return{tag_name:'v'+v,draft,prerelease,assets:[{name:name??`onecup-${v}.zip`,browser_download_url:url??`https://github.com/Chowjw-Vibecode/OneCup/releases/download/v${v}/onecup-${v}.zip`,size,state}]};}
 function native(){return{pageUrl:'http://localhost:25123/',apiUrl:'http://127.0.0.1:8080',host:{app:'decent.app',platform:'android'},connection:{connected:true,machineConnected:true,stale:false},settings:{simulatedDevices:[]},machineState:'idle',busy:false,canInstall:true};}
 function fixture(options={}){
- let time=1_000_000,id=0,skinReads=0,installed=options.installed??'0.2.29-rc.12';const tasks=new Map(),values=options.values??new Map(),context=native(),calls=[],statuses=[];let reloads=0,checks=0;
+ let time=1_000_000,id=0,skinReads=0,installed=options.installed??'0.2.29-rc.12';const tasks=new Map(),values=options.values??new Map([[CHINA_MIRROR_STORAGE_KEY,'false']]),context=native(),calls=[],statuses=[];let reloads=0,checks=0;
  const client={get:async path=>{calls.push(['get',path]);if(path==='/machine/state')return options.machineRead??{state:{state:'idle'}};skinReads++;if(options.readback&&skinReads>1) return options.readback();return{id:'this-cup',version:installed};},post:async(path,data)=>{calls.push(['post',path,data]);if(options.install)return options.install({context,client,payload:data,setInstalled:v=>installed=v});installed='0.2.29-rc.13';return{success:true};}};
  let owner=client;
  const storage=options.storage??{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
@@ -28,7 +28,7 @@ test('only the exact uploaded skin ZIP in the expected GitHub release is eligibl
 });
 
 test('default is off and makes no network or storage writes until explicitly enabled',async()=>{
- const f=fixture();f.updater.start();await f.advance(12*3_600_000);assert.equal(f.checks,0);assert.equal(f.calls.length,0);assert.equal(f.values.size,0);f.updater.dispose();
+ const f=fixture();f.updater.start();await f.advance(12*3_600_000);assert.equal(f.checks,0);assert.equal(f.calls.length,0);assert.deepEqual([...f.values],[[CHINA_MIRROR_STORAGE_KEY,'false']]);f.updater.dispose();
 });
 
 test('native loopback, health, no simulation, idle and explicit clean-draft predicate are all required',()=>{
@@ -61,7 +61,7 @@ test('operation starting or gateway replacement during release fetch prevents in
 });
 
 test('release failure stays isolated and is throttled across page reopen',async()=>{
- const values=new Map(),f=fixture({values,fetch:async()=>{throw Error('offline')}});f.updater.start();f.updater.setEnabled(true);await f.advance(60_000);assert.equal(f.updater.status.phase,'error');assert.equal(f.checks,1);f.updater.dispose();const g=fixture({values});g.updater.start();await g.advance(60_000);assert.equal(g.checks,0);g.updater.dispose();
+ const values=new Map([[CHINA_MIRROR_STORAGE_KEY,'false']]),f=fixture({values,fetch:async()=>{throw Error('offline')}});f.updater.start();f.updater.setEnabled(true);await f.advance(60_000);assert.equal(f.updater.status.phase,'error');assert.equal(f.checks,1);f.updater.dispose();const g=fixture({values});g.updater.start();await g.advance(60_000);assert.equal(g.checks,0);g.updater.dispose();
 });
 
 test('uncertain POST is read back and is never blindly replayed, including after reopening',async()=>{
@@ -160,7 +160,7 @@ test('manual check works immediately with automatic updates off and keeps the sw
 });
 
 test('manual check bypasses the hourly wait while an open settings dialog still blocks installation',async()=>{
- const f=fixture({values:new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:1_000_000+3_600_000,pending:null})]])});
+ const f=fixture({values:new Map([[CHINA_MIRROR_STORAGE_KEY,'false'],[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:1_000_000+3_600_000,pending:null})]])});
  f.context.canInstall=false;f.updater.start();await f.updater.checkNow();
  assert.equal(f.checks,1);assert.equal(f.updater.status.phase,'available');assert.equal(f.calls.some(c=>c[0]==='post'),false);
  await f.advance(60_000);assert.equal(f.checks,1);assert.equal(f.reloads,0);
@@ -209,6 +209,15 @@ test('an old in-flight transition URL still verifies without replaying installat
 
 function mirrorRelease(v){const r=release(v),name=`onecup-${v}.zip`;return{tag_name:r.tag_name,prerelease:r.prerelease,body:`<!-- onecup-asset ${JSON.stringify({name,size:100,sha256:'a'.repeat(64)})} -->`,assets:[{name,browser_download_url:`https://gitee.com/${CHINA_MIRROR_REPOSITORY}/releases/download/v${v}/${name}`}]};}
 
+test('China mirror defaults on without enabling automatic installs; explicit off survives reload',async()=>{
+ const values=new Map(),f=fixture({values,fetch:async()=>({ok:true,json:async()=>[mirrorRelease('0.2.29-rc.13')]})});
+ assert.equal(f.updater.chinaMirrorEnabled,true);assert.equal(f.updater.enabled,false);
+ f.updater.start();await f.advance(60_000);assert.equal(f.checks,0);assert.equal(values.size,0);
+ await f.updater.checkNow();assert.equal(f.checks,1);assert.equal(f.updater.status.source,'china');assert.equal(f.calls.some(c=>c[0]==='post'),false);
+ f.updater.setChinaMirrorEnabled(false);f.updater.dispose();
+ const reopened=fixture({values});assert.equal(reopened.updater.chinaMirrorEnabled,false);assert.equal(reopened.updater.enabled,false);reopened.updater.dispose();
+});
+
 test('China selection persists independently and manual checks use the mirror without enabling updates',async()=>{
  const f=fixture({fetch:async()=>({ok:true,json:async()=>[mirrorRelease('0.2.29-rc.13')]})});f.context.canInstall=false;f.updater.start();f.updater.setChinaMirrorEnabled(true);await f.updater.checkNow();
  assert.equal(f.updater.enabled,false);assert.equal(f.updater.chinaMirrorEnabled,true);assert.equal(f.values.get(CHINA_MIRROR_STORAGE_KEY),'true');assert.equal(f.checks,1);assert.match(f.calls.find(c=>c[0]==='fetch')[1],/^https:\/\/gitee.com\/api\/v5\//);
@@ -230,7 +239,7 @@ test('a mirror choice changed during a lookup cannot install the previous route'
 
 test('mirror pending is verified even when the mirror preference is now off',async()=>{
  const pending={version:'0.2.35',url:`https://gitee.com/${CHINA_MIRROR_REPOSITORY}/releases/download/v0.2.35/onecup-0.2.35.zip`,apiOrigin:'http://127.0.0.1:8080'};
- const f=fixture({values:new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:0,pending})]]),installed:'0.2.35'});f.updater.start();await f.advance(60_000);
+ const f=fixture({values:new Map([[CHINA_MIRROR_STORAGE_KEY,'false'],[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:0,pending})]]),installed:'0.2.35'});f.updater.start();await f.advance(60_000);
  assert.equal(f.calls.some(c=>c[0]==='post'),false);assert.equal(f.reloads,1);assert.equal(f.updater.chinaMirrorEnabled,false);f.updater.dispose();
 });
 

@@ -1,17 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.35";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.35";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.35";
-import {telemetryPath} from "./chart-path.js?v=0.2.35";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.35";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.35";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.35";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.35";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.35";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.35";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.35";
-import { createSkinUpdater } from "./update.js?v=0.2.35";
-import { createUsageReporter } from "./usage.js?v=0.2.35";
+import {stageLabel} from "./stage-labels.js?v=0.2.36";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.36";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.36";
+import {telemetryPath} from "./chart-path.js?v=0.2.36";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.36";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.36";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.36";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.36";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.36";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.36";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.36";
+import { createSkinUpdater } from "./update.js?v=0.2.36";
+import { createUsageReporter } from "./usage.js?v=0.2.36";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -56,7 +56,7 @@ let client;
 let displayManager;
 let usageReporter;
 let skinUpdater;
-const SKIN_VERSION = "0.2.35";
+const SKIN_VERSION = "0.2.36";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -157,14 +157,13 @@ const strings = {
     save: "保存",
     profileName: "方案名称",
     settings: "设置",
-    usageTitle: "匿名国家 / 地区统计",
-    usageHelp: "发送随机编号、产品名称和版本号，由网络出口判断国家 / 地区；不含出杯记录、配方或设备编号。关闭后停止后续上报。",
-    usageOn: "开启",
-    usageOff: "关闭",
+    settingOn: "已开启",
+    settingOff: "已关闭",
+    currentSkinVersion: "当前版本",
     updateTitle: "自动更新皮肤",
     updateHelp: "默认关闭。开启后每小时检查，在空闲且没有未保存修改时安装同一发布频道的新版本。也可随时点击「检查更新」。更新失败会提示，可能需要手动重装皮肤包；不清空方案、豆仓、记录或偏好。",
     chinaMirrorTitle: "China 镜像服务器",
-    chinaMirrorHelp: "优先使用 Gitee 国内镜像，连接失败时自动改用 GitHub。",
+    chinaMirrorHelp: "默认开启，优先使用 Gitee 国内镜像，连接失败时自动改用 GitHub。",
     chinaMirrorUnsaved: "此线路选择未能保存，请检查本地存储。",
     updateCheck: "检查更新",
     updateAvailable: "发现新版本，等待空闲且没有未保存修改时更新",
@@ -180,7 +179,6 @@ const strings = {
     updateUnsupported: "当前 Decaid 不支持或不允许自动安装，请在 Decaid 中手动安装皮肤。",
     updateStorageError: "存储不可用，不会开始新的自动安装。请恢复本地存储，重新打开页面后再次设置。",
     updatePreferenceUnsaved: "此开关选择未能保存，仅当前页面有效；恢复存储后需重新打开页面并再次设置。",
-    usageUnsaved: "此选择未能保存，仅在当前页面有效。请恢复本地存储，重新打开页面后再次设置；重新打开时可能恢复原设置。",
     language: "语言",
     appearance: "外观",
     toggleTheme: "浅色 / 深色",
@@ -363,14 +361,13 @@ const strings = {
     save: "Save",
     profileName: "Profile name",
     settings: "Settings",
-    usageTitle: "Anonymous country / region statistics",
-    usageHelp: "Sends a random ID, product name and version; the network exit determines the country / region. No shots, recipes or device IDs are sent. Turn off to stop future check-ins.",
-    usageOn: "On",
-    usageOff: "Off",
+    settingOn: "Enabled",
+    settingOff: "Disabled",
+    currentSkinVersion: "Current version",
     updateTitle: "Automatic skin updates",
     updateHelp: "Off by default. Checks hourly and installs newer releases from the same channel only while idle with no unsaved edits. You can also check at any time. A failed update may require manual skin reinstallation. Profiles, beans, shots and preferences are not cleared.",
     chinaMirrorTitle: "China mirror server",
-    chinaMirrorHelp: "Prefer the Gitee mirror. Connection failures fall back to GitHub.",
+    chinaMirrorHelp: "On by default. Prefer the Gitee mirror; connection failures fall back to GitHub.",
     chinaMirrorUnsaved: "This server choice could not be saved. Check local storage.",
     updateCheck: "Check for updates",
     updateAvailable: "New version found; waiting for idle with no unsaved edits",
@@ -386,7 +383,6 @@ const strings = {
     updateUnsupported: "This Decaid installation does not support or allow automatic installation. Install the skin manually in Decaid.",
     updateStorageError: "Storage is unavailable; no new automatic installation will start. Restore storage, reopen the page, then set it again.",
     updatePreferenceUnsaved: "This choice was not saved and applies only to this page. Restore storage, reopen the page, then set it again.",
-    usageUnsaved: "This choice could not be saved and applies only to this page. Restore local storage access, reopen the page, then set it again. Reopening may restore the previous setting.",
     language: "Language",
     appearance: "Appearance",
     toggleTheme: "Light / Dark",
@@ -2599,7 +2595,6 @@ function returnToDashboard() {
 function renderSettings() {
   updateDashboardExitButton();
   renderDisplaySettings();
-  renderUsageSetting();
   renderSkinUpdateSetting();
   $("serverUrl").value = s.baseUrl;
   $("deviceDetails").innerHTML =
@@ -2647,20 +2642,14 @@ function renderSettings() {
     renderSettings();
   };
 }
-function renderUsageSetting() {
-  const enabled = usageReporter?.enabled ?? true;
-  $("usageEnabled").setAttribute("aria-checked", String(enabled));
-  $("usageEnabled").textContent = t(enabled ? "usageOn" : "usageOff");
-  $("usageStatus").hidden = usageReporter?.preferenceSaved !== false;
-  $("usageStatus").textContent = $("usageStatus").hidden ? "" : t("usageUnsaved");
-}
 function renderSkinUpdateSetting() {
-  const value=skinUpdater?.status ?? {phase:'disabled',enabled:false};
+  const value=skinUpdater?.status ?? {phase:'disabled',enabled:false,chinaMirror:true};
   const labels={available:value.enabled?'updateAvailable':'updateAvailableOff',disabled:'updateDisabled',waiting:'updateWaiting',checking:'updateChecking',installing:'updateInstalling',awaiting_confirmation:'updateConfirming',reload_pending:'updateReload',current:'updateCurrent',error:'updateError',unsupported:'updateUnsupported',storage_error:'updateStorageError'};
   $('skinUpdateEnabled').setAttribute('aria-checked',String(value.enabled));
-  $('skinUpdateEnabled').textContent=t(value.enabled?'usageOn':'usageOff');
+  $('skinUpdateEnabled').textContent=t(value.enabled?'settingOn':'settingOff');
+  $('skinCurrentVersion').textContent='OneCup · '+t('currentSkinVersion')+' '+SKIN_VERSION;
   $('chinaMirrorEnabled').setAttribute('aria-checked',String(value.chinaMirror===true));
-  $('chinaMirrorEnabled').textContent=t(value.chinaMirror?'usageOn':'usageOff');
+  $('chinaMirrorEnabled').textContent=t(value.chinaMirror?'settingOn':'settingOff');
   $('chinaMirrorHelp').textContent=t(value.mirrorPreferenceSaved===false?'chinaMirrorUnsaved':'chinaMirrorHelp');
   $('chinaMirrorEnabled').disabled=['installing','awaiting_confirmation','reload_pending'].includes(value.phase);
   $('skinUpdateCheck').disabled=['checking','installing','awaiting_confirmation','reload_pending'].includes(value.phase);
@@ -2838,10 +2827,6 @@ $("settingsButton").onclick = $("connectionButton").onclick = openSettings;
 $("skinUpdateEnabled").onclick = () => { skinUpdater?.setEnabled(!skinUpdater.enabled); renderSkinUpdateSetting(); };
 $("skinUpdateCheck").onclick = () => { void skinUpdater?.checkNow(); };
 $("chinaMirrorEnabled").onclick = () => { skinUpdater?.setChinaMirrorEnabled(!skinUpdater.chinaMirrorEnabled); renderSkinUpdateSetting(); };
-$("usageEnabled").onclick = () => {
-  usageReporter?.setEnabled(!usageReporter.enabled);
-  renderUsageSetting();
-};
 for (const id of ["activeBrightness","sleepBrightness","rotationMinutes"]) $(id).oninput = () => {
   s.displayDraft = {...(s.displayDraft ?? s.displaySettings?.preferences ?? DEFAULT_DISPLAY_PREFERENCES),[id]:Number($(id).value)};
   s.displayDirty = true;
@@ -2932,6 +2917,8 @@ usageReporter = createUsageReporter({currentVersion:SKIN_VERSION,getContext:() =
   settings:s.settings, connection:s.connection, machineState:machineState(),
   busy:s.busy || Boolean(s.awaiting) || running(),
 })});
+// Reporting is enabled on startup; retain the existing ID and retry schedule.
+usageReporter.setEnabled(true);
 usageReporter.start();
 connect(s.baseUrl);
 startWorkflowPolling();

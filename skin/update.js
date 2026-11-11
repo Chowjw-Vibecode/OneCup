@@ -1,8 +1,8 @@
-import {mirrorReleasesUrl,trustedMirrorAsset,normalizeMirrorReleases,confirmedMirrorDownloadFailure} from './china-mirror.js?v=0.2.35';
+import {mirrorReleasesUrl,trustedMirrorAsset,normalizeMirrorReleases,confirmedMirrorDownloadFailure} from './china-mirror.js?v=0.2.36';
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.35';
+import {isUsageEnvironment} from './usage.js?v=0.2.36';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
 export const CHINA_MIRROR_STORAGE_KEY='onecup.chinaMirror.v1';
 export const CHINA_MIRROR_REPOSITORY='chowjw/OneCup';
@@ -46,13 +46,13 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
  reload=()=>globalThis.location.reload(),onStatus=()=>{},events=globalThis.window}={}){
  let saved={enabled:false,nextCheck:0,pending:null},preferenceSaved=true,storageBlocked=false,active=false,disposed=false,timer=null,readyAt=0,working=false,installedVersion=null,availableTarget=null;
  let state={phase:'disabled',version:null};
- let chinaMirror=false,mirrorPreferenceSaved=true,checkSource=null,fallbackUsed=false;
+ let chinaMirror=true,mirrorPreferenceSaved=true,checkSource=null,fallbackUsed=false;
  try{if(storage===undefined)storage=globalThis.localStorage;}catch{storageBlocked=true;preferenceSaved=false;}
  const context=()=>{try{return getContext()??{}}catch{return {}}};
  function emit(phase,detail={}){state={phase,version:installedVersion??saved.pending?.version??null,source:checkSource,fallback:fallbackUsed,...detail};try{onStatus({...state,enabled:saved.enabled,preferenceSaved,chinaMirror,mirrorPreferenceSaved});}catch{}}
  function read(){if(storageBlocked)return false;try{const raw=storage.getItem(UPDATE_STORAGE_KEY);if(raw!==null)saved=decode(raw);return true;}catch{storageBlocked=true;preferenceSaved=false;return false;}}
  function persist(){if(storageBlocked){preferenceSaved=false;return false;}try{const raw=JSON.stringify(saved);storage.setItem(UPDATE_STORAGE_KEY,raw);if(storage.getItem(UPDATE_STORAGE_KEY)!==raw)throw Error('readback failed');preferenceSaved=true;return true;}catch{storageBlocked=true;preferenceSaved=false;return false;}}
- function readMirror(){try{const raw=storage.getItem(CHINA_MIRROR_STORAGE_KEY);if(raw!==null&&raw!=='true'&&raw!=='false')throw Error('invalid mirror preference');chinaMirror=raw==='true';mirrorPreferenceSaved=true;return true;}catch{mirrorPreferenceSaved=false;return false;}}
+ function readMirror(){try{const raw=storage.getItem(CHINA_MIRROR_STORAGE_KEY);if(raw!==null&&raw!=='true'&&raw!=='false')throw Error('invalid mirror preference');chinaMirror=raw!=='false';mirrorPreferenceSaved=true;return true;}catch{mirrorPreferenceSaved=false;return false;}}
  function setChinaMirrorEnabled(value){
   chinaMirror=value===true;
   try{const raw=String(chinaMirror);storage.setItem(CHINA_MIRROR_STORAGE_KEY,raw);if(storage.getItem(CHINA_MIRROR_STORAGE_KEY)!==raw)throw Error('readback failed');mirrorPreferenceSaved=true;}catch{mirrorPreferenceSaved=false;}
