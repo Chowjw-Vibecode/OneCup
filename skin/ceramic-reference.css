@@ -68,8 +68,8 @@ body[data-ceramic-screen=taste] #ceramicTweak,body[data-ceramic-screen=taste] #c
 .gauge .dial-hand circle{fill:#f4f0e6;stroke:#d4cfc3;stroke-width:1.4}
 .gauge .dial-ticks path{stroke-width:.6}.gauge .dial-ticks text{font-size:13px}
 @media(max-aspect-ratio:13/10){#app{min-width:960px}.ceramic-steam-dialog,.ceramic-adjust-dialog{min-width:960px}}
-/* Scalable vector lockup: cup icon, Chinese title and OneCup wordmark. */
-.brand,.gp-brand,.beans-brand{display:block!important;width:22.2vw!important;height:4vw!important;flex:none!important;line-height:0!important}
+/* The approved designer lockup uses a transparent source and one fixed frame. */
+.brand,.gp-brand,.beans-brand{display:block!important;width:28.5vw!important;height:4.4vw!important;flex:none!important;line-height:0!important}
 .brand img.onecup-brand-art,.gp-brand img.onecup-brand-art,.beans-brand img.onecup-brand-art{width:100%!important;height:100%!important;display:block!important;fill:none!important;stroke:none!important;filter:none!important;object-fit:contain;overflow:visible}
 
 .ceramic-adjust-dialog>.dialog-header,.ceramic-steam-dialog>.dialog-header{height:10.5vh;min-height:60px;position:relative;padding:0 3.2vw;display:flex;align-items:center}

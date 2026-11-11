@@ -21,8 +21,8 @@
     .app{width:100%;max-width:1920px;height:100dvh;min-height:0;margin:auto;display:grid;grid-template-rows:10.5% minmax(0,1fr);padding:0 3vw;overflow:hidden;position:relative;isolation:isolate}
     .app:focus{outline:none}
     .topbar{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:24px;z-index:2}
-    .brand{width:clamp(210px,21.3vw,352px);aspect-ratio:352/63;display:block;overflow:hidden}
-    .brand{height:auto;object-fit:contain}
+    .brand{width:clamp(250px,28.5vw,452px);height:clamp(36px,4.4vw,70px);display:block;overflow:visible}
+    .brand{object-fit:contain}
     .stage-title{text-align:center;font-size:clamp(18px,1.7vw,28px);font-weight:600;letter-spacing:.08em}
     .picker{min-height:0;display:grid;grid-template-rows:12.5% minmax(0,1fr) 82px;position:relative}
     .intro{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 .4vw 1vh}
@@ -144,7 +144,7 @@
 <body>
   <div class="app" tabindex="-1">
     <header class="topbar">
-      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.34" alt="这一杯 · OneCup" width="352" height="63">
+      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.35" alt="这一杯 · OneCup">
       <div class="stage-title" id="stageTitle">品鉴 · 选风味</div>
     </header>
 

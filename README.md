@@ -4,7 +4,7 @@
 
 「这一杯 · OneCup」是一套给 Decaid 平板用的横屏皮肤。从选豆、调整配方，到看萃取、记口感，屏幕始终围绕正在做的这杯咖啡。
 
-[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.34) · [安装方法](#安装)
+[国内下载](https://gitee.com/chowjw/OneCup/releases) · [GitHub 下载](https://github.com/Chowjw-Vibecode/OneCup/releases/tag/v0.2.35) · [安装方法](#安装)
 
 ## 设计思路
 
@@ -45,16 +45,17 @@
 
 ## 安装
 
-1. 下载皮肤包 **this-cup-0.2.34.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
+1. 下载皮肤包 **onecup-0.2.35.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
-3. 需要联动小方或 Crystal 磨豆机时，另下载 **thiscup-crystal.reaplugin-0.1.6.zip**，在 Decaid 的 **Plugins → Plugin actions → Install plugin → ZIP file** 中安装并启用。
+3. 需要联动小方或 Crystal 磨豆机时，请使用配套控制器的当前正式版，在 Decaid 的 **Plugins → Plugin actions → Install plugin → ZIP file** 中安装并启用。皮肤更新不替换已安装的磨豆机控制器。
 
-[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.34) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+[本版更新说明](https://gitee.com/chowjw/OneCup/releases) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
 
-## 0.2.34 过渡版
+## 0.2.35
 
-- 英文名称统一为 OneCup，品牌标识使用矢量路径，适配平板与桌面分辨率。
-- 安装包与后续更新切换至 OneCup 新仓库；旧仓库的 0.2.34 为过渡版。
+- 英文名称统一为 OneCup，采用设计师提供的中英文一体透明标识，适配平板与桌面分辨率。
+- 设置增加「China 镜像服务器」，开启后优先使用 Gitee，检查失败时回退 GitHub。国内与 GitHub 发布相同安装包。
+- 准备页主操作字体与其他操作按钮统一；品鉴页短方案名与豆名不重叠。
 
 ## 0.2.33
 
@@ -83,3 +84,7 @@
 ![风味轮：按大类放大](docs/images/08-flavor-wheel-expanded.png)
 
 改名保留原有皮肤身份和数据存储位置，以延续已保存的设置、豆仓及评价。
+
+## 许可证
+
+原创程序代码采用 [MIT 许可证](LICENSE)。第三方字体、资料和素材仍适用其原有许可和版权声明。

@@ -1,14 +1,17 @@
+import {mirrorReleasesUrl,trustedMirrorAsset,normalizeMirrorReleases,confirmedMirrorDownloadFailure} from './china-mirror.js?v=0.2.35';
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.34';
+import {isUsageEnvironment} from './usage.js?v=0.2.35';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
+export const CHINA_MIRROR_STORAGE_KEY='onecup.chinaMirror.v1';
+export const CHINA_MIRROR_REPOSITORY='chowjw/OneCup';
 export const RELEASES_URL='https://api.github.com/repos/Chowjw-Vibecode/OneCup/releases?per_page=100';
 const HOUR=3_600_000, CHECK_INTERVAL=HOUR, START_DELAY=60_000, RECHECK=30_000;
 const versionPattern=/^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(alpha|beta|rc)\.(0|[1-9]\d*))?$/;
 function version(value){const m=typeof value==='string'&&value.match(versionPattern);return m?{value:value.replace(/^v/,''),base:m.slice(1,4).map(Number),channel:m[4]??null,sequence:Number(m[5]??0)}:null;}
 function compare(a,b){for(let i=0;i<3;i++)if(a.base[i]!==b.base[i])return a.base[i]-b.base[i];if(a.channel===b.channel)return a.sequence-b.sequence;if(!a.channel)return 1;if(!b.channel)return -1;return ['alpha','beta','rc'].indexOf(a.channel)-['alpha','beta','rc'].indexOf(b.channel);}
-function trustedAsset(url,tag,asset,legacy=false){try{const u=new URL(url);return u.protocol==='https:'&&u.hostname==='github.com'&&!u.username&&!u.password&&!u.search&&!u.hash&&(u.pathname===`/Chowjw-Vibecode/OneCup/releases/download/${tag}/${asset}`||(legacy&&u.pathname===`/Chowjw-Vibecode/This-Cup/releases/download/${tag}/${asset}`));}catch{return false;}}
+function trustedAsset(url,tag,asset,legacy=false){if(trustedMirrorAsset(url,tag,asset,CHINA_MIRROR_REPOSITORY))return true;try{const u=new URL(url);return u.protocol==='https:'&&u.hostname==='github.com'&&!u.username&&!u.password&&!u.search&&!u.hash&&(u.pathname===`/Chowjw-Vibecode/OneCup/releases/download/${tag}/${asset}`||(legacy&&u.pathname===`/Chowjw-Vibecode/This-Cup/releases/download/${tag}/${asset}`));}catch{return false;}}
 export function selectSkinUpdate(releases,currentVersion){
  const current=version(currentVersion);if(!current||!Array.isArray(releases))return null;
  const options=[];
@@ -43,11 +46,30 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
  reload=()=>globalThis.location.reload(),onStatus=()=>{},events=globalThis.window}={}){
  let saved={enabled:false,nextCheck:0,pending:null},preferenceSaved=true,storageBlocked=false,active=false,disposed=false,timer=null,readyAt=0,working=false,installedVersion=null,availableTarget=null;
  let state={phase:'disabled',version:null};
+ let chinaMirror=false,mirrorPreferenceSaved=true,checkSource=null,fallbackUsed=false;
  try{if(storage===undefined)storage=globalThis.localStorage;}catch{storageBlocked=true;preferenceSaved=false;}
  const context=()=>{try{return getContext()??{}}catch{return {}}};
- function emit(phase,detail={}){state={phase,version:installedVersion??saved.pending?.version??null,...detail};try{onStatus({...state,enabled:saved.enabled,preferenceSaved});}catch{}}
+ function emit(phase,detail={}){state={phase,version:installedVersion??saved.pending?.version??null,source:checkSource,fallback:fallbackUsed,...detail};try{onStatus({...state,enabled:saved.enabled,preferenceSaved,chinaMirror,mirrorPreferenceSaved});}catch{}}
  function read(){if(storageBlocked)return false;try{const raw=storage.getItem(UPDATE_STORAGE_KEY);if(raw!==null)saved=decode(raw);return true;}catch{storageBlocked=true;preferenceSaved=false;return false;}}
  function persist(){if(storageBlocked){preferenceSaved=false;return false;}try{const raw=JSON.stringify(saved);storage.setItem(UPDATE_STORAGE_KEY,raw);if(storage.getItem(UPDATE_STORAGE_KEY)!==raw)throw Error('readback failed');preferenceSaved=true;return true;}catch{storageBlocked=true;preferenceSaved=false;return false;}}
+ function readMirror(){try{const raw=storage.getItem(CHINA_MIRROR_STORAGE_KEY);if(raw!==null&&raw!=='true'&&raw!=='false')throw Error('invalid mirror preference');chinaMirror=raw==='true';mirrorPreferenceSaved=true;return true;}catch{mirrorPreferenceSaved=false;return false;}}
+ function setChinaMirrorEnabled(value){
+  chinaMirror=value===true;
+  try{const raw=String(chinaMirror);storage.setItem(CHINA_MIRROR_STORAGE_KEY,raw);if(storage.getItem(CHINA_MIRROR_STORAGE_KEY)!==raw)throw Error('readback failed');mirrorPreferenceSaved=true;}catch{mirrorPreferenceSaved=false;}
+  if(!working&&!saved.pending&&!installedVersion&&mirrorPreferenceSaved&&read()){availableTarget=null;saved.nextCheck=0;persist();emit(saved.enabled?'waiting':'disabled');refresh();}
+  else emit(state.phase,state);
+  return chinaMirror;
+ }
+ async function lookup(){
+  const init=()=>({headers:{Accept:'application/json'},credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15_000)});
+  fallbackUsed=false;
+  if(chinaMirror){
+   checkSource='china';emit('checking');
+   try{const response=await fetchImpl(mirrorReleasesUrl(CHINA_MIRROR_REPOSITORY),init());if(!response.ok)throw Error('mirror unavailable');return selectSkinUpdate(normalizeMirrorReleases(await response.json(),CHINA_MIRROR_REPOSITORY),currentVersion);}catch{fallbackUsed=true;}
+  }
+  checkSource='github';emit('checking');
+  const response=await fetchImpl(RELEASES_URL,init());if(!response.ok)throw Error('release check failed');return selectSkinUpdate(await response.json(),currentVersion);
+ }
  function cancel(){if(timer!==null)clearTimer(timer);timer=null;}
  function schedule(delay){cancel();if(active&&!disposed&&(saved.enabled||saved.pending))timer=setTimer(()=>{timer=null;void tick();},Math.max(0,delay));}
  function finishInstalled(target){
@@ -76,6 +98,8 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
   if(!read()||!preferenceSaved){emit('storage_error');return;}
   if(saved.pending){await verify(owner,saved.pending);return;}
   if(!saved.enabled){emit('disabled');return;}
+  if(!readMirror()){emit('storage_error');return;}
+  if(!chinaMirror&&trustedMirrorAsset(target.url,'v'+target.version,`onecup-${target.version}.zip`,CHINA_MIRROR_REPOSITORY)){availableTarget=null;saved.nextCheck=0;if(!persist()){emit('storage_error');return;}emit('waiting');schedule(RECHECK);return;}
   if(!active||disposed||!['idle','schedidle','sleeping'].includes(machineRead?.state?.state)||getClient()!==owner||!canAutoInstall(context())){emit('waiting');schedule(RECHECK);return;}
   if(compare(installed,version(target.version))>=0){finishInstalled({version:installed.value});return;}
   saved.pending={...target,apiOrigin:origin(context())};
@@ -85,6 +109,25 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
    if(typeof owner.request==='function')await owner.request('POST','/webui/skins/install/url',{url:target.url},120_000);
    else await owner.post('/webui/skins/install/url',{url:target.url});
   }catch(error){
+   // Only a fully received, audited download-phase error can release this reservation.
+   // Timeouts, unknown builds and copy failures continue through read-only verification.
+   if(trustedMirrorAsset(target.url,'v'+target.version,`onecup-${target.version}.zip`,CHINA_MIRROR_REPOSITORY)&&confirmedMirrorDownloadFailure(error,context().nativeCommit)){
+    if(read()&&saved.pending?.url===target.url&&saved.pending.version===target.version&&saved.pending.apiOrigin===origin(context())&&getClient()===owner){
+     saved.pending=null;availableTarget=null;if(!persist()){emit('storage_error');return;}
+     if(!saved.enabled){emit('disabled');return;}
+     try{
+      const response=await fetchImpl(RELEASES_URL,{headers:{Accept:'application/json'},credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15_000)});
+      if(!response.ok)throw Error('fallback unavailable');
+      const releases=await response.json();if(!Array.isArray(releases))throw Error('invalid releases');
+      const fallback=selectSkinUpdate(releases.filter(r=>r.tag_name==='v'+target.version),currentVersion);
+      if(!fallback||new URL(fallback.url).hostname!=='github.com')throw Error('same-version package unavailable');
+      if(!active||disposed||!read()||!saved.enabled||getClient()!==owner)return;
+      if(saved.pending){await verify(owner,saved.pending);return;}
+      checkSource='github';fallbackUsed=true;availableTarget=fallback;emit('available',{version:fallback.version});schedule(RECHECK);
+     }catch{emit('error');schedule(CHECK_INTERVAL);}
+     return;
+    }
+   }
    // These responses reject the route before an installer can run. Other failures remain uncertain.
    if([401,403,404,405].includes(error?.status)){
     if(read()&&saved.pending?.version===target.version){saved.pending=null;persist();emit('unsupported');schedule(CHECK_INTERVAL);return;}
@@ -101,7 +144,7 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
    if(installedVersion){emit('reload_pending');if(saved.enabled&&canAutoInstall(context())){try{reload();}catch{}}else schedule(RECHECK);return;}
    const owner=getClient();
    if(saved.pending){if(owner?.get)await verify(owner,saved.pending);else{emit('awaiting_confirmation');schedule(60_000);}return;}
-   if(!read()||!preferenceSaved){emit('storage_error');return;}
+   if(!read()||!preferenceSaved||!readMirror()){emit('storage_error');return;}
    if(!saved.enabled&&!manual){emit('disabled');return;}
    if(manual&&!isUsageEnvironment(context())){emit('unsupported');return;}
    if(!manual&&now()<readyAt){schedule(readyAt-now());return;}
@@ -109,12 +152,11 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
    if(!manual&&availableTarget){const target=availableTarget;if(typeof owner.exclusive==='function')await owner.exclusive(()=>install(owner,target));else await install(owner,target);return;}
    if(!manual&&now()<saved.nextCheck){emit('current');schedule(saved.nextCheck-now());return;}
    saved.nextCheck=now()+CHECK_INTERVAL;if(!persist()){emit('storage_error');return;}
-   emit('checking');
-   const response=await fetchImpl(RELEASES_URL,{headers:{Accept:'application/vnd.github+json'},credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15_000)});
-   if(!response.ok)throw Error('release check failed');
-   const target=selectSkinUpdate(await response.json(),currentVersion);
+   const requestedMirror=chinaMirror;
+   const target=await lookup();
    if(!active||disposed)return;
-   if(!read()||!preferenceSaved){emit('storage_error');return;}
+   if(!read()||!preferenceSaved||!readMirror()){emit('storage_error');return;}
+   if(chinaMirror!==requestedMirror){availableTarget=null;saved.nextCheck=0;persist();emit(saved.enabled?'waiting':'disabled');schedule(RECHECK);return;}
    availableTarget=target;
    if(!saved.enabled){emit(manual?(target?'available':'current'):'disabled',{version:target?.version??null});return;}
    if(!target){emit('current');schedule(CHECK_INTERVAL);return;}
@@ -131,7 +173,7 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
  function refresh(){if(!active||disposed||working)return;if(saved.pending){schedule(0);return;}if(!saved.enabled)return;schedule(Math.max(0,readyAt-now()));}
  function setEnabled(value){saved.enabled=value===true;if(saved.enabled&&!saved.pending)saved.nextCheck=Math.min(saved.nextCheck,now()+CHECK_INTERVAL);persist();cancel();if(saved.pending){emit('awaiting_confirmation');schedule(0);}else if(!preferenceSaved)emit('storage_error');else{emit(saved.enabled?'waiting':'disabled');if(saved.enabled)refresh();}return saved.enabled;}
  const pageShow=event=>{if(event.persisted)start();};
- read();events?.addEventListener('pagehide',stop);events?.addEventListener('pageshow',pageShow);
- return{get enabled(){return saved.enabled;},get preferenceSaved(){return preferenceSaved;},get status(){return {...state,enabled:saved.enabled,preferenceSaved};},start,stop,refresh,setEnabled,checkNow:()=>tick(true),
+ read();readMirror();events?.addEventListener('pagehide',stop);events?.addEventListener('pageshow',pageShow);
+ return{get enabled(){return saved.enabled;},get preferenceSaved(){return preferenceSaved;},get status(){return {...state,enabled:saved.enabled,preferenceSaved,chinaMirror,mirrorPreferenceSaved};},get chinaMirrorEnabled(){return chinaMirror;},get mirrorPreferenceSaved(){return mirrorPreferenceSaved;},start,stop,refresh,setEnabled,setChinaMirrorEnabled,checkNow:()=>tick(true),
   dispose(){stop();disposed=true;events?.removeEventListener('pagehide',stop);events?.removeEventListener('pageshow',pageShow);}};
 }

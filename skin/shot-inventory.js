@@ -1,4 +1,4 @@
-import {recordBeanConsumption} from './beans.js?v=0.2.34';
+import {recordBeanConsumption} from './beans.js?v=0.2.35';
 
 // Use the saved shot, never today's selection or a later tasting annotation.
 export function consumptionOf(shot) {

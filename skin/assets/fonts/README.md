@@ -1,8 +1,8 @@
 # Bundled typography / 随包字体
 
-The approved boards use several typographic roles. **Noto Serif SC** supplies Song-style headings, substantial controls and numerals. **Noto Sans SC** supplies supporting labels and notes. **Source Serif 4** is retained for the small Latin wordmark. All three families are distributed under the **SIL Open Font License 1.1**, with the original copyright and license files in their respective directories.
+The approved boards use several typographic roles. **Noto Serif SC** supplies Song-style headings, substantial controls and numerals. **Noto Sans SC** supplies supporting labels and notes. **Source Serif 4** remains available for supporting Latin text. The OneCup logo uses the designer-provided image without replacing its letterforms. All three families are distributed under the **SIL Open Font License 1.1**, with the original copyright and license files in their respective directories.
 
-确认的设计图并非全部使用宋体。标题、主要控件和大数值使用 Noto Serif SC；说明、弱/强、选填、参数摘要标签及笔记输入使用 Noto Sans SC；英文小字标识使用 Source Serif 4。三套字体均附 SIL Open Font License 1.1 原文。这是根据设计图视觉特征选择的跨设备实现，不是对原始字体的鉴定。
+确认的设计图并非全部使用宋体。标题、主要控件和大数值使用 Noto Serif SC；说明、弱/强、选填、参数摘要标签及笔记输入使用 Noto Sans SC；英文品牌标识采用设计师提供的原稿，不替换字形；Source Serif 4 供其他拉丁文字使用。三套字体均附 SIL Open Font License 1.1 原文。这是根据设计图视觉特征选择的跨设备实现，不是对原始字体的鉴定。
 
 ## Roles / 品鉴页字样分类
 

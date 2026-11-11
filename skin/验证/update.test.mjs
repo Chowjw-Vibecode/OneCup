@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSkinUpdater,canAutoInstall,selectSkinUpdate,UPDATE_STORAGE_KEY,RELEASES_URL} from '../update.js';
+import {createSkinUpdater,canAutoInstall,selectSkinUpdate,UPDATE_STORAGE_KEY,RELEASES_URL,CHINA_MIRROR_STORAGE_KEY,CHINA_MIRROR_REPOSITORY} from '../update.js';
 const flush=async()=>{for(let i=0;i<35;i++)await Promise.resolve();};
 function release(v,{draft=false,prerelease=v.includes('-'),url,name,state='uploaded',size=100}={}){return{tag_name:'v'+v,draft,prerelease,assets:[{name:name??`onecup-${v}.zip`,browser_download_url:url??`https://github.com/Chowjw-Vibecode/OneCup/releases/download/v${v}/onecup-${v}.zip`,size,state}]};}
 function native(){return{pageUrl:'http://localhost:25123/',apiUrl:'http://127.0.0.1:8080',host:{app:'decent.app',platform:'android'},connection:{connected:true,machineConnected:true,stale:false},settings:{simulatedDevices:[]},machineState:'idle',busy:false,canInstall:true};}
 function fixture(options={}){
  let time=1_000_000,id=0,skinReads=0,installed=options.installed??'0.2.29-rc.12';const tasks=new Map(),values=options.values??new Map(),context=native(),calls=[],statuses=[];let reloads=0,checks=0;
- const client={get:async path=>{calls.push(['get',path]);if(path==='/machine/state')return options.machineRead??{state:{state:'idle'}};skinReads++;if(options.readback&&skinReads>1) return options.readback();return{id:'this-cup',version:installed};},post:async(path,data)=>{calls.push(['post',path,data]);if(options.install)return options.install({context,client,setInstalled:v=>installed=v});installed='0.2.29-rc.13';return{success:true};}};
+ const client={get:async path=>{calls.push(['get',path]);if(path==='/machine/state')return options.machineRead??{state:{state:'idle'}};skinReads++;if(options.readback&&skinReads>1) return options.readback();return{id:'this-cup',version:installed};},post:async(path,data)=>{calls.push(['post',path,data]);if(options.install)return options.install({context,client,payload:data,setInstalled:v=>installed=v});installed='0.2.29-rc.13';return{success:true};}};
  let owner=client;
  const storage=options.storage??{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
- const updater=createSkinUpdater({currentVersion:options.currentVersion??'0.2.29-rc.12',getContext:()=>context,getClient:()=>owner,storage,events:null,now:()=>time,setTimer:(fn,delay)=>{const key=++id;tasks.set(key,{fn,at:time+delay});return key;},clearTimer:key=>tasks.delete(key),reload:()=>reloads++,onStatus:s=>statuses.push(s),fetchImpl:async(url,init)=>{checks++;calls.push(['fetch',url,init]);if(options.fetch)return options.fetch({context,setOwner:v=>owner=v});return{ok:true,json:async()=>[release('0.2.29-rc.13')]};}});
+ const updater=createSkinUpdater({currentVersion:options.currentVersion??'0.2.29-rc.12',getContext:()=>context,getClient:()=>owner,storage,events:null,now:()=>time,setTimer:(fn,delay)=>{const key=++id;tasks.set(key,{fn,at:time+delay});return key;},clearTimer:key=>tasks.delete(key),reload:()=>reloads++,onStatus:s=>statuses.push(s),fetchImpl:async(url,init)=>{checks++;calls.push(['fetch',url,init]);if(options.fetch)return options.fetch({url,context,setOwner:v=>owner=v});return{ok:true,json:async()=>[release('0.2.29-rc.13')]};}});
  async function advance(ms){const end=time+ms;let count=0;for(;;){const next=[...tasks].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!next)break;if(++count>100)throw Error('timer loop');time=next[1].at;tasks.delete(next[0]);next[1].fn();await flush();}time=end;await flush();}
  return{updater,context,client,calls,statuses,values,advance,setInstalled:v=>installed=v,get reloads(){return reloads},get checks(){return checks},get tasks(){return tasks.size}};
 }
@@ -205,4 +205,58 @@ test('an old in-flight transition URL still verifies without replaying installat
  const pending={version:'0.2.34',url:'https://github.com/Chowjw-Vibecode/This-Cup/releases/download/v0.2.34/this-cup-0.2.34.zip',apiOrigin:'http://127.0.0.1:8080'};
  const f=fixture({values:new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:0,pending})]]),installed:'0.2.34'});f.updater.start();await f.advance(60_000);
  assert.equal(f.calls.some(c=>c[0]==='post'),false);assert.equal(f.reloads,1);f.updater.dispose();
+});
+
+function mirrorRelease(v){const r=release(v),name=`onecup-${v}.zip`;return{tag_name:r.tag_name,prerelease:r.prerelease,body:`<!-- onecup-asset ${JSON.stringify({name,size:100,sha256:'a'.repeat(64)})} -->`,assets:[{name,browser_download_url:`https://gitee.com/${CHINA_MIRROR_REPOSITORY}/releases/download/v${v}/${name}`}]};}
+
+test('China selection persists independently and manual checks use the mirror without enabling updates',async()=>{
+ const f=fixture({fetch:async()=>({ok:true,json:async()=>[mirrorRelease('0.2.29-rc.13')]})});f.context.canInstall=false;f.updater.start();f.updater.setChinaMirrorEnabled(true);await f.updater.checkNow();
+ assert.equal(f.updater.enabled,false);assert.equal(f.updater.chinaMirrorEnabled,true);assert.equal(f.values.get(CHINA_MIRROR_STORAGE_KEY),'true');assert.equal(f.checks,1);assert.match(f.calls.find(c=>c[0]==='fetch')[1],/^https:\/\/gitee.com\/api\/v5\//);
+ assert.equal(f.updater.status.source,'china');assert.equal(f.updater.status.phase,'available');assert.equal(f.calls.some(c=>c[0]==='post'),false);f.updater.dispose();
+ const g=fixture({values:f.values});assert.equal(g.updater.chinaMirrorEnabled,true);assert.equal(g.updater.enabled,false);g.updater.dispose();
+});
+
+test('China metadata failures fall back to GitHub and install only once',async()=>{
+ for(const bad of ['offline','metadata']){const f=fixture({fetch:async({url})=>{if(url.startsWith('https://gitee.com/')){if(bad==='offline')throw Error('offline');return{ok:true,json:async()=>[{tag_name:'v0.2.29-rc.13',prerelease:true,assets:[]}]};}return{ok:true,json:async()=>[release('0.2.29-rc.13')]};}});
+ f.updater.start();f.updater.setChinaMirrorEnabled(true);f.updater.setEnabled(true);await f.advance(60_000);
+ assert.equal(f.checks,2);assert.equal(f.reloads,1);assert.equal(f.calls.filter(c=>c[0]==='post').length,1);assert.match(f.calls.find(c=>c[0]==='post')[2].url,/^https:\/\/github.com\/Chowjw-Vibecode\/OneCup\//);assert.equal(f.updater.status.fallback,true);f.updater.dispose();}
+});
+
+test('a mirror choice changed during a lookup cannot install the previous route',async()=>{
+ let resolve;const f=fixture({fetch:()=>new Promise(done=>resolve=done)});f.updater.start();f.updater.setChinaMirrorEnabled(true);f.updater.setEnabled(true);const checking=f.updater.checkNow();await flush();
+ f.updater.setChinaMirrorEnabled(false);resolve({ok:true,json:async()=>[mirrorRelease('0.2.29-rc.13')]});await checking;
+ assert.equal(f.calls.some(c=>c[0]==='post'),false);assert.equal(f.reloads,0);assert.equal(f.updater.chinaMirrorEnabled,false);f.updater.dispose();
+});
+
+test('mirror pending is verified even when the mirror preference is now off',async()=>{
+ const pending={version:'0.2.35',url:`https://gitee.com/${CHINA_MIRROR_REPOSITORY}/releases/download/v0.2.35/onecup-0.2.35.zip`,apiOrigin:'http://127.0.0.1:8080'};
+ const f=fixture({values:new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:0,pending})]]),installed:'0.2.35'});f.updater.start();await f.advance(60_000);
+ assert.equal(f.calls.some(c=>c[0]==='post'),false);assert.equal(f.reloads,1);assert.equal(f.updater.chinaMirrorEnabled,false);f.updater.dispose();
+});
+
+
+test('an audited native mirror download error switches to the same GitHub version once',async()=>{
+ const message="Couldn't install the skin. The service refused access. Check repository access or try again later.";
+ const f=fixture({fetch:async({url})=>({ok:true,json:async()=>url.startsWith('https://gitee.com/')?[mirrorRelease('0.2.29-rc.13')]:[release('0.2.29-rc.13'),release('0.2.30')]}),install:async({payload,setInstalled})=>{if(payload.url.startsWith('https://gitee.com/'))throw Object.assign(Error(message),{status:500,details:{error:message}});setInstalled('0.2.29-rc.13');}});
+ f.context.nativeCommit='14361a94b32888f6a81182e9e239f513d39d060c';f.updater.start();f.updater.setChinaMirrorEnabled(true);f.updater.setEnabled(true);await f.advance(60_000);
+ assert.equal(f.calls.filter(c=>c[0]==='post').length,1);assert.equal(f.updater.status.phase,'available');assert.equal(f.updater.status.fallback,true);
+ await f.advance(30_000);const posts=f.calls.filter(c=>c[0]==='post');assert.equal(posts.length,2);assert.match(posts[1][2].url,/github.com.*onecup-0.2.29-rc.13.zip$/);assert.equal(f.reloads,1);f.updater.dispose();
+});
+
+test('unknown native commits and non-download mirror failures keep pending without another POST',async()=>{
+ for(const kind of ['unknown-build','copy','timeout']){
+  const message=kind==='copy'?"Couldn't install the skin. Check storage space and file permissions, then try again.":"Couldn't install the skin. The connection took too long. Try again.";
+  const f=fixture({fetch:async()=>({ok:true,json:async()=>[mirrorRelease('0.2.29-rc.13')]}),install:async()=>{throw Object.assign(Error(message),{status:kind==='timeout'?0:500,details:kind==='timeout'?null:{error:message}})}});
+  f.context.nativeCommit=kind==='unknown-build'?'other':'14361a94b32888f6a81182e9e239f513d39d060c';f.updater.start();f.updater.setChinaMirrorEnabled(true);f.updater.setEnabled(true);await f.advance(120_000);
+  assert.equal(f.calls.filter(c=>c[0]==='post').length,1);assert.equal(f.updater.status.phase,'awaiting_confirmation');assert(JSON.parse(f.values.get(UPDATE_STORAGE_KEY)).pending);f.updater.dispose();
+ }
+});
+
+
+test('turning China off during the final native reads cancels an unsubmitted mirror install',async()=>{
+ const f=fixture({fetch:async({url})=>({ok:true,json:async()=>url.startsWith('https://gitee.com/')?[mirrorRelease('0.2.29-rc.13')]:[release('0.2.29-rc.13')]})});
+ const originalGet=f.client.get;f.client.get=async path=>{const value=await originalGet(path);if(path==='/machine/state')f.updater.setChinaMirrorEnabled(false);return value;};
+ f.updater.start();f.updater.setChinaMirrorEnabled(true);f.updater.setEnabled(true);await f.advance(60_000);
+ assert.equal(f.calls.filter(c=>c[0]==='post').length,0);assert.equal(JSON.parse(f.values.get(UPDATE_STORAGE_KEY)).pending,null);
+ await f.advance(30_000);assert.equal(f.calls.filter(c=>c[0]==='post').length,1);assert.match(f.calls.find(c=>c[0]==='post')[2].url,/^https:\/\/github\.com\//);f.updater.dispose();
 });

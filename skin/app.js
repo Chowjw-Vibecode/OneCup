@@ -1,17 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.34";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.34";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.34";
-import {telemetryPath} from "./chart-path.js?v=0.2.34";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.34";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.34";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.34";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.34";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.34";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.34";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.34";
-import { createSkinUpdater } from "./update.js?v=0.2.34";
-import { createUsageReporter } from "./usage.js?v=0.2.34";
+import {stageLabel} from "./stage-labels.js?v=0.2.35";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.35";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.35";
+import {telemetryPath} from "./chart-path.js?v=0.2.35";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.35";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.35";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.35";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.35";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.35";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.35";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.35";
+import { createSkinUpdater } from "./update.js?v=0.2.35";
+import { createUsageReporter } from "./usage.js?v=0.2.35";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -56,7 +56,7 @@ let client;
 let displayManager;
 let usageReporter;
 let skinUpdater;
-const SKIN_VERSION = "0.2.34";
+const SKIN_VERSION = "0.2.35";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -163,6 +163,9 @@ const strings = {
     usageOff: "关闭",
     updateTitle: "自动更新皮肤",
     updateHelp: "默认关闭。开启后每小时检查，在空闲且没有未保存修改时安装同一发布频道的新版本。也可随时点击「检查更新」。更新失败会提示，可能需要手动重装皮肤包；不清空方案、豆仓、记录或偏好。",
+    chinaMirrorTitle: "China 镜像服务器",
+    chinaMirrorHelp: "优先使用 Gitee 国内镜像，连接失败时自动改用 GitHub。",
+    chinaMirrorUnsaved: "此线路选择未能保存，请检查本地存储。",
     updateCheck: "检查更新",
     updateAvailable: "发现新版本，等待空闲且没有未保存修改时更新",
     updateAvailableOff: "发现新版本，开启自动更新后可安装",
@@ -366,6 +369,9 @@ const strings = {
     usageOff: "Off",
     updateTitle: "Automatic skin updates",
     updateHelp: "Off by default. Checks hourly and installs newer releases from the same channel only while idle with no unsaved edits. You can also check at any time. A failed update may require manual skin reinstallation. Profiles, beans, shots and preferences are not cleared.",
+    chinaMirrorTitle: "China mirror server",
+    chinaMirrorHelp: "Prefer the Gitee mirror. Connection failures fall back to GitHub.",
+    chinaMirrorUnsaved: "This server choice could not be saved. Check local storage.",
     updateCheck: "Check for updates",
     updateAvailable: "New version found; waiting for idle with no unsaved edits",
     updateAvailableOff: "New version found; turn on automatic updates to install",
@@ -2653,14 +2659,18 @@ function renderSkinUpdateSetting() {
   const labels={available:value.enabled?'updateAvailable':'updateAvailableOff',disabled:'updateDisabled',waiting:'updateWaiting',checking:'updateChecking',installing:'updateInstalling',awaiting_confirmation:'updateConfirming',reload_pending:'updateReload',current:'updateCurrent',error:'updateError',unsupported:'updateUnsupported',storage_error:'updateStorageError'};
   $('skinUpdateEnabled').setAttribute('aria-checked',String(value.enabled));
   $('skinUpdateEnabled').textContent=t(value.enabled?'usageOn':'usageOff');
+  $('chinaMirrorEnabled').setAttribute('aria-checked',String(value.chinaMirror===true));
+  $('chinaMirrorEnabled').textContent=t(value.chinaMirror?'usageOn':'usageOff');
+  $('chinaMirrorHelp').textContent=t(value.mirrorPreferenceSaved===false?'chinaMirrorUnsaved':'chinaMirrorHelp');
+  $('chinaMirrorEnabled').disabled=['installing','awaiting_confirmation','reload_pending'].includes(value.phase);
   $('skinUpdateCheck').disabled=['checking','installing','awaiting_confirmation','reload_pending'].includes(value.phase);
-  $('skinUpdateStatus').textContent=t(labels[value.phase]??'updateWaiting')+(value.version?' · '+value.version:'')+(value.preferenceSaved===false&&value.phase!=='storage_error'?' '+t('updatePreferenceUnsaved'):'');
+  $('skinUpdateStatus').textContent=t(labels[value.phase]??'updateWaiting')+(value.version?' · '+value.version:'')+(value.preferenceSaved===false&&value.phase!=='storage_error'?' '+t('updatePreferenceUnsaved'):'')+(['checking','current','available','error'].includes(value.phase)&&value.source?' · '+(value.source==='china'?'China / Gitee':value.fallback?'GitHub（'+(s.language==='zh'?'已回退':'fallback')+'）':'GitHub'):'');
 }
 function skinUpdateContext() {
   const grinder=client?.grinder?.cachedState;
   const grinderBusy=grinder?.available!==false&&Boolean(s.grinderOperationPending||grinder?.busy||grinder?.operation||grinder?.state==='grinding'||['checking','unknown'].includes(grinder?.observation)||(grinder?.connected&&grinder.state!=='idle'));
   const dialog=[...document.querySelectorAll('.overlay:not([hidden]),[role="dialog"],[aria-modal="true"]')].some(el=>el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden');
-  return {pageUrl:location.href,apiUrl:s.baseUrl,host:window.__DECENT_HOST__,connection:s.connection,settings:s.settings,machineState:machineState(),
+  return {pageUrl:location.href,apiUrl:s.baseUrl,host:window.__DECENT_HOST__,connection:s.connection,settings:s.settings,machineState:machineState(),nativeCommit:s.info?.commit,
     busy:s.busy||Boolean(s.awaiting)||running(),
     canInstall:!s.skinUpdating&&!s.modal&&!dialog&&!s.stopPending&&!s.stopAwaiting&&!s.displayDirty&&!s.favoriteBusy&&!s.scaleBusy&&!s.scaleTimerBusy&&!s.workflowConflict&&s.inventorySync?.status!=='pending'&&!grinderBusy&&!dirty()&&!hotWaterDirty()&&window.ceramicUI?.canAutoUpdate?.()===true};
 }
@@ -2827,6 +2837,7 @@ $("languageButton").onclick = $("settingsLanguage").onclick = toggleLanguage;
 $("settingsButton").onclick = $("connectionButton").onclick = openSettings;
 $("skinUpdateEnabled").onclick = () => { skinUpdater?.setEnabled(!skinUpdater.enabled); renderSkinUpdateSetting(); };
 $("skinUpdateCheck").onclick = () => { void skinUpdater?.checkNow(); };
+$("chinaMirrorEnabled").onclick = () => { skinUpdater?.setChinaMirrorEnabled(!skinUpdater.chinaMirrorEnabled); renderSkinUpdateSetting(); };
 $("usageEnabled").onclick = () => {
   usageReporter?.setEnabled(!usageReporter.enabled);
   renderUsageSetting();
