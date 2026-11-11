@@ -32,6 +32,11 @@ const fs=require('node:fs');
   const leaf=page.locator('#wheelArt [data-node="fruit:0:1"] text'),leafBox=await leaf.boundingBox();
   await page.touchscreen.tap(leafBox.x+leafBox.width/2,leafBox.y+leafBox.height/2);await page.evaluate(()=>new Promise(requestAnimationFrame));
   assert.equal(await page.locator('#wheelArt [data-node="fruit:0:1"]').getAttribute('aria-pressed'),'true','touch tap selects a leaf after pinch/cancel');
+  const pickedNode=page.locator('#wheelArt [data-node="fruit:0:1"]');
+  const pickedStyle=()=>pickedNode.evaluate(e=>({outline:getComputedStyle(e).outlineStyle,stroke:getComputedStyle(e.querySelector('path')).stroke,focusVisible:e.matches(':focus-visible'),dash:getComputedStyle(e.querySelector('path')).strokeDasharray,checks:e.querySelectorAll('.node-check').length}));
+  let appearance=await pickedStyle();assert.equal(appearance.outline,'none','touch focus must not draw a native bounding rectangle');assert.equal(appearance.stroke,'rgb(129, 216, 208)');assert.equal(appearance.checks,1);
+  await page.keyboard.press('Tab');await pickedNode.focus();appearance=await pickedStyle();assert(appearance.focusVisible);assert.equal(appearance.outline,'none');assert.equal(appearance.stroke,'rgb(129, 216, 208)','keyboard focus keeps the selected Tiffany contour');assert.notEqual(appearance.dash,'none','keyboard focus remains visible on the sector');
+  await page.keyboard.press('Space');assert.equal(await pickedNode.getAttribute('aria-pressed'),'false');await page.keyboard.press('Enter');assert.equal(await pickedNode.getAttribute('aria-pressed'),'true');
   await page.locator('#zoomWheel').click();assert.equal(await page.locator('[data-flavor="fruit:0:1"]').getAttribute('aria-pressed'),'true');
   if(width===1007&&lang==='zh'){fs.mkdirSync('/tmp/thiscup-wheel-touch',{recursive:true});await page.screenshot({path:'/tmp/thiscup-wheel-touch/small-1007x602.png'});await page.locator('#zoomWheel').click();await page.screenshot({path:'/tmp/thiscup-wheel-touch/expanded-1007x602.png'});}
   results.push({width,height,lang,result:'footer, pinch, bounds, remaining-finger pan, cancellation, selection passed'});await page.close();

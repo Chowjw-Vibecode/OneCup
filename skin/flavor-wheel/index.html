@@ -129,8 +129,9 @@
     .app.expanded .wheel-sector{pointer-events:none;visibility:hidden}
     .app.expanded .official-art{pointer-events:auto}
     .app.expanded #wheelArt [data-node]{cursor:pointer}
+    #wheelArt [data-node]:focus{outline:none}
     #wheelArt [data-node].is-selected>path{stroke:#81d8d0;stroke-width:6;stroke-linejoin:round}
-    #wheelArt [data-node]:focus-visible>path{stroke:#10334a;stroke-width:5;stroke-dasharray:8 5}
+    #wheelArt [data-node]:focus-visible>path{stroke:#81d8d0;stroke-width:6;stroke-dasharray:8 5}
     #wheelArt .node-check{pointer-events:none;fill:#10334a;stroke:#fffdfa;stroke-width:3;paint-order:stroke;font-size:28px;font-weight:700}
     @media(max-height:740px) and (min-width:900px){.app.expanded .detail-card:has(.empty-selection){grid-template-rows:auto minmax(0,1fr) auto 56px}}
     @media(min-width:1650px){.choice-mark{width:29px;height:29px;flex-basis:29px}.choice-mark svg{width:18px;height:18px}.general-choice .choice-mark{width:25px;height:25px;flex-basis:25px}.selected-chip{min-height:53px;border-radius:28px;padding-right:16px;padding-left:19px}.selected-chip svg{width:16px;height:16px}.selected-tags{gap:11px}}
@@ -144,7 +145,7 @@
 <body>
   <div class="app" tabindex="-1">
     <header class="topbar">
-      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.37" alt="这一杯 · OneCup">
+      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.38" alt="这一杯 · OneCup">
       <div class="stage-title" id="stageTitle">品鉴 · 选风味</div>
     </header>
 

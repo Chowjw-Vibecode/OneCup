@@ -1,5 +1,5 @@
-import {brandMarkup} from './brand.js?v=0.2.37';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.37';
+import {brandMarkup} from './brand.js?v=0.2.38';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.38';
 // Schema: Decaid lib/src/models/data/profile.dart, native DE1 frame encoding.
 // This module edits a detached draft only; it has no device or network adapter.
 const copy=v=>JSON.parse(JSON.stringify(v));
