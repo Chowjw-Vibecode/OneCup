@@ -1,15 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.29-rc.11";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.29-rc.11";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.29-rc.11";
-import {telemetryPath} from "./chart-path.js?v=0.2.29-rc.11";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.29-rc.11";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.29-rc.11";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.29-rc.11";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.29-rc.11";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.29-rc.11";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.29-rc.11";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.29-rc.11";
+import {stageLabel} from "./stage-labels.js?v=0.2.30";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.30";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.30";
+import {telemetryPath} from "./chart-path.js?v=0.2.30";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.30";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.30";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.30";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.30";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.30";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.30";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.30";
+import { createSkinUpdater } from "./update.js?v=0.2.30";
+import { createUsageReporter } from "./usage.js?v=0.2.30";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -52,6 +54,9 @@ const query = new URLSearchParams(location.search);
 const DEFAULT_BASE = `http://${location.hostname || "127.0.0.1"}:8080`;
 let client;
 let displayManager;
+let usageReporter;
+let skinUpdater;
+const SKIN_VERSION = "0.2.30";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -152,6 +157,24 @@ const strings = {
     save: "保存",
     profileName: "方案名称",
     settings: "设置",
+    usageTitle: "匿名国家 / 地区统计",
+    usageHelp: "发送随机编号和产品名称，由网络出口判断国家 / 地区；不含出杯记录、配方或设备编号。关闭后停止后续上报。",
+    usageOn: "开启",
+    usageOff: "关闭",
+    updateTitle: "自动更新皮肤",
+    updateHelp: "默认关闭。开启后，在空闲且没有未保存修改时安装同一发布频道的新版本。更新失败会提示，可能需要手动重装皮肤包；不清空方案、豆仓、记录或偏好。",
+    updateDisabled: "已关闭自动更新",
+    updateWaiting: "等待空闲，并保留未保存的修改",
+    updateChecking: "正在检查新版本…",
+    updateInstalling: "正在更新皮肤，请稍候；停止机器仍可使用",
+    updateConfirming: "安装结果待核实，正在读取版本；请勿重复安装",
+    updateReload: "新版已安装，等待空闲后刷新；关闭自动更新时不会自动刷新",
+    updateCurrent: "当前没有适用的新版本",
+    updateError: "本次更新未完成，当前页面保留，稍后再检查",
+    updateUnsupported: "当前 Decaid 不支持或不允许自动安装，请在 Decaid 中手动安装皮肤。",
+    updateStorageError: "存储不可用，不会开始新的自动安装。请恢复本地存储，重新打开页面后再次设置。",
+    updatePreferenceUnsaved: "此开关选择未能保存，仅当前页面有效；恢复存储后需重新打开页面并再次设置。",
+    usageUnsaved: "此选择未能保存，仅在当前页面有效。请恢复本地存储，重新打开页面后再次设置；重新打开时可能恢复原设置。",
     language: "语言",
     appearance: "外观",
     toggleTheme: "浅色 / 深色",
@@ -334,6 +357,24 @@ const strings = {
     save: "Save",
     profileName: "Profile name",
     settings: "Settings",
+    usageTitle: "Anonymous country / region statistics",
+    usageHelp: "Sends a random ID and product name; the network exit determines the country / region. No shots, recipes or device IDs are sent. Turn off to stop future check-ins.",
+    usageOn: "On",
+    usageOff: "Off",
+    updateTitle: "Automatic skin updates",
+    updateHelp: "Off by default. Installs newer releases from the same channel only while idle with no unsaved edits. A failed update may require manual skin reinstallation. Profiles, beans, shots and preferences are not cleared.",
+    updateDisabled: "Automatic updates are off",
+    updateWaiting: "Waiting for idle with no unsaved edits",
+    updateChecking: "Checking for updates…",
+    updateInstalling: "Updating the skin. Please wait; machine Stop remains available",
+    updateConfirming: "Verifying the installed version; do not repeat the installation",
+    updateReload: "New version installed; waiting to reload while idle. Automatic reload stays off when updates are disabled",
+    updateCurrent: "No applicable newer release",
+    updateError: "Update did not complete. This page stays open; another check will run later",
+    updateUnsupported: "This Decaid installation does not support or allow automatic installation. Install the skin manually in Decaid.",
+    updateStorageError: "Storage is unavailable; no new automatic installation will start. Restore storage, reopen the page, then set it again.",
+    updatePreferenceUnsaved: "This choice was not saved and applies only to this page. Restore storage, reopen the page, then set it again.",
+    usageUnsaved: "This choice could not be saved and applies only to this page. Restore local storage access, reopen the page, then set it again. Reopening may restore the previous setting.",
     language: "Language",
     appearance: "Appearance",
     toggleTheme: "Light / Dark",
@@ -615,7 +656,7 @@ const connected = () =>
     !s.connection.stale
   );
 const editable = () =>
-  connected() && !!s.workflow && !running() && !s.busy && !s.awaiting;
+  connected() && !!s.workflow && !running() && !s.busy && !s.awaiting && !s.skinUpdating;
 const canStartFromScreen = () => s.machineInfo?.GHC === false;
 const ready = () =>
   connected() &&
@@ -623,6 +664,7 @@ const ready = () =>
   !running() &&
   !s.awaiting &&
   !s.busy &&
+  !s.skinUpdating &&
   !(s.settings?.blockOnNoScale && !s.connection.scaleConnected);
 const toast = (message, error = false) => {
   clearTimeout(toast.timer);
@@ -1038,6 +1080,7 @@ async function sendCommand(action) {
     }
     return;
   }
+  if (s.skinUpdating) { toast(t("updateInstalling")); return; }
   if (!connected()) {
     toast(t("noConnection"), true);
     return;
@@ -1476,6 +1519,8 @@ async function connect(base) {
     if (sequence !== s.connectSequence) return;
     s.info = context.info;
     s.settings = context.settings ?? {};
+    usageReporter?.refresh();
+    skinUpdater?.refresh();
     s.machineInfo = context.machineInfo ?? null;
     s.devices = Array.isArray(context.devices) ? context.devices : [];
     s.profiles = Array.isArray(context.profiles) ? context.profiles : [];
@@ -1656,13 +1701,13 @@ function render() {
     isRunning ||
     s.busy;
   $("powerButton").disabled =
-    !connected() || isRunning || s.busy || !!s.awaiting || !!s.modal;
+    !connected() || isRunning || s.busy || s.skinUpdating || !!s.awaiting || !!s.modal;
   $("powerButton").querySelector("span").textContent =
     state === "sleeping" ? t("wake") : t("sleep");
   document.querySelectorAll("[data-command]").forEach((b) => {
     b.disabled = canStartFromScreen()
       ? !ready() || (!!s.modal && s.modal !== "settingsDialog")
-      : !s.workflow || running() || s.busy || (!!s.modal && s.modal !== "settingsDialog");
+      : !s.workflow || running() || s.busy || s.skinUpdating || (!!s.modal && s.modal !== "settingsDialog");
     b.querySelector("span").textContent = t(
       b.dataset.command,
     );
@@ -2542,6 +2587,8 @@ function returnToDashboard() {
 function renderSettings() {
   updateDashboardExitButton();
   renderDisplaySettings();
+  renderUsageSetting();
+  renderSkinUpdateSetting();
   $("serverUrl").value = s.baseUrl;
   $("deviceDetails").innerHTML =
     `${t("version")} ${escapeHTML(s.info?.fullVersion ?? "—")}<br>${s.devices
@@ -2587,6 +2634,28 @@ function renderSettings() {
     await applyDraft();
     renderSettings();
   };
+}
+function renderUsageSetting() {
+  const enabled = usageReporter?.enabled ?? true;
+  $("usageEnabled").setAttribute("aria-checked", String(enabled));
+  $("usageEnabled").textContent = t(enabled ? "usageOn" : "usageOff");
+  $("usageStatus").hidden = usageReporter?.preferenceSaved !== false;
+  $("usageStatus").textContent = $("usageStatus").hidden ? "" : t("usageUnsaved");
+}
+function renderSkinUpdateSetting() {
+  const value=skinUpdater?.status ?? {phase:'disabled',enabled:false};
+  const labels={disabled:'updateDisabled',waiting:'updateWaiting',checking:'updateChecking',installing:'updateInstalling',awaiting_confirmation:'updateConfirming',reload_pending:'updateReload',current:'updateCurrent',error:'updateError',unsupported:'updateUnsupported',storage_error:'updateStorageError'};
+  $('skinUpdateEnabled').setAttribute('aria-checked',String(value.enabled));
+  $('skinUpdateEnabled').textContent=t(value.enabled?'usageOn':'usageOff');
+  $('skinUpdateStatus').textContent=t(labels[value.phase]??'updateWaiting')+(value.version?' · '+value.version:'')+(value.preferenceSaved===false&&value.phase!=='storage_error'?' '+t('updatePreferenceUnsaved'):'');
+}
+function skinUpdateContext() {
+  const grinder=client?.grinder?.cachedState;
+  const grinderBusy=grinder?.available!==false&&Boolean(s.grinderOperationPending||grinder?.busy||grinder?.operation||grinder?.state==='grinding'||['checking','unknown'].includes(grinder?.observation)||(grinder?.connected&&grinder.state!=='idle'));
+  const dialog=[...document.querySelectorAll('.overlay:not([hidden]),[role="dialog"],[aria-modal="true"]')].some(el=>el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden');
+  return {pageUrl:location.href,apiUrl:s.baseUrl,host:window.__DECENT_HOST__,connection:s.connection,settings:s.settings,machineState:machineState(),
+    busy:s.busy||Boolean(s.awaiting)||running(),
+    canInstall:!s.skinUpdating&&!s.modal&&!dialog&&!s.stopPending&&!s.stopAwaiting&&!s.displayDirty&&!s.favoriteBusy&&!s.scaleBusy&&!s.scaleTimerBusy&&!s.workflowConflict&&s.inventorySync?.status!=='pending'&&!grinderBusy&&!dirty()&&!hotWaterDirty()&&window.ceramicUI?.canAutoUpdate?.()===true};
 }
 function openSettings() {
   renderSettings();
@@ -2749,6 +2818,11 @@ $("themeButton").onclick = $("settingsTheme").onclick = () =>
   setTheme(s.theme === "light" ? "dark" : "light");
 $("languageButton").onclick = $("settingsLanguage").onclick = toggleLanguage;
 $("settingsButton").onclick = $("connectionButton").onclick = openSettings;
+$("skinUpdateEnabled").onclick = () => { skinUpdater?.setEnabled(!skinUpdater.enabled); renderSkinUpdateSetting(); };
+$("usageEnabled").onclick = () => {
+  usageReporter?.setEnabled(!usageReporter.enabled);
+  renderUsageSetting();
+};
 for (const id of ["activeBrightness","sleepBrightness","rotationMinutes"]) $(id).oninput = () => {
   s.displayDraft = {...(s.displayDraft ?? s.displaySettings?.preferences ?? DEFAULT_DISPLAY_PREFERENCES),[id]:Number($(id).value)};
   s.displayDirty = true;
@@ -2834,6 +2908,12 @@ new ResizeObserver(() => {
 }).observe($("chartWrap"));
 setTheme(s.theme);
 localize();
+usageReporter = createUsageReporter({getContext:() => ({
+  pageUrl:location.href, apiUrl:s.baseUrl, host:window.__DECENT_HOST__,
+  settings:s.settings, connection:s.connection, machineState:machineState(),
+  busy:s.busy || Boolean(s.awaiting) || running(),
+})});
+usageReporter.start();
 connect(s.baseUrl);
 startWorkflowPolling();
 window.addEventListener("pagehide", () => {
@@ -2870,7 +2950,7 @@ window.thisCup = {
   getWorkflow: () => clone(s.workflow),
   getProfileIdentity: () => s.workflowConflict ? null : s.profileIdentity,
   refreshProfileLibrary,
-  isRunning: running,
+  isRunning: () => running() || Boolean(s.skinUpdating),
   stop: () => sendCommand("stop"),
   translate: t,
   notice: toast,
@@ -3695,3 +3775,11 @@ window.onlineProfiles = mountOnlineProfiles({getClient:()=>client,getLanguage:()
  isAllowed:()=>s.modal==='profileDialog'&&!running()&&!s.busy,
  onLibrary:entries=>{s.profiles=entries;renderProfiles();},
  onBrowseLocal:entry=>{if(entry){s.selectedProfile=entry;s.selectedProfileUnavailable=false;s.profileSelectionRevision=(s.profileSelectionRevision??0)+1;s.favoriteOnly=false;$("profileSearch").value='';}renderProfiles();scrollSelectedProfile(s.profileDialogSequence);},notice:toast,explainError});
+
+// This module is created after the tasting UI so pending drafts can block reloads.
+skinUpdater=createSkinUpdater({currentVersion:SKIN_VERSION,getClient:()=>client,getContext:skinUpdateContext,onStatus:value=>{
+  const blocked=['installing','awaiting_confirmation'].includes(value.phase),changed=Boolean(s.skinUpdating)!==blocked;
+  s.skinUpdating=blocked;renderSkinUpdateSetting();if(changed)render();
+  if(value.phase==='awaiting_confirmation')status(t('updateConfirming'),true);
+}});
+skinUpdater.start();

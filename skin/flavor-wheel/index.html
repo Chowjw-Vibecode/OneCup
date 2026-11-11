@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <title>这一杯 · 风味轮交互原型</title>
+  <style>
+    @font-face{font-family:'This Cup Noto Serif SC';src:url('../assets/fonts/notoserifsc/NotoSerifSC-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
+    @font-face{font-family:'This Cup Source Serif 4';src:url('../assets/fonts/sourceserif4/SourceSerif4-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
+    @font-face{font-family:'This Cup Noto Sans SC';src:url('../assets/fonts/notosanssc/NotoSansSC-Variable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+    :root{--paper:#faf9f6;--raised:#fffdfa;--input:#f5f3ef;--ink:#10334a;--muted:#526c7e;--line:#12334b26;--accent:#f5a77c;--serif:'This Cup Noto Serif SC','This Cup Source Serif 4','Songti SC',serif;--sans:'This Cup Noto Sans SC','PingFang SC',sans-serif;--number:'This Cup Source Serif 4',Georgia,serif;font-family:var(--serif);font-synthesis:none;color:var(--ink);background:var(--paper)}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper) url('../assets/ceramic/paper.webp') center/cover;color:var(--ink)}
+    button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border:0;background:none;min-height:44px}
+    button:focus-visible{outline:3px solid #176cb0;outline-offset:4px}
+    button:disabled{cursor:default;opacity:.45}
+    [hidden]{display:none!important}
+    h1,h2,h3,p{margin:0}
+    .app{width:100%;max-width:1920px;height:100dvh;min-height:700px;margin:auto;display:grid;grid-template-rows:10.5% minmax(0,1fr);padding:0 3vw;overflow:hidden;position:relative;isolation:isolate}
+    .topbar{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:24px;z-index:2}
+    .brand{width:clamp(210px,21.3vw,352px);aspect-ratio:352/63;display:block;overflow:hidden}
+    .brand image{width:1586px;height:992px}
+    .stage-title{text-align:center;font-size:clamp(18px,1.7vw,28px);font-weight:600;letter-spacing:.08em}
+    .picker{min-height:0;display:grid;grid-template-rows:12.5% minmax(0,1fr) 13.5%;position:relative}
+    .intro{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 .4vw 1vh}
+    .intro h1{font-size:clamp(28px,2.55vw,44px);font-weight:600;letter-spacing:.03em;line-height:1.4}
+    .intro p{font:400 clamp(15px,1.2vw,21px)/1.6 var(--sans);color:var(--muted);padding-top:8px}
+    .intro-hint{align-self:flex-end;margin-bottom:1.1vh;display:flex;align-items:center;gap:8px;font:400 clamp(13px,1.08vw,18px)/1.5 var(--sans);white-space:nowrap;color:var(--muted)}
+    .intro-hint svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.4}
+    .workspace{min-height:0;display:grid;grid-template-columns:minmax(0,53.5%) minmax(0,46.5%);gap:0;position:relative;isolation:isolate;padding-bottom:1.5vh}
+    .workspace:before{content:'';position:absolute;z-index:-1;left:-7vw;right:-5vw;top:12%;height:76%;border-radius:35% 58% 34% 22%/39% 37% 51% 40%;background:#dff0f6;transform:rotate(-4deg)}
+    .wheel-region{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;padding-right:2.8vw}
+    .wheel-window{position:relative;width:min(100%,64vh);aspect-ratio:1;flex-shrink:0;overflow:auto;border-radius:20px;background:transparent;box-shadow:none;scrollbar-width:none;overscroll-behavior:contain}
+    .wheel-window::-webkit-scrollbar{display:none}
+    .wheel-content{position:relative;width:100%;aspect-ratio:1;isolation:isolate}
+    .official-art{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
+    .wheel-sector{position:absolute;inset:0;width:100%;height:100%;padding:0;min-height:0;clip-path:var(--clip);-webkit-clip-path:var(--clip);outline:none!important}
+    .wheel-sector svg{width:100%;height:100%;display:block;pointer-events:none}
+    .focus-outline{fill:none;stroke:transparent;stroke-width:3}
+    .wheel-sector:hover .focus-outline,.wheel-sector:focus-visible .focus-outline{stroke:#10334a;stroke-width:4}
+    .wheel-sector[aria-current=true] .focus-outline{stroke:#10334a;stroke-width:3}
+    .wheel-region{position:relative}
+    .wheel-tools{position:absolute;right:3.3vw;top:0;display:flex;gap:7px;z-index:3}
+    .wheel-tools button{min-height:44px;min-width:44px;border:1px solid #a5b7c2;border-radius:22px;background:#fffdfaeb;box-shadow:0 2px 4px #14364717;padding:0 14px;font:400 clamp(13px,1.1vw,19px) var(--sans)}
+    .wheel-tools button[aria-pressed=true]{background:#e1edf2;border-color:#10334a}
+    .detail-card{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto clamp(110px,16vh,180px);gap:clamp(9px,1.4vh,19px);padding:clamp(22px,2vw,38px);border-radius:2vw;background:linear-gradient(145deg,var(--raised),var(--paper));box-shadow:inset 0 0 0 1px #fff8,0 .3vw 1.2vw #524d3c16;position:relative;overflow:hidden}
+    .detail-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px}
+    .category-heading{display:flex;align-items:center;gap:13px}
+    .category-dot{width:clamp(17px,1.6vw,29px);height:clamp(17px,1.6vw,29px);border-radius:50%;background:var(--active-color);box-shadow:inset 0 0 0 1px #10334a19}
+    .detail-heading h2{font-size:clamp(29px,2.7vw,46px);font-weight:600;line-height:1.25;letter-spacing:.06em}
+    .detail-heading>span{font:400 clamp(13px,1.1vw,19px)/1.4 var(--sans);color:var(--muted)}
+    .choice-groups{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9cb5c3 transparent;scrollbar-gutter:stable;padding:1px 5px 5px 1px;display:flex;flex-direction:column;gap:clamp(15px,2vh,25px)}
+    .choice-group{flex:0 0 auto;display:flex;flex-direction:column;gap:8px}
+    .group-select{min-height:44px;padding:4px 1px;display:flex;align-items:center;justify-content:space-between;gap:9px;font:500 clamp(18px,1.4vw,23px)/1.4 var(--sans);text-align:left}
+    .group-select small{font:400 clamp(11px,.9vw,15px)/1.3 var(--sans);color:var(--muted);display:block;margin-top:3px}
+    .group-select[aria-pressed=true] .choice-mark{background:var(--ink);border-color:var(--ink)}
+    .group-select[aria-pressed=true] .choice-mark svg{opacity:1}
+    .category-heading{min-width:0}.category-heading h2 small{display:block;font:450 clamp(11px,.9vw,16px)/1.35 var(--sans);letter-spacing:.02em;color:var(--muted);margin-top:5px}
+    .flavor-choice>span:first-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .flavor-choice strong{font:500 clamp(18px,1.45vw,24px)/1.4 var(--sans);overflow-wrap:anywhere}
+    .flavor-choice small{font:400 clamp(11px,.95vw,16px)/1.3 var(--sans);color:var(--muted)}
+    .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(9px,1vw,18px)}
+    .flavor-choice{min-height:68px;height:auto;padding:10px 1.3vw;border:1px solid #bfcbd1;border-radius:1.1vw;background:linear-gradient(145deg,#fffefa,#f5f3ef);box-shadow:inset 0 2px 2px #fff9,0 2px 5px #12334b0a;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:clamp(18px,1.7vw,30px);text-align:left;transition:background .15s,border-color .15s}
+    .choice-grid.three-short{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .choice-mark{width:23px;height:23px;flex:0 0 23px;border-radius:50%;border:1px solid #91a4af;background:#fffefa80;display:grid;place-items:center}
+    .choice-mark svg{width:14px;height:14px;stroke:#fffdfa;stroke-width:2.3;fill:none;opacity:0}
+    .flavor-choice[aria-pressed=true]{background:#e1edf2;border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+    .flavor-choice[aria-pressed=true] .choice-mark,.general-choice[aria-pressed=true] .choice-mark{background:var(--ink);border-color:var(--ink)}
+    .flavor-choice[aria-pressed=true] .choice-mark svg,.general-choice[aria-pressed=true] .choice-mark svg{opacity:1}
+    .flavor-choice:hover{border-color:var(--ink)}
+    .general-choice{display:flex;align-items:center;gap:12px;justify-self:start;min-height:44px;padding:0 2px;font:400 clamp(14px,1.18vw,20px)/1.4 var(--sans);text-align:left}
+    .general-choice .choice-mark{width:20px;height:20px;flex-basis:20px}
+    .selected-area{min-height:0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:clamp(7px,1vh,15px);padding-top:1vh}
+    .selected-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+    .selected-heading h3{font-size:clamp(18px,1.5vw,25px);font-weight:550;display:flex;align-items:baseline;gap:10px}
+    .selected-heading h3 small{font:400 .8em var(--sans);color:var(--muted)}
+    .clear-button{font:400 clamp(13px,1.05vw,18px) var(--sans);color:var(--muted);padding:0 4px;min-width:44px}
+    .selected-tags{display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;min-height:44px;overflow:auto;padding:1px 2px 4px;scrollbar-width:thin;scrollbar-color:#a7bec9 transparent}
+    .selected-chip{display:flex;align-items:center;gap:10px;background:#edf3f5;border:1px solid #bacbd4;border-radius:24px;padding:0 12px 0 15px;min-height:44px;font:400 clamp(14px,1.15vw,19px)/1.4 var(--sans);white-space:nowrap}
+    .selected-chip svg{width:13px;height:13px;stroke:var(--muted);stroke-width:1.7;fill:none;flex-shrink:0}
+    .selected-chip:hover{background:#dce8ee}
+    .empty-selection{font:400 clamp(14px,1.08vw,18px)/1.7 var(--sans);color:var(--muted);padding:5px 0}
+    .footer{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:.8vh .4vw 0}
+    .selection-status{display:flex;align-items:center;gap:12px;font:400 clamp(15px,1.25vw,21px)/1.5 var(--sans);color:var(--muted)}
+    .selection-status strong{font:600 clamp(24px,2.05vw,35px)/1 var(--number);color:var(--ink)}
+    .footer-meta{display:flex;flex-direction:column;justify-content:center;min-width:0;padding-top:6px}
+    .source-note{display:flex;align-items:center;gap:7px;font:400 clamp(12px,1vw,16px)/1.4 var(--sans);color:var(--muted);white-space:nowrap}
+    .source-note a{color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+    .source-note a:focus-visible{outline:3px solid #176cb0;outline-offset:1px}
+    .footer-actions{display:flex;align-items:stretch;gap:1.2vw}
+    .button{height:clamp(56px,7.6vh,88px);min-width:clamp(130px,12.2vw,230px);padding:.8vw 1.8vw;border-radius:1.2vw;border:1px solid #a5b7c2;background:linear-gradient(145deg,var(--raised),var(--input));box-shadow:inset 0 2px 3px #fff9,0 .2vw .4vw #12334b12;font-size:clamp(21px,1.8vw,31px);font-weight:500;display:flex;align-items:center;justify-content:center;gap:15px}
+    .button.primary{min-width:clamp(210px,20vw,370px);background:linear-gradient(145deg,#ffc5a2,#f5a77c 85%);border:1px solid #efb18c;box-shadow:inset 0 2px 2px #fff8,0 .25vw .35vw #7e73611a}
+    .button svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;fill:none}
+    .summary{min-height:0;position:relative;display:grid;grid-template-columns:1fr 1.05fr;align-items:center;gap:6vw;padding:3vh 2vw 10vh;isolation:isolate}
+    .summary:before{content:'';position:absolute;inset:15% -8vw 20% -8vw;border-radius:32% 38% 42% 20%;background:#dff0f6;z-index:-1;transform:rotate(-4deg)}
+    .summary-intro{display:flex;flex-direction:column;align-items:center;gap:2.5vh;text-align:center}
+    .summary-cup{width:min(24vw,350px);height:min(24vw,350px);background:url('../assets/ceramic/ready-cup-blue.svg') center/contain no-repeat}
+    .summary-intro h1{font-size:clamp(30px,3.2vw,55px);font-weight:600;letter-spacing:.06em}
+    .summary-intro p{font:400 clamp(15px,1.25vw,21px)/1.7 var(--sans);color:var(--muted)}
+    .summary-card{border-radius:2vw;background:linear-gradient(145deg,var(--raised),var(--paper));box-shadow:inset 0 0 0 1px #fff8,0 .3vw 1.2vw #524d3c16;padding:clamp(28px,3vw,54px);display:flex;flex-direction:column;gap:2.8vh;max-height:100%;min-height:340px}
+    .summary-card header{display:flex;align-items:center;justify-content:space-between;gap:15px}
+    .summary-card h2{font-size:clamp(26px,2.2vw,38px);font-weight:600}
+    .summary-card header span{font:400 clamp(13px,1vw,17px) var(--sans);color:var(--muted)}
+    .summary-card .summary-label{font:400 clamp(14px,1.15vw,19px) var(--sans);color:var(--muted);border-top:1px solid var(--line);padding-top:2.2vh}
+    .summary-tags{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;overflow:auto;min-height:90px;max-height:30vh;align-content:flex-start}
+    .summary-tag{display:flex;align-items:center;gap:9px;min-height:44px;border-radius:26px;background:#e4eff4;padding:8px 19px;font-size:clamp(19px,1.65vw,28px)}
+    .summary-tag:before{content:'';width:7px;height:7px;background:var(--ink);border-radius:50%}
+    .summary-card .button{width:100%;margin-top:auto;flex-shrink:0}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .app.expanded{grid-template-rows:64px minmax(0,1fr)}
+    .app.expanded .picker{grid-template-rows:0 minmax(0,1fr) 82px}
+    .app.expanded .intro{visibility:hidden;overflow:hidden;padding:0}
+    .app.expanded .workspace{grid-template-columns:minmax(0,65%) minmax(0,35%);padding-top:4px}
+    .app.expanded .wheel-window{width:min(100%,calc(100dvh - 160px));overflow:auto;cursor:grab;touch-action:pan-x pan-y}
+    .app.expanded .wheel-content{width:300%}
+    .app.expanded .wheel-window.dragging{cursor:grabbing}
+    .app.expanded .wheel-region{padding-right:1vw}
+    .app.expanded .detail-card{padding:20px;gap:10px;grid-template-rows:auto minmax(0,1fr) auto 106px}
+    .app.category-zoom .wheel-content{width:100%}
+    .app.category-zoom .wheel-window{overflow:hidden;cursor:default}
+    .app.category-zoom #wheelArt>circle,.app.category-zoom #wheelArt>text{display:none}
+    .app.expanded .choice-grid{grid-template-columns:1fr}
+    .app.expanded .choice-grid.three-short{grid-template-columns:1fr}
+    .app.expanded .wheel-tools{right:1vw;top:0}
+    .app.expanded .wheel-sector{pointer-events:none;visibility:hidden}
+    .app.expanded .official-art{pointer-events:auto}
+    .app.expanded #wheelArt [data-node]{cursor:pointer}
+    #wheelArt [data-node].is-selected>path{stroke:#10334a;stroke-width:6;stroke-linejoin:round}
+    #wheelArt [data-node]:focus-visible>path{stroke:#10334a;stroke-width:5;stroke-dasharray:8 5}
+    #wheelArt .node-check{pointer-events:none;fill:#10334a;stroke:#fffdfa;stroke-width:3;paint-order:stroke;font-size:28px;font-weight:700}
+    @media(max-height:740px) and (min-width:900px){.app.expanded .detail-card:has(.empty-selection){grid-template-rows:auto minmax(0,1fr) auto 56px}}
+    @media(min-width:1650px){.choice-mark{width:29px;height:29px;flex-basis:29px}.choice-mark svg{width:18px;height:18px}.general-choice .choice-mark{width:25px;height:25px;flex-basis:25px}.selected-chip{min-height:53px;border-radius:28px;padding-right:16px;padding-left:19px}.selected-chip svg{width:16px;height:16px}.selected-tags{gap:11px}}
+    @media(max-height:740px) and (min-width:900px){.app{min-height:640px}.intro p{padding-top:2px;font-size:14px}.intro h1{font-size:27px}.intro-hint{font-size:12px}.detail-card{padding:18px 22px;gap:7px}.detail-heading h2{font-size:25px}.detail-heading{min-height:37px}.detail-heading>span{font-size:12px}.category-heading{gap:10px}.flavor-choice{min-height:68px;height:auto;font-size:18px}.selected-heading{min-height:44px}.selected-area{padding-top:5px;gap:5px}.general-choice{min-height:44px;font-size:13px}.footer-meta{padding-top:4px}.source-note{font-size:12px;gap:4px}.selection-status strong{font-size:22px}.selection-status{font-size:13px}.choice-groups{gap:16px}}
+    @media(max-height:740px) and (min-width:900px){.detail-card:has(.empty-selection){grid-template-rows:auto minmax(0,1fr) auto 56px}.selected-area:has(.empty-selection) .selected-tags{display:none}.choice-groups{gap:8px}}
+    @media(max-width:900px){.app{height:auto;min-height:100dvh;overflow:visible;padding:0 24px;grid-template-rows:80px auto}.brand{width:180px}.topbar{grid-template-columns:1fr auto}.stage-title{display:none}.picker{grid-template-rows:auto auto auto}.intro{padding:18px 0}.intro h1{font-size:28px}.intro p{font-size:15px}.intro-hint{display:none}.workspace{grid-template-columns:1fr;padding-bottom:22px;gap:16px}.wheel-region{padding:0}.detail-card{border-radius:24px;height:550px;padding:24px;gap:12px;grid-template-rows:auto minmax(0,1fr) auto 125px}.detail-heading h2{font-size:29px}.flavor-choice{font-size:21px;min-height:68px;height:auto;border-radius:13px;padding:0 18px}.detail-heading>span,.general-choice,.selected-chip{font-size:15px}.selected-tags{max-height:160px}.footer{padding:12px 0;position:sticky;bottom:0;z-index:4;background:var(--paper) url('../assets/ceramic/paper.webp') center/cover;gap:12px}.footer-meta{padding-top:0}.source-note{font-size:11px;gap:3px}.source-note>span{display:none}.selection-status{font-size:13px;gap:6px}.selection-status strong{font-size:25px}.button{font-size:20px;border-radius:14px;min-width:100px;height:56px;padding:8px 18px}.button.primary{min-width:170px}.footer-actions{gap:10px}.summary{grid-template-columns:1fr;padding:20px 0 50px;gap:25px}.summary-intro{gap:15px}.summary-cup{width:200px;height:200px}.summary-card{border-radius:24px}.summary-tags{max-height:40vh}}
+    @media(max-width:480px){.app{padding:0 16px}.brand{width:170px}.intro h1{font-size:25px}.intro p{font-size:13px}.detail-card{padding:20px}.footer{flex-wrap:wrap;gap:12px}.selection-status{padding-left:4px}.footer-actions{width:100%}.footer-actions .button{flex:1;min-width:0}.footer-actions .primary{flex:1.7}.selected-chip{font-size:14px}.summary-intro h1{font-size:30px}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <svg class="brand" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="brand-ink" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="../assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#brand-ink)"/></svg>
+      <div class="stage-title" id="stageTitle">品鉴 · 选风味</div>
+    </header>
+
+    <main class="picker" id="picker" aria-labelledby="pickerTitle">
+      <section class="intro">
+        <div><h1 id="pickerTitle">这一杯，喝到了什么？</h1><p>先记录味道，喜欢与否回品鉴页再评。</p></div>
+        <span class="intro-hint">左边点大类，右边选具体风味</span>
+      </section>
+      <div class="workspace">
+        <section class="wheel-region" aria-label="风味轮">
+          <div class="wheel-tools"><button id="zoomWheel" type="button" aria-pressed="false">放大</button></div>
+          <div class="wheel-window" id="wheelWindow"><div class="wheel-content" id="wheel">
+<svg id="wheelArt" class="official-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1160" role="group" aria-labelledby="title desc"><title id="title">咖啡风味轮 · 矢量交互原型</title><desc id="desc">依据SCA及WCR风味轮分类重绘；完整9大类、28中层、73外层。并非SCA官方图文件。</desc><style>text{font-family:"This Cup Noto Sans SC","Noto Sans SC","PingFang SC",sans-serif;font-weight:500}</style>
+<g data-node="floral"><title>花香 · Floral</title><path d="M559.212,364.057 A205,205 0 0,1 620.590,367.059 L600.592,466.059 A104,104 0 0,0 569.454,464.536 Z" fill="#ed008c" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-87.200)" x="154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central">花香</text></g>
+<g data-node="floral:0"><title>红茶 · Black Tea</title><path d="M526.053,38.742 A532,532 0 0,1 563.475,36.257 L573.632,363.099 A205,205 0 0,0 559.212,364.057 Z" fill="#ae667e" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(86.200)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">红茶</text></g>
+<g data-node="floral:1"><title>花香 · Floral</title><path d="M571.698,233.103 A335,335 0 0,1 646.330,239.632 L620.590,367.059 A205,205 0 0,0 574.920,363.063 Z" fill="#ef5794" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-85.000)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">花香</text></g>
+<g data-node="floral:1:0"><title>洋甘菊 · Chamomile</title><path d="M566.816,36.163 A532,532 0 0,1 604.319,36.556 L595.313,233.350 A335,335 0 0,0 571.698,233.103 Z" fill="#fcad28" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-89.400)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">洋甘菊</text></g>
+<g data-node="floral:1:1"><title>玫瑰 · Rose</title><path d="M607.657,36.719 A532,532 0 0,1 645.019,39.988 L620.942,235.511 A335,335 0 0,0 597.416,233.453 Z" fill="#e574a7" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-85.000)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">玫瑰</text></g>
+<g data-node="floral:1:2"><title>茉莉花 · Jasmine</title><path d="M648.335,40.407 A532,532 0 0,1 685.336,46.532 L646.330,239.632 A335,335 0 0,0 623.031,235.775 Z" fill="#fffce9" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-80.600)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">茉莉花</text></g>
+<g data-node="fruit"><title>水果味 · Fruity</title><path d="M621.852,367.318 A205,205 0 0,1 783.809,545.931 L683.396,556.804 A104,104 0 0,0 601.232,466.190 Z" fill="#ed1b24" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-42.200)" x="154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central">水果味</text></g>
+<g data-node="fruit:0"><title>浆果/莓果 · Berry</title><path d="M648.392,240.056 A335,335 0 0,1 734.732,270.875 L674.687,386.177 A205,205 0 0,0 621.852,367.318 Z" fill="#ee2b4b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-70.356)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">浆果/莓果</text></g>
+<g data-node="fruit:0:0"><title>黑莓 · Blackberry</title><path d="M688.610,47.205 A532,532 0 0,1 721.654,55.205 L669.199,245.094 A335,335 0 0,0 648.392,240.056 Z" fill="#0c0918" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-76.389)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">黑莓</text></g>
+<g data-node="fruit:0:1"><title>覆盆子 · Raspberry</title><path d="M724.873,56.106 A532,532 0 0,1 757.274,66.405 L691.629,252.146 A335,335 0 0,0 671.226,245.661 Z" fill="#e42887" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-72.367)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">覆盆子</text></g>
+<g data-node="fruit:0:2"><title>蓝莓 · Blueberry</title><path d="M760.422,67.528 A532,532 0 0,1 792.021,80.075 L713.509,260.754 A335,335 0 0,0 693.612,252.853 Z" fill="#656aac" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-68.344)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">蓝莓</text></g>
+<g data-node="fruit:0:3"><title>草莓 · Strawberry</title><path d="M795.082,81.416 A532,532 0 0,1 825.723,96.148 L734.732,270.875 A335,335 0 0,0 715.437,261.599 Z" fill="#eb2b3b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-64.322)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">草莓</text></g>
+<g data-node="fruit:1"><title>果干 · Dried Fruit</title><path d="M736.596,271.853 A335,335 0 0,1 774.789,295.453 L699.199,401.217 A205,205 0 0,0 675.827,386.776 Z" fill="#d7454f" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-58.289)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">果干</text></g>
+<g data-node="fruit:1:0"><title>葡萄干 · Raisin</title><path d="M828.683,97.702 A532,532 0 0,1 858.215,114.546 L755.192,282.461 A335,335 0 0,0 736.596,271.853 Z" fill="#9d1d7a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-60.300)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">葡萄干</text></g>
+<g data-node="fruit:1:1"><title>西梅干 · Prune</title><path d="M861.059,116.303 A532,532 0 0,1 889.337,135.178 L774.789,295.453 A335,335 0 0,0 756.983,283.567 Z" fill="#83568d" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-56.278)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">西梅干</text></g>
+<g data-node="fruit:2"><title>其他水果 · Other Fruit</title><path d="M776.498,296.682 A335,335 0 0,1 890.014,441.051 L769.710,490.314 A205,205 0 0,0 700.245,401.969 Z" fill="#f2674a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-38.178)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">其他水果</text></g>
+<g data-node="fruit:2:0"><title>椰子 · Coconut</title><path d="M892.050,137.130 A532,532 0 0,1 918.935,157.942 L793.427,309.787 A335,335 0 0,0 776.498,296.682 Z" fill="#e78e28" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-52.256)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">椰子</text></g>
+<g data-node="fruit:2:1"><title>樱桃 · Cherry</title><path d="M921.504,160.080 A532,532 0 0,1 946.863,182.726 L811.013,325.393 A335,335 0 0,0 795.045,311.133 Z" fill="#e61559" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-48.233)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">樱桃</text></g>
+<g data-node="fruit:2:2"><title>石榴 · Pomegranate</title><path d="M949.276,185.039 A532,532 0 0,1 972.983,209.408 L827.461,342.195 A335,335 0 0,0 812.533,326.850 Z" fill="#f24a63" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-44.211)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">石榴</text></g>
+<g data-node="fruit:2:3"><title>菠萝 · Pineapple</title><path d="M975.229,211.885 A532,532 0 0,1 997.168,237.857 L842.691,360.109 A335,335 0 0,0 828.875,343.754 Z" fill="#fc9c1a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-40.189)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">菠萝</text></g>
+<g data-node="fruit:2:4"><title>葡萄 · Grape</title><path d="M999.234,240.484 A532,532 0 0,1 1019.298,267.931 L856.626,379.047 A335,335 0 0,0 843.992,361.764 Z" fill="#9ec536" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-36.167)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">葡萄</text></g>
+<g data-node="fruit:2:5"><title>苹果 · Apple</title><path d="M1021.175,270.698 A532,532 0 0,1 1039.264,299.484 L869.198,398.916 A335,335 0 0,0 857.807,380.789 Z" fill="#6bbe73" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-32.144)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">苹果</text></g>
+<g data-node="fruit:2:6"><title>桃/桃子 · Peach</title><path d="M1040.942,302.375 A532,532 0 0,1 1056.967,332.360 L880.346,419.618 A335,335 0 0,0 870.255,400.736 Z" fill="#f67d52" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-28.122)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">桃/桃子</text></g>
+<g data-node="fruit:2:7"><title>梨/梨子 · Pear</title><path d="M1058.438,335.362 A532,532 0 0,1 1072.321,366.397 L890.014,441.051 A335,335 0 0,0 881.272,421.508 Z" fill="#b2aa23" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-24.100)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">梨/梨子</text></g>
+<g data-node="fruit:3"><title>柑橘类水果 · Citrus Fruit</title><path d="M890.806,443.001 A335,335 0 0,1 913.053,531.936 L783.809,545.931 A205,205 0 0,0 770.195,491.508 Z" fill="#ffe799" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-14.044)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">柑橘类水果</text></g>
+<g data-node="fruit:3:0"><title>柚(葡萄柚) · Grapefruit</title><path d="M1073.578,369.494 A532,532 0 0,1 1085.250,401.426 L898.155,463.109 A335,335 0 0,0 890.806,443.001 Z" fill="#f2595c" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-20.078)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">柚(葡萄柚)</text></g>
+<g data-node="fruit:3:1"><title>橙 · Orange</title><path d="M1086.286,404.604 A532,532 0 0,1 1095.689,437.276 L904.729,485.683 A335,335 0 0,0 898.808,465.110 Z" fill="#f57826" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-16.056)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">橙</text></g>
+<g data-node="fruit:3:2"><title>柠檬 · Lemon</title><path d="M1096.500,440.519 A532,532 0 0,1 1103.588,473.771 L909.703,508.664 A335,335 0 0,0 905.240,487.725 Z" fill="#f6d901" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-12.033)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">柠檬</text></g>
+<g data-node="fruit:3:3"><title>酸橙/莱姆 · Lime</title><path d="M1104.170,477.062 A532,532 0 0,1 1108.908,510.729 L913.053,531.936 A335,335 0 0,0 910.070,510.737 Z" fill="#91c255" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-8.011)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">酸橙/莱姆</text></g>
+<g data-node="sour"><title>酸味/发酵味 · Sour/Fermented</title><path d="M783.943,547.212 A205,205 0 0,1 741.938,693.702 L662.154,631.771 A104,104 0 0,0 683.464,557.454 Z" fill="#f3d000" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(16.000)" x="154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central" textLength="83" lengthAdjust="spacingAndGlyphs">酸味/发酵味</text></g>
+<g data-node="sour:0"><title>酸味 · Sour</title><path d="M913.273,534.030 A335,335 0 0,1 894.355,683.785 L772.366,638.853 A205,205 0 0,0 783.943,547.212 Z" fill="#e0d929" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(7.200)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">酸味</text></g>
+<g data-node="sour:0:0"><title>酸香味/酸性芳香 · Sour Aromatics</title><path d="M1109.258,514.053 A532,532 0 0,1 1111.743,551.475 L914.838,557.594 A335,335 0 0,0 913.273,534.030 Z" fill="#c2bc22" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(-3.800)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">酸香味/酸性芳香</text></g>
+<g data-node="sour:0:1"><title>醋酸 · Acetic Acid</title><path d="M1111.837,554.816 A532,532 0 0,1 1111.444,592.319 L914.650,583.313 A335,335 0 0,0 914.897,559.698 Z" fill="#a3c694" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(0.600)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">醋酸</text></g>
+<g data-node="sour:0:2"><title>酪酸 · Butyric Acid</title><path d="M1111.281,595.657 A532,532 0 0,1 1108.012,633.019 L912.489,608.942 A335,335 0 0,0 914.547,585.416 Z" fill="#d8c60a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(5.000)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">酪酸</text></g>
+<g data-node="sour:0:3"><title>异戊酸 · Isovaleric Acid</title><path d="M1107.593,636.335 A532,532 0 0,1 1101.468,673.336 L908.368,634.330 A335,335 0 0,0 912.225,611.031 Z" fill="#70c15a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(9.400)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">异戊酸</text></g>
+<g data-node="sour:0:4"><title>柠檬酸 · Citric Acid</title><path d="M1100.795,676.610 A532,532 0 0,1 1091.849,713.032 L902.311,659.326 A335,335 0 0,0 907.944,636.392 Z" fill="#e6d90b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(13.800)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">柠檬酸</text></g>
+<g data-node="sour:0:5"><title>苹果酸 · Malic Acid</title><path d="M1090.928,716.245 A532,532 0 0,1 1079.214,751.873 L894.355,683.785 A335,335 0 0,0 901.731,661.350 Z" fill="#b3c526" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(18.200)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">苹果酸</text></g>
+<g data-node="sour:1"><title>酒精/发酵味 · Alcohol/Fermented</title><path d="M893.621,685.757 A335,335 0 0,1 844.630,773.416 L741.938,693.702 A205,205 0 0,0 771.917,640.061 Z" fill="#fcf2b9" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(29.200)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central" textLength="112" lengthAdjust="spacingAndGlyphs">酒精/发酵味</text></g>
+<g data-node="sour:1:0"><title>酒味/红酒 · Winey</title><path d="M1078.049,755.006 A532,532 0 0,1 1063.636,789.630 L884.545,707.560 A335,335 0 0,0 893.621,685.757 Z" fill="#a80674" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(22.600)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">酒味/红酒</text></g>
+<g data-node="sour:1:1"><title>威士忌 · Whiskey</title><path d="M1062.234,792.665 A532,532 0 0,1 1045.208,826.081 L872.941,730.513 A335,335 0 0,0 883.663,709.471 Z" fill="#b33955" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(27.000)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">威士忌</text></g>
+<g data-node="sour:1:2"><title>发酵 · Fermented</title><path d="M1043.577,828.999 A532,532 0 0,1 1024.037,861.011 L859.610,752.509 A335,335 0 0,0 871.914,732.351 Z" fill="#d3a907" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(31.400)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">发酵</text></g>
+<g data-node="sour:1:3"><title>过熟 · Overripe</title><path d="M1022.187,863.795 A532,532 0 0,1 1000.249,894.213 L844.630,773.416 A335,335 0 0,0 858.445,754.262 Z" fill="#7c7129" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(35.800)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">过熟</text></g>
+<g data-node="vegetal"><title>绿色/植物 · Green/Vegetative</title><path d="M741.145,694.717 A205,205 0 0,1 609.168,770.914 L594.797,670.942 A104,104 0 0,0 661.752,632.286 Z" fill="#127f3c" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(60.000)" x="154.50" y="0" fill="#ffffff" font-size="23" text-anchor="middle" dominant-baseline="central" textLength="83" lengthAdjust="spacingAndGlyphs">绿色/植物</text></g>
+<g data-node="vegetal:0"><title>橄榄油 · Olive Oil</title><path d="M998.191,896.847 A532,532 0 0,1 973.983,925.493 L731.817,705.756 A205,205 0 0,0 741.145,694.717 Z" fill="#a0b127" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(40.200)" x="368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">橄榄油</text></g>
+<g data-node="vegetal:1"><title>生的 · Raw</title><path d="M971.729,927.961 A532,532 0 0,1 945.396,954.665 L720.801,716.997 A205,205 0 0,0 730.948,706.707 Z" fill="#6b8a38" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(44.600)" x="368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">生的</text></g>
+<g data-node="vegetal:2"><title>绿色/植物 · Green/Vegetative</title><path d="M808.555,812.924 A335,335 0 0,1 652.964,894.958 L624.650,768.079 A205,205 0 0,0 719.862,717.879 Z" fill="#24b255" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(62.200)" x="270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">绿色/植物</text></g>
+<g data-node="vegetal:2:0"><title>未熟 · Under-ripe</title><path d="M942.959,956.953 A532,532 0 0,1 914.654,981.558 L790.731,828.417 A335,335 0 0,0 808.555,812.924 Z" fill="#a9ca47" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(49.000)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">未熟</text></g>
+<g data-node="vegetal:2:1"><title>豆荚 · Peapod</title><path d="M912.049,983.653 A532,532 0 0,1 881.940,1006.014 L770.131,843.817 A335,335 0 0,0 789.091,829.736 Z" fill="#46b54a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(53.400)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">豆荚</text></g>
+<g data-node="vegetal:2:2"><title>新鲜 · Fresh</title><path d="M879.182,1007.902 A532,532 0 0,1 847.446,1027.888 L748.411,857.591 A335,335 0 0,0 768.395,845.006 Z" fill="#02ab70" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(57.800)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">新鲜</text></g>
+<g data-node="vegetal:2:3"><title>深绿 · Dark Green</title><path d="M844.551,1029.559 A532,532 0 0,1 811.376,1047.050 L725.697,869.658 A335,335 0 0,0 746.588,858.643 Z" fill="#015e3d" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(62.200)" x="433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">深绿</text></g>
+<g data-node="vegetal:2:4"><title>植物 · Vegetative</title><path d="M808.361,1048.495 A532,532 0 0,1 773.942,1063.389 L702.125,879.946 A335,335 0 0,0 723.799,870.567 Z" fill="#16b46b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(66.600)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">植物</text></g>
+<g data-node="vegetal:2:5"><title>干草似的 · Hay-like</title><path d="M770.825,1064.598 A532,532 0 0,1 735.364,1076.808 L677.833,888.396 A335,335 0 0,0 700.162,880.708 Z" fill="#9fa124" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(71.000)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">干草似的</text></g>
+<g data-node="vegetal:2:6"><title>香草似的/草本植物似的 · Herb-like</title><path d="M732.164,1077.775 A532,532 0 0,1 695.871,1087.228 L652.964,894.958 A335,335 0 0,0 675.818,889.005 Z" fill="#78c357" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(75.400)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">香草似的/草本植物似的</text></g>
+<g data-node="vegetal:3"><title>豆子味 · Beany</title><path d="M692.606,1087.946 A532,532 0 0,1 655.695,1094.587 L609.168,770.914 A205,205 0 0,0 623.392,768.355 Z" fill="#72a197" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(79.800)" x="368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">豆子味</text></g>
+<g data-node="other"><title>其他 · Other</title><path d="M607.893,771.094 A205,205 0 0,1 402.788,671.057 L490.097,620.283 A104,104 0 0,0 594.150,671.033 Z" fill="#00a7d1" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(296.000)" x="-154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central">其他</text></g>
+<g data-node="other:0"><title>纸或霉味 · Papery/Musty</title><path d="M625.581,899.885 A335,335 0 0,1 391.122,844.677 L464.418,737.310 A205,205 0 0,0 607.893,771.094 Z" fill="#9cbbcd" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(283.250)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">纸或霉味</text></g>
+<g data-node="other:0:0"><title>陈腐味/不新鲜 · Stale</title><path d="M652.385,1095.053 A532,532 0 0,1 616.462,1098.749 L602.960,902.212 A335,335 0 0,0 625.581,899.885 Z" fill="#657d6b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(84.125)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">陈腐味/不新鲜</text></g>
+<g data-node="other:0:1"><title>硬纸板 · Cardboard</title><path d="M613.127,1098.968 A532,532 0 0,1 577.029,1099.992 L578.129,902.995 A335,335 0 0,0 600.860,902.350 Z" fill="#dac247" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(88.375)" x="433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">硬纸板</text></g>
+<g data-node="other:0:2"><title>纸味 · Papery</title><path d="M573.686,1099.963 A532,532 0 0,1 537.612,1098.309 L553.308,901.935 A335,335 0 0,0 576.024,902.976 Z" fill="#ffffff" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(272.625)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">纸味</text></g>
+<g data-node="other:0:3"><title>木味 · Woody</title><path d="M534.281,1098.032 A532,532 0 0,1 498.428,1093.709 L528.634,899.039 A335,335 0 0,0 551.211,901.761 Z" fill="#725c28" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(276.875)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">木味</text></g>
+<g data-node="other:0:4"><title>发霉/潮湿 · Moldy/Damp</title><path d="M495.127,1093.186 A532,532 0 0,1 459.693,1086.218 L504.243,894.322 A335,335 0 0,0 526.555,898.709 Z" fill="#a2ad75" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(281.125)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">发霉/潮湿</text></g>
+<g data-node="other:0:5"><title>霉味/尘土味 · Musty/Dusty</title><path d="M456.439,1085.452 A532,532 0 0,1 421.619,1075.877 L480.268,887.810 A335,335 0 0,0 502.194,893.839 Z" fill="#cba768" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(285.375)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">霉味/尘土味</text></g>
+<g data-node="other:0:6"><title>霉味/泥土味 · Musty/Earthy</title><path d="M418.431,1074.872 A532,532 0 0,1 384.417,1062.744 L456.841,879.540 A335,335 0 0,0 478.260,887.177 Z" fill="#958546" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(289.625)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">霉味/泥土味</text></g>
+<g data-node="other:0:7"><title>动物香/动物味 · Animalic</title><path d="M381.312,1061.505 A532,532 0 0,1 348.290,1046.889 L434.092,869.556 A335,335 0 0,0 454.886,878.760 Z" fill="#a1a27a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(293.875)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">动物香/动物味</text></g>
+<g data-node="other:0:8"><title>肉汤味 · Meaty Brothy</title><path d="M345.286,1045.423 A532,532 0 0,1 313.437,1028.400 L412.146,857.914 A335,335 0 0,0 432.200,868.633 Z" fill="#cb8279" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(298.125)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">肉汤味</text></g>
+<g data-node="other:0:9"><title>石炭酸/酚味 · Phenolic</title><path d="M310.550,1026.716 A532,532 0 0,1 280.051,1007.380 L391.122,844.677 A335,335 0 0,0 410.327,856.853 Z" fill="#e87c88" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(302.375)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">石炭酸/酚味</text></g>
+<g data-node="other:1"><title>化学 · Chemical</title><path d="M389.388,843.485 A335,335 0 0,1 290.409,736.411 L402.788,671.057 A205,205 0 0,0 463.357,736.580 Z" fill="#62c7db" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(317.250)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">化学</text></g>
+<g data-node="other:1:0"><title>苦味 · Bitter</title><path d="M277.296,1005.486 A532,532 0 0,1 248.314,983.943 L371.137,829.919 A335,335 0 0,0 389.388,843.485 Z" fill="#6ccbbd" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(306.625)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">苦味</text></g>
+<g data-node="other:1:1"><title>咸味 · Salty</title><path d="M245.707,981.850 A532,532 0 0,1 218.401,958.218 L352.301,813.720 A335,335 0 0,0 369.496,828.601 Z" fill="#f6fbfd" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(310.875)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">咸味</text></g>
+<g data-node="other:1:2"><title>药味 · Medicinal</title><path d="M215.956,955.938 A532,532 0 0,1 190.477,930.348 L334.718,796.170 A335,335 0 0,0 350.762,812.285 Z" fill="#65a8c4" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(315.125)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">药味</text></g>
+<g data-node="other:1:3"><title>石油 · Petroleum</title><path d="M188.208,927.893 A532,532 0 0,1 164.695,900.484 L318.483,777.365 A335,335 0 0,0 333.289,794.624 Z" fill="#00a8c3" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(319.375)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">石油</text></g>
+<g data-node="other:1:4"><title>臭鼬味 · Skunky</title><path d="M162.614,897.868 A532,532 0 0,1 141.197,868.792 L303.686,757.409 A335,335 0 0,0 317.172,775.718 Z" fill="#01142a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(323.625)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">臭鼬味</text></g>
+<g data-node="other:1:5"><title>橡胶 · Rubber</title><path d="M139.316,866.029 A532,532 0 0,1 120.112,835.446 L290.409,736.411 A335,335 0 0,0 302.501,755.669 Z" fill="#01142b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(327.875)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">橡胶</text></g>
+<g data-node="roasted"><title>烘烤味 · Roasted</title><path d="M402.144,669.942 A205,205 0 0,1 375.455,554.342 L476.231,561.071 A104,104 0 0,0 489.770,619.717 Z" fill="#d43829" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(347.000)" x="-154.50" y="0" fill="#ffffff" font-size="23" text-anchor="middle" dominant-baseline="central">烘烤味</text></g>
+<g data-node="roasted:0"><title>烟丝 · Pipe Tobacco</title><path d="M118.441,832.551 A532,532 0 0,1 101.557,800.629 L395.638,657.641 A205,205 0 0,0 402.144,669.942 Z" fill="#a39564" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(332.125)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">烟丝</text></g>
+<g data-node="roasted:1"><title>烟草 · Tobacco</title><path d="M100.105,797.618 A532,532 0 0,1 85.633,764.533 L389.501,643.732 A205,205 0 0,0 395.078,656.481 Z" fill="#d3b483" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(336.375)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">烟草</text></g>
+<g data-node="roasted:2"><title>焦味 · Burnt</title><path d="M267.926,689.798 A335,335 0 0,1 246.117,595.333 L375.683,584.726 A205,205 0 0,0 389.029,642.533 Z" fill="#b5804c" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(347.000)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">焦味</text></g>
+<g data-node="roasted:2:0"><title>辛酸味/辣刺鼻味 · Acrid</title><path d="M84.408,761.423 A532,532 0 0,1 72.428,727.355 L260.382,668.346 A335,335 0 0,0 267.926,689.798 Z" fill="#ada16b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(340.625)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">辛酸味/辣刺鼻味</text></g>
+<g data-node="roasted:2:1"><title>灰烬味 · Ashy</title><path d="M71.436,724.163 A532,532 0 0,1 62.014,689.302 L253.824,644.384 A335,335 0 0,0 259.758,666.336 Z" fill="#94a894" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(344.875)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">灰烬味</text></g>
+<g data-node="roasted:2:2"><title>烟熏味 · Smoky</title><path d="M61.262,686.045 A532,532 0 0,1 54.449,650.581 L249.061,620.001 A335,335 0 0,0 253.351,642.333 Z" fill="#a67e38" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(349.125)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">烟熏味</text></g>
+<g data-node="roasted:2:3"><title>棕色,烘烤 · Brown, Roast</title><path d="M53.940,647.277 A532,532 0 0,1 49.774,611.406 L246.117,595.333 A335,335 0 0,0 248.740,617.921 Z" fill="#825726" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(353.375)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">棕色,烘烤</text></g>
+<g data-node="roasted:3"><title>谷类 · Cereal</title><path d="M245.952,593.234 A335,335 0 0,1 245.744,545.682 L375.455,554.342 A205,205 0 0,0 375.582,583.442 Z" fill="#e6bc34" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(359.750)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">谷类</text></g>
+<g data-node="roasted:3:0"><title>稻谷/谷物 · Grain</title><path d="M49.511,608.074 A532,532 0 0,1 48.015,571.993 L245.009,570.514 A335,335 0 0,0 245.952,593.234 Z" fill="#d2a389" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(357.625)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">稻谷/谷物</text></g>
+<g data-node="roasted:3:1"><title>麦芽 · Malt</title><path d="M48.000,568.650 A532,532 0 0,1 49.182,532.557 L245.744,545.682 A335,335 0 0,0 245.000,568.409 Z" fill="#e49c6b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(361.875)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">麦芽</text></g>
+<g data-node="spices"><title>香料味 · Spices</title><path d="M375.545,553.058 A205,205 0 0,1 399.877,470.120 L488.620,518.344 A104,104 0 0,0 476.277,560.419 Z" fill="#ba1243" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(376.350)" x="-154.50" y="0" fill="#ffffff" font-size="23" text-anchor="middle" dominant-baseline="central">香料味</text></g>
+<g data-node="spices:0"><title>辛辣味 · Pungent</title><path d="M49.415,529.222 A532,532 0 0,1 53.096,494.542 L376.964,539.694 A205,205 0 0,0 375.545,553.058 Z" fill="#744863" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(366.058)" x="-368.50" y="0" fill="#ffffff" font-size="21" text-anchor="middle" dominant-baseline="central">辛辣味</text></g>
+<g data-node="spices:1"><title>胡椒 · Pepper</title><path d="M53.568,491.233 A532,532 0 0,1 59.729,456.907 L379.520,525.191 A205,205 0 0,0 377.145,538.419 Z" fill="#e21935" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(370.175)" x="-368.50" y="0" fill="#ffffff" font-size="21" text-anchor="middle" dominant-baseline="central">胡椒</text></g>
+<g data-node="spices:2"><title>棕色香料 · Brown Spice</title><path d="M252.832,495.988 A335,335 0 0,1 285.652,408.049 L399.877,470.120 A205,205 0 0,0 379.792,523.933 Z" fill="#be404c" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(380.467)" x="-270.00" y="0" fill="#ffffff" font-size="21" text-anchor="middle" dominant-baseline="central">棕色香料</text></g>
+<g data-node="spices:2:0"><title>八角 · Anise</title><path d="M60.437,453.640 A532,532 0 0,1 69.046,419.844 L258.253,474.706 A335,335 0 0,0 252.832,495.988 Z" fill="#c7a118" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(374.292)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">八角</text></g>
+<g data-node="spices:2:1"><title>肉豆蔻 · Nutmeg</title><path d="M69.987,416.637 A532,532 0 0,1 81.000,383.546 L265.780,451.850 A335,335 0 0,0 258.845,472.687 Z" fill="#a61719" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(378.408)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">肉豆蔻</text></g>
+<g data-node="spices:2:2"><title>肉桂 · Cinnamon</title><path d="M82.169,380.415 A532,532 0 0,1 95.529,348.200 L274.929,429.592 A335,335 0 0,0 266.516,449.878 Z" fill="#e69335" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(382.525)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">肉桂</text></g>
+<g data-node="spices:2:3"><title>丁香 · Clove</title><path d="M96.920,345.161 A532,532 0 0,1 112.558,313.988 L285.652,408.049 A335,335 0 0,0 275.805,427.678 Z" fill="#b7796e" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(386.642)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">丁香</text></g>
+<g data-node="nuts"><title>坚果/可可 · Nutty/Cocoa</title><path d="M400.495,468.990 A205,205 0 0,1 446.374,412.536 L512.209,489.130 A104,104 0 0,0 488.934,517.770 Z" fill="#a78e8b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(399.100)" x="-154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central" textLength="83" lengthAdjust="spacingAndGlyphs">坚果/可可</text></g>
+<g data-node="nuts:0"><title>坚果味 · Nutty</title><path d="M286.663,406.203 A335,335 0 0,1 327.172,348.220 L425.285,433.508 A205,205 0 0,0 400.495,468.990 Z" fill="#b79289" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(394.940)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">坚果味</text></g>
+<g data-node="nuts:0:0"><title>花生 · Peanuts</title><path d="M114.163,311.056 A532,532 0 0,1 132.216,280.748 L298.031,387.118 A335,335 0 0,0 286.663,406.203 Z" fill="#e4b608" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(390.780)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">花生</text></g>
+<g data-node="nuts:0:1"><title>榛子 · Hazelnut</title><path d="M134.030,277.941 A532,532 0 0,1 154.233,249.022 L311.895,367.140 A335,335 0 0,0 299.173,385.350 Z" fill="#955f22" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(394.940)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">榛子</text></g>
+<g data-node="nuts:0:2"><title>扁桃仁/杏仁 · Almond</title><path d="M156.246,246.353 A532,532 0 0,1 178.495,218.977 L327.172,348.220 A335,335 0 0,0 313.162,365.459 Z" fill="#d9aa9b" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(399.100)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">扁桃仁/杏仁</text></g>
+<g data-node="nuts:1"><title>可可 · Cocoa</title><path d="M328.558,346.636 A335,335 0 0,1 361.636,313.949 L446.374,412.536 A205,205 0 0,0 426.133,432.538 Z" fill="#b37123" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(405.340)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">可可</text></g>
+<g data-node="nuts:1:0"><title>巧克力 · Chocolate</title><path d="M180.695,216.461 A532,532 0 0,1 204.871,190.770 L343.782,330.459 A335,335 0 0,0 328.558,346.636 Z" fill="#6c2822" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(403.260)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">巧克力</text></g>
+<g data-node="nuts:1:1"><title>黑巧克力 · Dark Chocolate</title><path d="M207.249,188.421 A532,532 0 0,1 233.224,164.551 L361.636,313.949 A335,335 0 0,0 345.279,328.979 Z" fill="#4a281f" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(407.420)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">黑巧克力</text></g>
+<g data-node="sweet"><title>甜味 · Sweet</title><path d="M447.354,411.699 A205,205 0 0,1 557.931,364.191 L568.804,464.604 A104,104 0 0,0 512.706,488.706 Z" fill="#f36523" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(426.750)" x="-154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central">甜味</text></g>
+<g data-node="sweet:0"><title>红糖 · Brown Sugar</title><path d="M363.236,312.582 A335,335 0 0,1 446.794,260.622 L498.486,379.903 A205,205 0 0,0 447.354,411.699 Z" fill="#ce7c92" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(418.125)" x="-270.00" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">红糖</text></g>
+<g data-node="sweet:0:0"><title>糖浆 · Molasses</title><path d="M235.766,162.381 A532,532 0 0,1 264.544,139.617 L381.358,298.248 A335,335 0 0,0 363.236,312.582 Z" fill="#24000a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(411.656)" x="-433.50" y="0" fill="#ffffff" font-size="26" text-anchor="middle" dominant-baseline="central">糖浆</text></g>
+<g data-node="sweet:0:1"><title>枫糖 · Maple Syrup</title><path d="M267.242,137.644 A532,532 0 0,1 297.650,117.109 L402.204,284.074 A335,335 0 0,0 383.056,297.005 Z" fill="#d85d28" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(415.969)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">枫糖</text></g>
+<g data-node="sweet:0:2"><title>焦糖/焦糖化的 · Caramelized</title><path d="M300.489,115.344 A532,532 0 0,1 332.355,97.154 L424.058,271.509 A335,335 0 0,0 403.992,282.963 Z" fill="#e2a229" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(420.281)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central" textLength="179" lengthAdjust="spacingAndGlyphs">焦糖/焦糖化的</text></g>
+<g data-node="sweet:0:3"><title>蜂蜜 · Honey</title><path d="M335.318,95.607 A532,532 0 0,1 368.462,79.865 L446.794,260.622 A335,335 0 0,0 425.924,270.535 Z" fill="#f67c27" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(424.594)" x="-433.50" y="0" fill="#142c39" font-size="26" text-anchor="middle" dominant-baseline="central">蜂蜜</text></g>
+<g data-node="sweet:1"><title>香草 · Vanilla</title><path d="M371.533,78.546 A532,532 0 0,1 405.767,65.340 L512.861,374.306 A205,205 0 0,0 499.670,379.395 Z" fill="#f5987e" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(428.906)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">香草</text></g>
+<g data-node="sweet:2"><title>香兰素/香草醛 · Vanillin</title><path d="M408.928,64.256 A532,532 0 0,1 444.058,53.662 L527.616,369.806 A205,205 0 0,0 514.079,373.888 Z" fill="#fec7c8" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(433.219)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">香兰素/香草醛</text></g>
+<g data-node="sweet:3"><title>总体甜味 · Overall Sweet</title><path d="M447.292,52.818 A532,532 0 0,1 483.119,44.896 L542.668,366.428 A205,205 0 0,0 528.863,369.481 Z" fill="#dc737a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(437.531)" x="-368.50" y="0" fill="#142c39" font-size="21" text-anchor="middle" dominant-baseline="central">总体甜味</text></g>
+<g data-node="sweet:4"><title>甜味芳香 · Sweet Aromatics</title><path d="M486.408,44.297 A532,532 0 0,1 522.729,39.092 L557.931,364.191 A205,205 0 0,0 543.935,366.197 Z" fill="#ba466a" stroke="#faf9f6" stroke-width="1.6"/>
+<text transform="translate(580 568) rotate(441.844)" x="-368.50" y="0" fill="#ffffff" font-size="21" text-anchor="middle" dominant-baseline="central">甜味芳香</text></g>
+<circle cx="580" cy="568" r="100" fill="#faf9f6"/><text x="580" y="555" text-anchor="middle" font-size="28" fill="#10334a">选大类</text><text x="580" y="592" text-anchor="middle" font-size="19" fill="#526c7e">右侧选词条</text></svg>
+          </div></div>
+        </section>
+        <section class="detail-card" aria-labelledby="categoryTitle">
+          <header class="detail-heading"><div class="category-heading"><i class="category-dot" aria-hidden="true"></i><h2 id="categoryTitle">花香</h2></div><span>点大按钮<br>可多选</span></header>
+          <div class="choice-groups" id="choices" aria-label="具体风味选项，可上下滚动"></div>
+          <button class="general-choice" id="generalChoice" type="button" aria-pressed="false"><span class="choice-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7"/></svg></span><span id="generalText">说不具体，就记「花香」</span></button>
+          <section class="selected-area" aria-labelledby="selectedTitle">
+            <header class="selected-heading"><h3 id="selectedTitle">已选风味 <small id="selectedCount">0 项</small></h3><button class="clear-button" id="clearAll" type="button" disabled>清空</button></header>
+            <div class="selected-tags" id="selectedTags"><p class="empty-selection">选中的味道会留在这里。</p></div>
+          </section>
+        </section>
+      </div>
+      <footer class="footer">
+        <div class="footer-meta"><div class="selection-status" id="selectionStatus" aria-live="polite"><strong>0</strong><span>项风味</span></div><div class="source-note"><span>SCA / WCR 分类 · 词条来源</span><a href="https://sca.coffee/store/p/the-coffee-tasters-flavor-wheel-poster-simplified-chinese-etet9" target="_blank" rel="noopener noreferrer" aria-label="查看 SCA 风味轮使用说明">SCA</a><span>/</span><a href="https://worldcoffeeresearch.org/resources/sensory-lexicon" target="_blank" rel="noopener noreferrer" aria-label="查看 WCR 感官词典">WCR</a></div></div>
+        <div class="footer-actions"><button class="button" id="cancel" type="button">取消</button><button class="button primary" id="confirm" type="button">确认风味<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg></button></div>
+      </footer>
+    </main>
+
+    <main class="summary" id="summary" aria-labelledby="summaryTitle" hidden>
+      <section class="summary-intro"><div class="summary-cup" aria-hidden="true"></div><h1 id="summaryTitle">留住这一杯的感受</h1><p>记录喝到的味道，再判断是否合口。</p></section>
+      <section class="summary-card" aria-labelledby="summaryCardTitle">
+        <header><h2 id="summaryCardTitle">这一杯的品鉴</h2></header>
+        <p class="summary-label">风味</p>
+        <div class="summary-tags" id="summaryTags"></div>
+        <button class="button primary" id="openPicker" type="button">选风味<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v5m9 4h-5m-4 9v-5m-9-4h5"/></svg></button>
+      </section>
+    </main>
+    <div class="sr-only" id="announcement" role="status" aria-live="polite"></div>
+  </div>
+  <script>
+    'use strict';
+    // This isolated prototype uses only in-memory sample state. It does not load
+    // the production app, call device APIs, or write a real tasting record.
+    // Canonical English hierarchy is transcribed from the SCA official wheel.
+    // Chinese captions assist reading; the original official Chinese artwork is
+    // preserved unchanged. Every node is selectable, including intermediate nodes.
+    const item=(en,cn)=>({en,cn});
+    const group=(en,cn,children=[])=>({en,cn,children:children.map(([en,cn])=>item(en,cn))});
+    const wheelLocale=new URLSearchParams(location.search).get('lang')==='en'?'en':'zh';
+    const tr=(cn,en)=>wheelLocale==='en'?en:cn;
+    let hosted=false;const originalByNode=new Map();
+    const categories = [
+  {
+    "id": "floral",
+    "en": "Floral",
+    "name": "花香",
+    "start": -96,
+    "end": -78.4,
+    "color": "#ed008c",
+    "groups": [
+      {
+        "en": "Black Tea",
+        "cn": "红茶",
+        "children": [],
+        "key": "floral:0"
+      },
+      {
+        "en": "Floral",
+        "cn": "花香",
+        "children": [
+          {
+            "en": "Chamomile",
+            "cn": "洋甘菊",
+            "key": "floral:1:0"
+          },
+          {
+            "en": "Rose",
+            "cn": "玫瑰",
+            "key": "floral:1:1"
+          },
+          {
+            "en": "Jasmine",
+            "cn": "茉莉花",
+            "key": "floral:1:2"
+          }
+        ],
+        "key": "floral:1"
+      }
+    ],
+    "key": "floral"
+  },
+  {
+    "id": "fruit",
+    "en": "Fruity",
+    "name": "水果味",
+    "start": -78.4,
+    "end": -6,
+    "color": "#ed1b24",
+    "groups": [
+      {
+        "en": "Berry",
+        "cn": "浆果/莓果",
+        "children": [
+          {
+            "en": "Blackberry",
+            "cn": "黑莓",
+            "key": "fruit:0:0"
+          },
+          {
+            "en": "Raspberry",
+            "cn": "覆盆子",
+            "key": "fruit:0:1"
+          },
+          {
+            "en": "Blueberry",
+            "cn": "蓝莓",
+            "key": "fruit:0:2"
+          },
+          {
+            "en": "Strawberry",
+            "cn": "草莓",
+            "key": "fruit:0:3"
+          }
+        ],
+        "key": "fruit:0"
+      },
+      {
+        "en": "Dried Fruit",
+        "cn": "果干",
+        "children": [
+          {
+            "en": "Raisin",
+            "cn": "葡萄干",
+            "key": "fruit:1:0"
+          },
+          {
+            "en": "Prune",
+            "cn": "西梅干",
+            "key": "fruit:1:1"
+          }
+        ],
+        "key": "fruit:1"
+      },
+      {
+        "en": "Other Fruit",
+        "cn": "其他水果",
+        "children": [
+          {
+            "en": "Coconut",
+            "cn": "椰子",
+            "key": "fruit:2:0"
+          },
+          {
+            "en": "Cherry",
+            "cn": "樱桃",
+            "key": "fruit:2:1"
+          },
+          {
+            "en": "Pomegranate",
+            "cn": "石榴",
+            "key": "fruit:2:2"
+          },
+          {
+            "en": "Pineapple",
+            "cn": "菠萝",
+            "key": "fruit:2:3"
+          },
+          {
+            "en": "Grape",
+            "cn": "葡萄",
+            "key": "fruit:2:4"
+          },
+          {
+            "en": "Apple",
+            "cn": "苹果",
+            "key": "fruit:2:5"
+          },
+          {
+            "en": "Peach",
+            "cn": "桃/桃子",
+            "key": "fruit:2:6"
+          },
+          {
+            "en": "Pear",
+            "cn": "梨/梨子",
+            "key": "fruit:2:7"
+          }
+        ],
+        "key": "fruit:2"
+      },
+      {
+        "en": "Citrus Fruit",
+        "cn": "柑橘类水果",
+        "children": [
+          {
+            "en": "Grapefruit",
+            "cn": "柚(葡萄柚)",
+            "key": "fruit:3:0"
+          },
+          {
+            "en": "Orange",
+            "cn": "橙",
+            "key": "fruit:3:1"
+          },
+          {
+            "en": "Lemon",
+            "cn": "柠檬",
+            "key": "fruit:3:2"
+          },
+          {
+            "en": "Lime",
+            "cn": "酸橙/莱姆",
+            "key": "fruit:3:3"
+          }
+        ],
+        "key": "fruit:3"
+      }
+    ],
+    "key": "fruit"
+  },
+  {
+    "id": "sour",
+    "en": "Sour/Fermented",
+    "name": "酸味/发酵味",
+    "start": -6,
+    "end": 38,
+    "color": "#f3d000",
+    "groups": [
+      {
+        "en": "Sour",
+        "cn": "酸味",
+        "children": [
+          {
+            "en": "Sour Aromatics",
+            "cn": "酸香味/酸性芳香",
+            "key": "sour:0:0"
+          },
+          {
+            "en": "Acetic Acid",
+            "cn": "醋酸",
+            "key": "sour:0:1"
+          },
+          {
+            "en": "Butyric Acid",
+            "cn": "酪酸",
+            "key": "sour:0:2"
+          },
+          {
+            "en": "Isovaleric Acid",
+            "cn": "异戊酸",
+            "key": "sour:0:3"
+          },
+          {
+            "en": "Citric Acid",
+            "cn": "柠檬酸",
+            "key": "sour:0:4"
+          },
+          {
+            "en": "Malic Acid",
+            "cn": "苹果酸",
+            "key": "sour:0:5"
+          }
+        ],
+        "key": "sour:0"
+      },
+      {
+        "en": "Alcohol/Fermented",
+        "cn": "酒精/发酵味",
+        "children": [
+          {
+            "en": "Winey",
+            "cn": "酒味/红酒",
+            "key": "sour:1:0"
+          },
+          {
+            "en": "Whiskey",
+            "cn": "威士忌",
+            "key": "sour:1:1"
+          },
+          {
+            "en": "Fermented",
+            "cn": "发酵",
+            "key": "sour:1:2"
+          },
+          {
+            "en": "Overripe",
+            "cn": "过熟",
+            "key": "sour:1:3"
+          }
+        ],
+        "key": "sour:1"
+      }
+    ],
+    "key": "sour"
+  },
+  {
+    "id": "vegetal",
+    "en": "Green/Vegetative",
+    "name": "绿色/植物",
+    "start": 38,
+    "end": 82,
+    "color": "#127f3c",
+    "groups": [
+      {
+        "en": "Olive Oil",
+        "cn": "橄榄油",
+        "children": [],
+        "key": "vegetal:0"
+      },
+      {
+        "en": "Raw",
+        "cn": "生的",
+        "children": [],
+        "key": "vegetal:1"
+      },
+      {
+        "en": "Green/Vegetative",
+        "cn": "绿色/植物",
+        "children": [
+          {
+            "en": "Under-ripe",
+            "cn": "未熟",
+            "key": "vegetal:2:0"
+          },
+          {
+            "en": "Peapod",
+            "cn": "豆荚",
+            "key": "vegetal:2:1"
+          },
+          {
+            "en": "Fresh",
+            "cn": "新鲜",
+            "key": "vegetal:2:2"
+          },
+          {
+            "en": "Dark Green",
+            "cn": "深绿",
+            "key": "vegetal:2:3"
+          },
+          {
+            "en": "Vegetative",
+            "cn": "植物",
+            "key": "vegetal:2:4"
+          },
+          {
+            "en": "Hay-like",
+            "cn": "干草似的",
+            "key": "vegetal:2:5"
+          },
+          {
+            "en": "Herb-like",
+            "cn": "香草似的/草本植物似的",
+            "key": "vegetal:2:6"
+          }
+        ],
+        "key": "vegetal:2"
+      },
+      {
+        "en": "Beany",
+        "cn": "豆子味",
+        "children": [],
+        "key": "vegetal:3"
+      }
+    ],
+    "key": "vegetal"
+  },
+  {
+    "id": "other",
+    "en": "Other",
+    "name": "其他",
+    "start": 82,
+    "end": 150,
+    "color": "#00a7d1",
+    "groups": [
+      {
+        "en": "Papery/Musty",
+        "cn": "纸或霉味",
+        "children": [
+          {
+            "en": "Stale",
+            "cn": "陈腐味/不新鲜",
+            "key": "other:0:0"
+          },
+          {
+            "en": "Cardboard",
+            "cn": "硬纸板",
+            "key": "other:0:1"
+          },
+          {
+            "en": "Papery",
+            "cn": "纸味",
+            "key": "other:0:2"
+          },
+          {
+            "en": "Woody",
+            "cn": "木味",
+            "key": "other:0:3"
+          },
+          {
+            "en": "Moldy/Damp",
+            "cn": "发霉/潮湿",
+            "key": "other:0:4"
+          },
+          {
+            "en": "Musty/Dusty",
+            "cn": "霉味/尘土味",
+            "key": "other:0:5"
+          },
+          {
+            "en": "Musty/Earthy",
+            "cn": "霉味/泥土味",
+            "key": "other:0:6"
+          },
+          {
+            "en": "Animalic",
+            "cn": "动物香/动物味",
+            "key": "other:0:7"
+          },
+          {
+            "en": "Meaty Brothy",
+            "cn": "肉汤味",
+            "key": "other:0:8"
+          },
+          {
+            "en": "Phenolic",
+            "cn": "石炭酸/酚味",
+            "key": "other:0:9"
+          }
+        ],
+        "key": "other:0"
+      },
+      {
+        "en": "Chemical",
+        "cn": "化学",
+        "children": [
+          {
+            "en": "Bitter",
+            "cn": "苦味",
+            "key": "other:1:0"
+          },
+          {
+            "en": "Salty",
+            "cn": "咸味",
+            "key": "other:1:1"
+          },
+          {
+            "en": "Medicinal",
+            "cn": "药味",
+            "key": "other:1:2"
+          },
+          {
+            "en": "Petroleum",
+            "cn": "石油",
+            "key": "other:1:3"
+          },
+          {
+            "en": "Skunky",
+            "cn": "臭鼬味",
+            "key": "other:1:4"
+          },
+          {
+            "en": "Rubber",
+            "cn": "橡胶",
+            "key": "other:1:5"
+          }
+        ],
+        "key": "other:1"
+      }
+    ],
+    "key": "other"
+  },
+  {
+    "id": "roasted",
+    "en": "Roasted",
+    "name": "烘烤味",
+    "start": 150,
+    "end": 184,
+    "color": "#d43829",
+    "groups": [
+      {
+        "en": "Pipe Tobacco",
+        "cn": "烟丝",
+        "children": [],
+        "key": "roasted:0"
+      },
+      {
+        "en": "Tobacco",
+        "cn": "烟草",
+        "children": [],
+        "key": "roasted:1"
+      },
+      {
+        "en": "Burnt",
+        "cn": "焦味",
+        "children": [
+          {
+            "en": "Acrid",
+            "cn": "辛酸味/辣刺鼻味",
+            "key": "roasted:2:0"
+          },
+          {
+            "en": "Ashy",
+            "cn": "灰烬味",
+            "key": "roasted:2:1"
+          },
+          {
+            "en": "Smoky",
+            "cn": "烟熏味",
+            "key": "roasted:2:2"
+          },
+          {
+            "en": "Brown, Roast",
+            "cn": "棕色,烘烤",
+            "key": "roasted:2:3"
+          }
+        ],
+        "key": "roasted:2"
+      },
+      {
+        "en": "Cereal",
+        "cn": "谷类",
+        "children": [
+          {
+            "en": "Grain",
+            "cn": "稻谷/谷物",
+            "key": "roasted:3:0"
+          },
+          {
+            "en": "Malt",
+            "cn": "麦芽",
+            "key": "roasted:3:1"
+          }
+        ],
+        "key": "roasted:3"
+      }
+    ],
+    "key": "roasted"
+  },
+  {
+    "id": "spices",
+    "en": "Spices",
+    "name": "香料味",
+    "start": 184,
+    "end": 208.7,
+    "color": "#ba1243",
+    "groups": [
+      {
+        "en": "Pungent",
+        "cn": "辛辣味",
+        "children": [],
+        "key": "spices:0"
+      },
+      {
+        "en": "Pepper",
+        "cn": "胡椒",
+        "children": [],
+        "key": "spices:1"
+      },
+      {
+        "en": "Brown Spice",
+        "cn": "棕色香料",
+        "children": [
+          {
+            "en": "Anise",
+            "cn": "八角",
+            "key": "spices:2:0"
+          },
+          {
+            "en": "Nutmeg",
+            "cn": "肉豆蔻",
+            "key": "spices:2:1"
+          },
+          {
+            "en": "Cinnamon",
+            "cn": "肉桂",
+            "key": "spices:2:2"
+          },
+          {
+            "en": "Clove",
+            "cn": "丁香",
+            "key": "spices:2:3"
+          }
+        ],
+        "key": "spices:2"
+      }
+    ],
+    "key": "spices"
+  },
+  {
+    "id": "nuts",
+    "en": "Nutty/Cocoa",
+    "name": "坚果/可可",
+    "start": 208.7,
+    "end": 229.5,
+    "color": "#a78e8b",
+    "groups": [
+      {
+        "en": "Nutty",
+        "cn": "坚果味",
+        "children": [
+          {
+            "en": "Peanuts",
+            "cn": "花生",
+            "key": "nuts:0:0"
+          },
+          {
+            "en": "Hazelnut",
+            "cn": "榛子",
+            "key": "nuts:0:1"
+          },
+          {
+            "en": "Almond",
+            "cn": "扁桃仁/杏仁",
+            "key": "nuts:0:2"
+          }
+        ],
+        "key": "nuts:0"
+      },
+      {
+        "en": "Cocoa",
+        "cn": "可可",
+        "children": [
+          {
+            "en": "Chocolate",
+            "cn": "巧克力",
+            "key": "nuts:1:0"
+          },
+          {
+            "en": "Dark Chocolate",
+            "cn": "黑巧克力",
+            "key": "nuts:1:1"
+          }
+        ],
+        "key": "nuts:1"
+      }
+    ],
+    "key": "nuts"
+  },
+  {
+    "id": "sweet",
+    "en": "Sweet",
+    "name": "甜味",
+    "start": 229.5,
+    "end": 264,
+    "color": "#f36523",
+    "groups": [
+      {
+        "en": "Brown Sugar",
+        "cn": "红糖",
+        "children": [
+          {
+            "en": "Molasses",
+            "cn": "糖浆",
+            "key": "sweet:0:0"
+          },
+          {
+            "en": "Maple Syrup",
+            "cn": "枫糖",
+            "key": "sweet:0:1"
+          },
+          {
+            "en": "Caramelized",
+            "cn": "焦糖/焦糖化的",
+            "key": "sweet:0:2"
+          },
+          {
+            "en": "Honey",
+            "cn": "蜂蜜",
+            "key": "sweet:0:3"
+          }
+        ],
+        "key": "sweet:0"
+      },
+      {
+        "en": "Vanilla",
+        "cn": "香草",
+        "children": [],
+        "key": "sweet:1"
+      },
+      {
+        "en": "Vanillin",
+        "cn": "香兰素/香草醛",
+        "children": [],
+        "key": "sweet:2"
+      },
+      {
+        "en": "Overall Sweet",
+        "cn": "总体甜味",
+        "children": [],
+        "key": "sweet:3"
+      },
+      {
+        "en": "Sweet Aromatics",
+        "cn": "甜味芳香",
+        "children": [],
+        "key": "sweet:4"
+      }
+    ],
+    "key": "sweet"
+  }
+];
+    const nodes=new Map();
+    categories.forEach(category=>{
+      category.key=category.id;nodes.set(category.key,{key:category.key,en:category.en,cn:category.name,parent:null,category:category.id});
+      category.groups.forEach((branch,groupIndex)=>{
+        branch.key=`${category.id}:${groupIndex}`;nodes.set(branch.key,{...branch,parent:category.key,category:category.id});
+        branch.children.forEach((leaf,leafIndex)=>{leaf.key=`${branch.key}:${leafIndex}`;nodes.set(leaf.key,{...leaf,parent:branch.key,category:category.id});});
+      });
+    });
+    const byId = new Map(categories.map(category => [category.id,category]));
+    const $ = id => document.getElementById(id);
+    let expanded = false, focusedCategory = null, zoomMode = 'small';
+    let activeId = categories[0].id;
+    let saved = new Set();
+    let draft = new Set();
+    let renderedCategory = '';
+    const wheelButtons = [];
+    const checkMarkup = '<span class="choice-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7"/></svg></span>';
+    const hasCategory = id => [...draft].some(key => nodes.get(key).category===id);
+    const point=(r,angle)=>({x:580+r*Math.cos(angle*Math.PI/180),y:568+r*Math.sin(angle*Math.PI/180)});
+    function annularPath(inner,outer,start,end){
+      const a=point(outer,start),b=point(outer,end),c=point(inner,end),d=point(inner,start);
+      return `M${a.x},${a.y} A${outer},${outer} 0 0 1 ${b.x},${b.y} L${c.x},${c.y} A${inner},${inner} 0 0 0 ${d.x},${d.y} Z`;
+    }
+    function clipPolygon(inner,outer,start,end){
+      const points=[];for(let i=0;i<=24;i++)points.push(point(outer,start+(end-start)*i/24));
+      for(let i=24;i>=0;i--)points.push(point(inner,start+(end-start)*i/24));
+      return 'polygon('+points.map(p=>`${p.x/11.6}% ${p.y/11.6}%`).join(',')+')';
+    }
+    categories.forEach((category,index)=>{
+      const button=document.createElement('button');button.type='button';button.className='wheel-sector category';
+      button.dataset.category=category.id;button.setAttribute('aria-label',wheelLocale==='en'?'View '+category.en:'查看'+category.name+' '+category.en);button.setAttribute('aria-current','false');
+      button.style.setProperty('--clip',clipPolygon(104,570,category.start,category.end));
+      button.innerHTML=`<svg viewBox="0 0 1160 1160" aria-hidden="true"><path class="focus-outline" d="${annularPath(105,518,category.start+.6,category.end-.6)}"/></svg>`;
+      button.addEventListener('click',()=>{activeId=category.id;focusedCategory=category.id;render();});
+      button.addEventListener('keydown',event=>{
+        if(!['ArrowRight','ArrowLeft','ArrowUp','ArrowDown'].includes(event.key))return;
+        event.preventDefault();const step=['ArrowRight','ArrowDown'].includes(event.key)?1:-1;
+        activeId=categories[(index+step+categories.length)%categories.length].id;render();
+        document.querySelector(`.category[data-category="${activeId}"]`).focus({preventScroll:true});
+      });
+      $('wheel').append(button);wheelButtons.push(button);
+    });
+    function nameFor(key){const n=nodes.get(key);return tr(n.cn,n.en);}
+    function isAncestor(ancestor,key){let node=nodes.get(key);while(node?.parent){if(node.parent===ancestor)return true;node=nodes.get(node.parent);}return false;}
+    function toggle(key){
+      focusedCategory=nodes.get(key).category;
+      if(draft.has(key))draft.delete(key);
+      else{for(const selected of [...draft])if(isAncestor(selected,key)||isAncestor(key,selected))draft.delete(selected);draft.add(key);}
+      render();
+    }
+    function render(){
+      const category=byId.get(activeId);
+      $('categoryTitle').innerHTML=`${tr(category.name,category.en)}<small>${tr(category.en,category.name)}</small>`;
+      document.documentElement.style.setProperty('--active-color',category.color);
+      $('generalText').textContent=tr('只记这一大类：'+category.name,'Just this family: '+category.en);
+      $('generalChoice').setAttribute('aria-pressed',draft.has(category.key));
+      if(renderedCategory!==activeId){
+        $('choices').replaceChildren();
+        category.groups.forEach(branch=>{
+          const section=document.createElement('section');section.className='choice-group';
+          const heading=document.createElement('button');heading.type='button';heading.className='group-select';heading.dataset.flavor=branch.key;
+          heading.innerHTML=`<span>${tr(branch.cn,branch.en)}<small>${tr(branch.en,branch.cn)}</small></span>${checkMarkup}`;
+          heading.onclick=()=>toggle(branch.key);section.append(heading);
+          if(branch.children.length){
+            const grid=document.createElement('div');grid.className='choice-grid';if(branch.children.length===3)grid.classList.add('three-short');
+            branch.children.forEach(leaf=>{
+              const button=document.createElement('button');button.type='button';button.className='flavor-choice';button.dataset.flavor=leaf.key;
+              button.innerHTML=`<span><strong>${tr(leaf.cn,leaf.en)}</strong><small>${tr(leaf.en,leaf.cn)}</small></span>${checkMarkup}`;
+              button.addEventListener('click',()=>toggle(leaf.key));grid.append(button);
+            });
+            section.append(grid);
+          }
+          $('choices').append(section);
+        });
+        $('choices').scrollTop=0;renderedCategory=activeId;
+      }
+      $('choices').querySelectorAll('[data-flavor]').forEach(button=>button.setAttribute('aria-pressed',draft.has(button.dataset.flavor)));
+      wheelButtons.forEach(button=>{button.setAttribute('aria-current',button.dataset.category===focusedCategory);button.classList.toggle('has-selection',hasCategory(button.dataset.category));});
+      const priorFocus=document.activeElement?.dataset.remove;
+      $('selectedTags').replaceChildren();
+      if(draft.size===0){const empty=document.createElement('p');empty.className='empty-selection';empty.textContent=tr('选中的味道会留在这里。','Selected flavors appear here.');$('selectedTags').append(empty)}
+      else for(const key of draft){
+        const chip=document.createElement('button');chip.type='button';chip.className='selected-chip';chip.dataset.remove=key;
+        chip.setAttribute('aria-label',tr('移除','Remove ')+nameFor(key));chip.innerHTML=`<span></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8"/></svg>`;
+        chip.querySelector('span').textContent=nameFor(key);
+        chip.addEventListener('click',()=>{draft.delete(key);render();$('announcement').textContent=tr('已移除','Removed ')+nameFor(key);const next=$('selectedTags').querySelector('button');(next||$('generalChoice')).focus({preventScroll:true})});
+        $('selectedTags').append(chip);
+      }
+      if(priorFocus&&draft.has(priorFocus))$('selectedTags').querySelector(`[data-remove="${priorFocus}"]`)?.focus({preventScroll:true});
+      document.querySelectorAll('#wheelArt [data-node]').forEach(el=>{const key=el.dataset.node;el.classList.toggle('is-selected',draft.has(key));el.setAttribute('aria-pressed',String(draft.has(key)));el.querySelector('.node-check')?.remove();if(draft.has(key)){const text=el.querySelector('text');const mark=document.createElementNS('http://www.w3.org/2000/svg','text');mark.setAttribute('class','node-check');mark.setAttribute('transform',text.getAttribute('transform'));mark.setAttribute('x',text.getAttribute('x'));mark.setAttribute('y','-22');mark.setAttribute('text-anchor','middle');mark.textContent='✓';el.append(mark)}});
+      $('selectedCount').textContent=draft.size+tr(' 项',' selected');$('clearAll').disabled=draft.size===0;
+      $('selectionStatus').querySelector('strong').textContent=draft.size;
+    }
+    function showSummary(confirmed){
+      if(hosted){parent.postMessage({type:confirmed?'thiscup-flavor-confirm':'thiscup-flavor-cancel',values:[...draft].map(key=>originalByNode.get(key)??'sca:'+key)},location.origin);return;}
+      setExpanded(false);
+      if(confirmed)saved=new Set(draft);
+      draft=new Set(saved);
+      $('summaryTags').replaceChildren();
+      if(saved.size===0){const empty=document.createElement('p');empty.className='empty-selection';empty.textContent='还没有记录风味';$('summaryTags').append(empty)}
+      else for(const key of saved){const chip=document.createElement('span');chip.className='summary-tag';chip.textContent=nameFor(key);$('summaryTags').append(chip)}
+      $('picker').hidden=true;$('summary').hidden=false;$('stageTitle').textContent='品鉴';
+      $('openPicker').focus({preventScroll:true});
+      $('announcement').textContent=confirmed?'已确认 '+saved.size+' 项风味，返回品鉴摘要。':'已取消本次修改，返回品鉴摘要。';
+    }
+    function openPicker(){draft=new Set(saved);$('summary').hidden=true;$('picker').hidden=false;$('stageTitle').textContent=tr('品鉴 · 选风味','Taste · flavors');render();document.querySelector(`.category[data-category="${activeId}"]`).focus({preventScroll:true})}
+    $('generalChoice').addEventListener('click',()=>toggle(byId.get(activeId).key));
+    function setExpanded(value){
+      expanded=value;zoomMode=value?(focusedCategory?'category':'full'):'small';
+      document.querySelector('.app').classList.toggle('category-zoom',zoomMode==='category');
+      setWheelGeometry();
+      document.querySelector('.app').classList.toggle('expanded',expanded);
+      $('zoomWheel').setAttribute('aria-pressed',String(expanded));
+      $('zoomWheel').textContent=expanded?tr('返回小图','Back to wheel'):tr('放大','Zoom');
+      $('wheelArt').querySelectorAll('[data-node]').forEach(el=>{el.setAttribute('role','button');el.setAttribute('tabindex',expanded?'0':'-1');const node=nodes.get(el.dataset.node);el.setAttribute('aria-label',node.cn+' '+node.en)});
+      if(expanded){$('stageTitle').textContent=zoomMode==='category'?tr('按大类放大 · 点选风味','Family view · tap to select'):tr('拖动查看 · 点词条选择','Drag to explore · tap to select');if(zoomMode==='full')requestAnimationFrame(focusExpandedCategory)}else{$('stageTitle').textContent=tr('品鉴 · 选风味','Taste · flavors');$('wheelWindow').scrollLeft=0;$('wheelWindow').scrollTop=0;}
+      render();
+    }
+    function focusExpandedCategory(){
+      if(zoomMode!=='full')return;
+      const pane=$('wheelWindow'),category=byId.get(activeId),p=point(433,(category.start+category.end)/2);
+      pane.scrollLeft=p.x/1160*pane.scrollWidth-pane.clientWidth/2;
+      pane.scrollTop=p.y/1160*pane.scrollHeight-pane.clientHeight/2;
+    }
+    let pan=null,suppressWheelClick=false;
+    $('wheelWindow').addEventListener('pointerdown',event=>{
+      if(zoomMode!=='full'||event.pointerType!=='mouse'||event.button!==0)return;
+      pan={id:event.pointerId,x:event.clientX,y:event.clientY,left:$('wheelWindow').scrollLeft,top:$('wheelWindow').scrollTop,moved:false};
+    });
+    $('wheelWindow').addEventListener('pointermove',event=>{
+      if(!pan||pan.id!==event.pointerId)return;
+      const dx=event.clientX-pan.x,dy=event.clientY-pan.y;
+      if(!pan.moved&&Math.hypot(dx,dy)<8)return;
+      pan.moved=true;suppressWheelClick=true;$('wheelWindow').setPointerCapture(event.pointerId);$('wheelWindow').classList.add('dragging');
+      $('wheelWindow').scrollLeft=pan.left-dx;$('wheelWindow').scrollTop=pan.top-dy;event.preventDefault();
+    });
+    function endPan(){if(!pan)return;pan=null;$('wheelWindow').classList.remove('dragging');setTimeout(()=>{suppressWheelClick=false},0)}
+    $('wheelWindow').addEventListener('pointerup',endPan);$('wheelWindow').addEventListener('pointercancel',endPan);
+    $('wheelWindow').addEventListener('click',event=>{if(suppressWheelClick){event.preventDefault();event.stopImmediatePropagation()}},true);
+    const wheelOriginal=new Map([...$('wheelArt').querySelectorAll('[data-node]')].map(el=>[el.dataset.node,{d:el.querySelector('path').getAttribute('d'),transform:el.querySelector('text').getAttribute('transform'),x:el.querySelector('text').getAttribute('x')}]));
+    function setWheelGeometry(){
+      const art=$('wheelArt');
+      art.querySelectorAll('[data-node]').forEach(el=>{const old=wheelOriginal.get(el.dataset.node);el.style.display='';el.querySelector('path').setAttribute('d',old.d);el.querySelector('text').setAttribute('transform',old.transform);el.querySelector('text').setAttribute('x',old.x)});
+      art.setAttribute('viewBox','0 0 1160 1160');
+      if(zoomMode!=='category')return;
+      const category=byId.get(activeId);
+      art.querySelectorAll('[data-node]').forEach(el=>{el.style.display=nodes.get(el.dataset.node).category===activeId?'':'none'});
+      const shape=(key,inner,outer,start,end)=>{const el=art.querySelector(`[data-node="${key}"]`);el.querySelector('path').setAttribute('d',annularPath(inner,outer,start+.2,end-.2));el.querySelector('text').setAttribute('transform',`translate(580 568) rotate(${(start+end)/2})`);el.querySelector('text').setAttribute('x',String((inner+outer)/2));};
+      shape(category.key,104,205,-45,45);
+      const total=category.groups.reduce((n,g)=>n+(g.children.length||1),0);let start=-45;
+      for(const group of category.groups){const end=start+90*(group.children.length||1)/total;shape(group.key,205,group.children.length?335:532,start,end);group.children.forEach((leaf,i)=>shape(leaf.key,335,532,start+(end-start)*i/group.children.length,start+(end-start)*(i+1)/group.children.length));start=end;}
+      art.setAttribute('viewBox','620 160 550 816');
+    }
+    function pickWheelNode(key){
+      const node=nodes.get(key);if(!node)return;
+      activeId=node.category;focusedCategory=node.category;
+      if(expanded)toggle(key);else render();
+    }
+    $('wheelArt').addEventListener('click',event=>{const target=event.target.closest('[data-node]');if(target)pickWheelNode(target.dataset.node)});
+    $('wheelArt').addEventListener('keydown',event=>{if(expanded&&['Enter',' '].includes(event.key)){const target=event.target.closest('[data-node]');if(target){event.preventDefault();pickWheelNode(target.dataset.node)}}});
+    $('wheelWindow').addEventListener('click',event=>{if(!expanded&&!event.target.closest('[data-category],[data-node]')){focusedCategory=null;render()}});
+    $('zoomWheel').onclick=()=>setExpanded(!expanded);
+    setExpanded(false);
+    $('clearAll').addEventListener('click',()=>{draft.clear();render();$('generalChoice').focus({preventScroll:true});$('announcement').textContent=tr('已清空待确认的风味。','Cleared the draft selection.')});
+    $('cancel').addEventListener('click',()=>showSummary(false));
+    $('confirm').addEventListener('click',()=>showSummary(true));
+    $('openPicker').addEventListener('click',openPicker);
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('picker').hidden){event.preventDefault();if(expanded)setExpanded(false);else showSummary(false)}});
+
+    if(wheelLocale==='en'){
+      document.documentElement.lang='en';
+      document.querySelector('.wheel-region').setAttribute('aria-label','Flavor wheel');$('choices').setAttribute('aria-label','Flavor choices; scroll for more');
+      const hub=$('wheelArt').querySelectorAll(':scope>text');if(hub[0]){hub[0].textContent='Choose flavors';hub[0].setAttribute('font-size','23')}if(hub[1]){hub[1].textContent='Select on the right';hub[1].setAttribute('font-size','16')}
+      $('pickerTitle').textContent='What did you taste in this cup?';
+      document.querySelector('.intro p').textContent='Record flavors here. Rate your enjoyment on the tasting page.';
+      document.querySelector('.intro-hint').textContent='Choose a family, then tap flavors';
+      document.querySelector('.detail-heading>span').textContent='Tap to select one or more';
+      $('selectedTitle').firstChild.textContent='Selected flavors ';
+      $('clearAll').textContent='Clear';$('cancel').textContent='Cancel';$('confirm').firstChild.textContent='Confirm flavors ';
+      document.querySelector('#selectionStatus span').textContent='flavors';
+      document.querySelector('.source-note>span').textContent='SCA / WCR categories · sources';
+      $('wheelArt').querySelectorAll('[data-node]').forEach(el=>{const n=nodes.get(el.dataset.node),t=el.querySelector('text');t.textContent=n.en;t.setAttribute('textLength',String(n.parent?(n.key.split(':').length===3?179:112):82));t.setAttribute('lengthAdjust','spacingAndGlyphs')});
+    }
+    document.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const controls=[...document.querySelectorAll('#picker button:not([disabled]),#picker a[href],#picker [tabindex="0"]')].filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');const first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}});
+    window.addEventListener('message',event=>{
+      if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='thiscup-flavor-init'||hosted)return;
+      hosted=true;saved.clear();originalByNode.clear();
+      for(const [i,value] of (Array.isArray(event.data.values)?event.data.values:[]).entries()){
+        if(typeof value!=='string')continue;
+        let key=value.startsWith('sca:')&&nodes.has(value.slice(4))?value.slice(4):[...nodes].find(([,n])=>n.en===value)?.[0];
+        if(!key){key='legacy:'+i;const legacyNames={'Citrus':'柑橘','Berries':'莓果','Stone fruit':'核果','Tropical fruit':'热带水果','Tea-like':'茶感','Caramel':'焦糖'};nodes.set(key,{key,en:value,cn:legacyNames[value]||value,parent:null,category:'legacy'})}
+        saved.add(key);originalByNode.set(key,value);
+      }
+      draft=new Set(saved);render();$('zoomWheel').focus({preventScroll:true});
+    });
+    if(parent!==window)parent.postMessage({type:'thiscup-flavor-ready'},location.origin);
+
+    render();
+  </script>
+</body>
+</html>

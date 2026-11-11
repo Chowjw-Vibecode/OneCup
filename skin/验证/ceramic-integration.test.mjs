@@ -337,3 +337,22 @@ test('热水中央随秤读数变化，冲洗中央计时、右侧显示液重',
  }
  assert.deepEqual(f.calls,[]);
 });
+
+
+test('skin installation blocks new machine commands while Stop remains available',async()=>{
+ const f=appFixture(['sendCommand']);f.s.skinUpdating=true;await f.context.sendCommand('espresso');
+ assert.equal(f.calls.some(c=>c[0]==='command'),false);assert(f.calls.some(c=>c[0]==='toast'&&c[1]==='updateInstalling'));
+ f.s.snapshot.machine.state.state='steam';await f.context.sendCommand('stop');assert.deepEqual(f.calls.filter(c=>c[0]==='command'),[['command','stop']]);
+});
+
+test('automatic skin installation context preserves drafts, dialogs, grinder work and tasting edits',()=>{
+ const f=appFixture(['skinUpdateContext']);f.context.location={href:'http://localhost:25123/'};f.context.dirty=()=>false;f.context.hotWaterDirty=()=>false;f.context.window.ceramicUI={canAutoUpdate:()=>true};
+ assert.equal(f.context.skinUpdateContext().canInstall,true);
+ for(const key of ['skinUpdating','displayDirty','favoriteBusy','scaleBusy','scaleTimerBusy','workflowConflict','stopPending','stopAwaiting']){f.s[key]=true;assert.equal(f.context.skinUpdateContext().canInstall,false,key);f.s[key]=false;}
+ f.s.inventorySync={status:'pending'};assert.equal(f.context.skinUpdateContext().canInstall,false);f.s.inventorySync=null;
+ f.context.dirty=()=>true;assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.dirty=()=>false;
+ f.context.hotWaterDirty=()=>true;assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.hotWaterDirty=()=>false;
+ f.context.window.ceramicUI.canAutoUpdate=()=>false;assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.window.ceramicUI.canAutoUpdate=()=>true;
+ f.context.client.grinder={cachedState:{available:true,connected:true,state:'grinding',busy:true}};assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.client.grinder.cachedState={available:false};
+ f.context.document.querySelectorAll=()=>[{getClientRects:()=>[{}]}];f.context.getComputedStyle=()=>({visibility:'visible'});assert.equal(f.context.skinUpdateContext().canInstall,false);
+});

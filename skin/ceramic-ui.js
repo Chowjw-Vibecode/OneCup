@@ -1,10 +1,11 @@
-import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.29-rc.11';
-import {stageLabel} from './stage-labels.js?v=0.2.29-rc.11';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.29-rc.11';
-import {mountBeans} from './beans.js?v=0.2.29-rc.11';
-import {paintGauge} from './instruments.js?v=0.2.29-rc.11';
-import {setGroupHeadHint} from './ghc-icons.js?v=0.2.29-rc.11';
-import {mountProfileEditor} from './profile-editor.js?v=0.2.29-rc.11';
+import {openFlavorWheel} from './flavor-wheel.js?v=0.2.30';
+import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.30';
+import {stageLabel} from './stage-labels.js?v=0.2.30';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.30';
+import {mountBeans} from './beans.js?v=0.2.30';
+import {paintGauge} from './instruments.js?v=0.2.30';
+import {setGroupHeadHint} from './ghc-icons.js?v=0.2.30';
+import {mountProfileEditor} from './profile-editor.js?v=0.2.30';
 export function mountCeramic(api){
  const $=id=>document.getElementById(id),s=api.state;
  const pitcherPrompt=mountSteamPitcher(api);
@@ -49,6 +50,7 @@ export function mountCeramic(api){
   }).catch(e=>{if(epoch===feedbackEpoch&&feedbackId===id&&s.runId===id&&client===api.client){feedbackLoading=false;renderFeedback();error(e,()=>{feedbackLoadAttempted=false;loadFeedback()})}});
  }
  function renderFeedback(){
+  if(flavorPanel&&feedbackLoading){flavorPanel.close();flavorPanel=null;flavorContext=null;}
   const inventory=$('ceramicRetryInventory');if(inventory){inventory.hidden=!(s.inventorySync?.id===s.runId&&s.inventorySync.client===api.client&&s.inventorySync.status==='error');inventory.textContent=text('重试扣豆','Retry inventory');inventory.disabled=api.running();}
 
   const retry=$('ceramicRetryShot');if(retry){retry.hidden=Boolean(feedbackLoaded||!s.runId||!api.retryFinishedShot);retry.disabled=feedbackRecovering||feedbackBusy||feedbackLoading||s.loadingFinishedId===s.runId;retry.textContent=text(retry.disabled?'读取中…':'重新读取记录',retry.disabled?'Loading…':'Reload shot');}
@@ -56,6 +58,7 @@ export function mountCeramic(api){
   $('ceramicNote').disabled=feedbackBusy||!feedbackEditable();
   $('ceramicBeans').disabled=api.running()||feedbackBusy;
   document.querySelectorAll('[data-ceramic-like],[data-ceramic-clear],.ceramic-sensory input,#ceramicFlavors').forEach(el=>el.disabled=feedbackBusy||!feedbackEditable());
+  if($('ceramicFlavors'))$('ceramicFlavors').disabled=feedbackBusy||feedbackLoading||feedbackRecovering||!feedbackEditable();
   if($('ceramicFlavorCount'))$('ceramicFlavorCount').textContent=feedback.flavors.length?String(feedback.flavors.length):'';
   document.querySelectorAll('[data-ceramic-like]').forEach((b,i)=>{b.classList.toggle('selected',feedback.like===b.dataset.ceramicLike);b.setAttribute('aria-pressed',String(feedback.like===b.dataset.ceramicLike));b.textContent=text(['喜欢','还好','不喜欢'][i],['Loved it','Okay','Not for me'][i])});
   for(const key of ['acid','sweet','bitter']){let el=$('ceramic'+key[0].toUpperCase()+key.slice(1));el.value=feedback[key]??3;el.classList.toggle('unset',feedback[key]===null);el.title=feedback[key]===null?text('未记录','Not rated'):String(feedback[key]);el.setAttribute('aria-valuetext',el.title);const labels={acid:['酸','Acidity'],sweet:['甜','Sweetness'],bitter:['苦','Bitterness']},label=text(...labels[key]);el.setAttribute('aria-label',label);document.querySelector(`[data-ceramic-clear="${key}"]`).setAttribute('aria-label',text('清除'+label+'记录','Clear '+label.toLowerCase()+' rating'));el.parentElement.querySelectorAll('small').forEach((e,i)=>e.textContent=text(i?'强':'弱',i?'High':'Low'));}
@@ -122,14 +125,15 @@ export function mountCeramic(api){
  for(const key of ['acid','sweet','bitter']){$('ceramic'+key[0].toUpperCase()+key.slice(1)).oninput=e=>{feedback[key]=Number(e.target.value);changedFeedback()};document.querySelector(`[data-ceramic-clear="${key}"]`).onclick=()=>{feedback[key]=null;changedFeedback()};}
  const flavorButton=document.createElement('button');flavorButton.id='ceramicFlavors';flavorButton.className='ceramic-flavors-button';
  $('ceramicNote').before(flavorButton);
- const flavorNames=[['花香','Floral'],['柑橘','Citrus'],['莓果','Berries'],['核果','Stone fruit'],['热带水果','Tropical fruit'],['茶感','Tea-like'],['蜂蜜','Honey'],['焦糖','Caramel'],['巧克力','Chocolate'],['坚果','Nutty'],['香料','Spices'],['发酵感','Fermented']];
+ let flavorPanel=null,flavorContext=null;
  flavorButton.onclick=()=>{
-  const selected=new Set(feedback.flavors),box=document.createElement('div');box.className='overlay ceramic-message';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');
-  const panel=document.createElement('section');panel.className='dialog';const title=document.createElement('h2');title.textContent=text('这一杯的风味','Flavors in this cup');panel.append(title);
-  const choices=document.createElement('div');choices.className='ceramic-flavor-choices';
-  flavorNames.forEach(([cn,en])=>{const b=document.createElement('button');b.textContent=text(cn,en);b.className='button secondary';b.setAttribute('aria-pressed',selected.has(en));b.onclick=()=>{selected.has(en)?selected.delete(en):selected.add(en);b.setAttribute('aria-pressed',selected.has(en))};choices.append(b)});panel.append(choices);
-  const cancel=document.createElement('button');cancel.className='button secondary';cancel.textContent=text('取消','Cancel');cancel.onclick=e=>{guardDismissClick(e);box.remove()};
-  const save=document.createElement('button');save.className='button primary';save.textContent=text('完成','Done');save.onclick=e=>{guardDismissClick(e);feedback.flavors=[...selected];box.remove();changedFeedback();render()};const actions=document.createElement('footer');actions.className='ceramic-flavor-actions';actions.append(cancel,save);panel.append(actions);box.append(panel);presentMessage(box);
+  if(feedbackBusy||feedbackLoading||feedbackRecovering||!feedbackEditable()||api.running())return;
+  flavorPanel?.close();
+  const context={id:s.runId,client:api.client,epoch:feedbackEpoch,revision:operationRevision};flavorContext=context;
+  flavorPanel=openFlavorWheel({values:feedback.flavors,locale:s.language,onClose:()=>{flavorPanel=null;flavorContext=null},onConfirm:values=>{
+   if(context.id!==s.runId||context.client!==api.client||context.epoch!==feedbackEpoch||context.revision!==operationRevision||feedbackBusy||!feedbackEditable()||api.running())return;
+   feedback.flavors=values;changedFeedback();render();
+  }});
  };
  $('ceramicNote').oninput=e=>{feedback.note=e.target.value;changedFeedback()};
  $('ceramicBeans').onclick=()=>{if(api.running()||feedbackBusy)return;beansPanel=mountBeans(document.body,{client:api.client,locale:s.language,selectedId:s.mode==='finished'?feedback.bean?.id:s.workflow?.context?.extras?.thisCupBeanId??null,getScale:()=>({connected:s.connection.scaleConnected,stale:s.connection.scaleStale,weight:s.snapshot.scale?.weight,tare:()=>api.client.tare()}),onSelect:async b=>{
@@ -248,6 +252,7 @@ export function mountCeramic(api){
  }
  const operationLabels={cleaning:['正在清洁','Cleaning'],descaling:['正在除垢','Descaling'],fwupgrade:['固件更新中','Updating firmware'],calibration:['正在校准','Calibrating'],selftest:['正在自检','Self-test'],airpurge:['正在排气','Purging air'],busy:['机器忙碌','Machine busy'],booting:['正在启动','Starting up'],error:['机器故障','Machine error'],steam:['蒸汽中','Steaming'],hotwater:['热水中','Dispensing hot water'],hotwater_rinse:['冲洗中','Flushing'],rinse:['冲洗中','Flushing'],flush:['冲洗中','Flushing'],steamrinse:['蒸汽冲洗中','Rinsing steam wand']};
  function render(){
+  if(flavorContext&&(flavorContext.id!==s.runId||flavorContext.client!==api.client)){flavorPanel?.close();flavorPanel=null;flavorContext=null;}
   const state=api.machineState(),operation=operationLabels[state],screen=operation?'operation':s.mode==='finished'&&!api.running()?'taste':state==='espresso'||api.running()?'brew':'ready';document.body.dataset.ceramicScreen=screen;
   // Reset the old cup as soon as a new run starts, even before its ID arrives.
   if(screen==='brew'||screen==='taste')loadFeedback(screen==='taste');
@@ -306,11 +311,12 @@ export function mountCeramic(api){
   pitcherPrompt.render();
  }
  function operationStarted(){
+  flavorPanel?.close();flavorPanel=null;flavorContext=null;
   operationRevision++;
   profileEditor?.close();profileEditor=null;
   beansPanel?.dismiss();beansPanel=null;
   if(adjustBefore){if(adjustBefore.revision===s.workflowRevision){s.draft=adjustBefore.draft;s.mode=adjustBefore.mode;}adjustBefore=null;s.ceramicDraftActive=false;}
   document.querySelectorAll('.ceramic-message').forEach(el=>el.remove());
  }
- render();return {render,error,operationStarted,beforeClose:id=>{if(id==='ceramicSteamDialog'){++steamPurgeRevision;steamPurgeValue=null;steamPurgeClient=null;}if(id==='ceramicAdjustDialog'&&adjustBefore){if(adjustBefore.revision===s.workflowRevision){s.draft=adjustBefore.draft;s.mode=adjustBefore.mode;}adjustBefore=null;s.ceramicDraftActive=false;}},draftApplied:()=>{adjustBefore=null;s.ceramicDraftActive=false;if(s.modal==='ceramicAdjustDialog')api.closeDialog()}};
+ render();return {render,error,canAutoUpdate:()=>!feedbackDirty&&!feedbackBusy&&!feedbackLoading&&!feedbackRecovering,operationStarted,beforeClose:id=>{if(id==='ceramicSteamDialog'){++steamPurgeRevision;steamPurgeValue=null;steamPurgeClient=null;}if(id==='ceramicAdjustDialog'&&adjustBefore){if(adjustBefore.revision===s.workflowRevision){s.draft=adjustBefore.draft;s.mode=adjustBefore.mode;}adjustBefore=null;s.ceramicDraftActive=false;}},draftApplied:()=>{adjustBefore=null;s.ceramicDraftActive=false;if(s.modal==='ceramicAdjustDialog')api.closeDialog()}};
 }

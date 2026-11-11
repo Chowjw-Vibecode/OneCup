@@ -1,5 +1,5 @@
-import {brandMarkup} from "./brand.js?v=0.2.29-rc.11";
-import {guardDismissClick} from "./dismiss-guard.js?v=0.2.29-rc.11";
+import {brandMarkup} from "./brand.js?v=0.2.30";
+import {guardDismissClick} from "./dismiss-guard.js?v=0.2.30";
 // Bean inventory is optional. Weighing writes only after explicit confirmation.
 const STORE='/store/thiscup/beans';
 const RECORDS='/store/thiscup-beans';

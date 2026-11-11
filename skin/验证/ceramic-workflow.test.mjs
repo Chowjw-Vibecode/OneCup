@@ -18,6 +18,8 @@ function domFixture(){
  const ids=new Map(),selectors=new Map();
  class Element{
   constructor(){this.children=[];this.dataset={};this.style={setProperty(name,value){this[name]=value;}};this.attributes={};this.textContent='';this.value='';this.hidden=false;this.className='';this.classes=new Set();this.classList={toggle:(name,on)=>on?this.classes.add(name):this.classes.delete(name)};}
+  set id(value){this._id=value;ids.set(value,this);}
+  get id(){return this._id;}
   setAttribute(name,value){this.attributes[name]=String(value);}
   append(...items){for(const item of items){item.parentElement=this;this.children.push(item);}}
   before(){}after(){}focus(){}remove(){this.removed=true;}
@@ -49,18 +51,18 @@ function ceramicFixture({language='zh',stored=null}={}){
   async shot(id){calls.push(['shot',id]);return copy(nativeShot);},
   async saveWorkflow(recipe,expected){calls.push(['saveWorkflow',copy(recipe),copy(expected)]);return {...copy(expected),...copy(recipe)};}
  };
- let ui,beansOptions;
+ let ui,beansOptions,flavorOptions,flavorHandle;
  const api={state,client,running:()=>false,editable:()=>true,machineState:()=> 'idle',canStart:()=>false,
   render:()=>ui?.render(),notice:(...args)=>notices.push(args),shotYield:()=>56,
   viewOf:w=>({name:w?.profile?.title,dose:w?.context?.targetDoseWeight,target:w?.context?.targetYield,temperature:w?.profile?.steps?.[0]?.temperature}),
   setWorkflow:w=>{state.workflow=copy(w);state.draft=copy(w);},updateAux:w=>{state.workflow=copy(w);},
   openDialog:id=>{state.modal=id;api.render();},closeDialog:()=>{ui.beforeClose(state.modal);state.modal=null;api.render();},
   openProfiles:()=>calls.push(['openProfiles']),command:action=>calls.push(['command',action])};
- const context=vm.createContext({stageLabel,document:dom.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;},mountProfileEditor(){}});
+ const context=vm.createContext({openFlavorWheel:options=>{flavorOptions=options;flavorHandle={closed:false,close(){flavorHandle.closed=true;options.onClose()}};return flavorHandle;},stageLabel,document:dom.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;},mountProfileEditor(){}});
  vm.runInContext(pitcherSource.replace(/export function /g,'function '),context);
  vm.runInContext(ceramicSource.replace(/^import .*;\n/gm,'').replace('export function mountCeramic','function mountCeramic'),context);
  ui=context.mountCeramic(api);
- return {...dom,state,api,ui,calls,notices,storage,nativeShot,get beansOptions(){return beansOptions;}};
+ return {...dom,state,api,ui,calls,notices,storage,nativeShot,get beansOptions(){return beansOptions;},get flavorOptions(){return flavorOptions;},get flavorHandle(){return flavorHandle;}};
 }
 
 test('tweak a finished shot is draft-only, and Cancel restores the old draft and screen',async()=>{
@@ -326,4 +328,34 @@ test('steam reopen ignores stale read from previous dialog session',async()=>{
 
  test('steam setting rejects native inactive states other than idle',async()=>{
  for(const mode of ['sleeping','heating','preheating','needswater','schedidle']){const f=ceramicFixture();f.storage.set('/machine/settings',{steamPurgeMode:0});f.get('ceramicTasteSteam').onclick();await flush();f.api.client.requireIdle=async()=>({state:{state:mode}});f.get('ceramicSteamPurge').checked=true;await f.get('ceramicSteamPurge').onchange();assert.equal(f.calls.some(c=>c[0]==='post'),false)}
+});
+
+
+test('flavor wheel confirms only into the current tasting draft; explicit save preserves other feedback',async()=>{
+ const f=ceramicFixture({stored:{shotId:'shot-1',flavors:['Stone fruit','Chocolate'],acid:4,sweet:2,bitter:1,note:'',like:null}});await flush();
+ f.get('ceramicFlavors').onclick();assert.deepEqual([...f.flavorOptions.values],['Stone fruit','Chocolate']);
+ f.flavorOptions.onConfirm(['Stone fruit','sca:fruit:0:0','sca:other:0:4']);
+ assert.equal(f.calls.some(c=>['post','put','command'].includes(c[0])),false);
+ await f.get('ceramicSaveTaste').onclick();await flush();
+ const saved=f.storage.get('/store/thiscup/tasting-shot-1');assert.deepEqual([...saved.flavors],['Stone fruit','sca:fruit:0:0','sca:other:0:4']);assert.equal(saved.acid,4);assert.equal(saved.sweet,2);assert.equal(saved.bitter,1);
+ assert.equal(f.calls.some(c=>c[0]==='command'||c[0]==='saveWorkflow'),false);
+});
+
+test('cancel and stale flavor confirmation cannot change another shot or an active operation',async()=>{
+ const f=ceramicFixture();await flush();f.get('ceramicFlavors').onclick();const first=f.flavorOptions;
+ f.flavorHandle.close();assert.equal(f.get('ceramicSaveTaste').disabled,true);
+ f.get('ceramicFlavors').onclick();const stale=f.flavorOptions;f.state.runId='shot-2';f.state.lastShot={id:'shot-2'};f.ui.render();await flush();
+ stale.onConfirm(['sca:fruit:0:0']);f.get('ceramicFlavors').onclick();assert.deepEqual([...f.flavorOptions.values],[]);
+ const operation=f.flavorOptions;f.ui.operationStarted();assert.equal(f.flavorHandle.closed,true);operation.onConfirm(['sca:fruit:0:0']);
+ assert.equal(f.calls.some(c=>['post','put','command'].includes(c[0])),false);assert.equal(f.get('ceramicSaveTaste').disabled,true);
+});
+
+
+test('flavor picker waits for the current shot feedback load so old flavors cannot be overwritten by a stale empty seed',async()=>{
+ const f=ceramicFixture();await flush();const pending=deferred();f.api.client.get=async()=>pending.promise;
+ f.state.runId='shot-2';f.state.lastShot={id:'shot-2'};f.ui.render();
+ assert.equal(f.get('ceramicFlavors').disabled,true);f.get('ceramicFlavors').onclick();assert.equal(f.flavorOptions,undefined);
+ pending.resolve({shotId:'shot-2',flavors:['Stone fruit','Chocolate']});await flush();
+ assert.equal(f.get('ceramicFlavors').disabled,false);f.get('ceramicFlavors').onclick();assert.deepEqual([...f.flavorOptions.values],['Stone fruit','Chocolate']);
+ assert.equal(f.calls.some(c=>['post','put','command'].includes(c[0])),false);
 });
