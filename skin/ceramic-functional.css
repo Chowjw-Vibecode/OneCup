@@ -12,10 +12,10 @@
 .steam-pitcher-panel>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .steam-pitcher-panel:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#fcfaf7ed 0%,#fcfaf790 12%,transparent 28%);pointer-events:none}
 .steam-pitcher-actions{display:flex;justify-content:space-between;padding:20px;gap:20px}
-.steam-pitcher-actions button{font:600 19px 'This Cup Noto Serif SC',Songti SC,serif;color:inherit;min-height:44px;border:0;cursor:pointer}
+.steam-pitcher-actions button{font:600 19px 'OneCup Noto Serif SC',Songti SC,serif;color:inherit;min-height:44px;border:0;cursor:pointer}
 .steam-pitcher-back{background:transparent;padding:9px 12px}
 .steam-pitcher-stop{border-radius:13px;padding:11px 19px;background:linear-gradient(130deg,#ffceaa,#f3ac80);box-shadow:inset 0 2px 2px #fff9,0 3px 7px #90562912}
-.steam-pitcher-panel h2{position:absolute;right:25px;bottom:58px;margin:0;font:600 clamp(24px,2.54vw,34px) 'This Cup Noto Serif SC',Songti SC,serif;letter-spacing:2px;text-shadow:0 1px 4px #fff5}
+.steam-pitcher-panel h2{position:absolute;right:25px;bottom:58px;margin:0;font:600 clamp(24px,2.54vw,34px) 'OneCup Noto Serif SC',Songti SC,serif;letter-spacing:2px;text-shadow:0 1px 4px #fff5}
 .steam-pitcher-panel h2[lang=en]{font-size:24px;max-width:250px;letter-spacing:0;text-align:right}
 /* Command errors must remain visible above the pitcher prompt. */
 body:has(.steam-pitcher-overlay:not([hidden])) .toast{z-index:21010;pointer-events:none}

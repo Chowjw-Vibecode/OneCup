@@ -1,4 +1,4 @@
-/* This Cup ceramic surface. Real text and controls; reference images supply illustration only. */
+/* OneCup ceramic surface. Real text and controls; reference images supply illustration only. */
 :root{--paper:#faf9f6;--panel:#faf9f6;--raised:#fffdfa;--input:#f5f3ef;--ink:#10334a;--muted:#526c7e;--faint:#7f919a;--line:#12334b26;--accent:#f5a77c;--accent-ink:#10334a;--accent-soft:#e2f3fa;--green:#2f8345;--blue:#1488ed;--brown:#87462b;--red:#f24e3e;--track:#dde7e9;font-family:'Songti SC','Noto Serif CJK SC','Source Han Serif SC',Georgia,serif;font-synthesis:none}
 :root[data-theme=dark]{--paper:#172a32;--panel:#20333a;--raised:#263d46;--input:#182e38;--ink:#ecf2f1;--muted:#b6c8cf;--line:#c0d5e329;--accent:#e9a178;--accent-ink:#102c3a;--accent-soft:#284650;--track:#43606a}
 #app{max-width:1920px;padding:0 2.4vw;grid-template-rows:10.5% 0 minmax(0,1fr) 11.2%;background:var(--paper);position:relative;isolation:isolate;font-size:clamp(14px,1.7vw,27px)}

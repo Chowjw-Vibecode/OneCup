@@ -1,6 +1,6 @@
 {
   "id": "thiscup-crystal.reaplugin",
-  "name": "This Cup · 小方",
+  "name": "OneCup · 小方",
   "author": "Chowjw’s Vibe Coding Lab",
   "description": "CRYSTAL grinder driver ported from our classic de1app controller. Connect only reads; settings and starts require explicit actions.",
   "version": "0.1.6",

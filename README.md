@@ -1,8 +1,10 @@
-# 这一杯 · This Cup
+# 这一杯 · OneCup
 
-「这一杯」是一套给 Decaid 平板用的横屏皮肤。从选豆、调整配方，到看萃取、记口感，屏幕始终围绕正在做的这杯咖啡。
+一次，只做好一杯。
 
-[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.33) · [安装方法](#安装)
+「这一杯 · OneCup」是一套给 Decaid 平板用的横屏皮肤。从选豆、调整配方，到看萃取、记口感，屏幕始终围绕正在做的这杯咖啡。
+
+[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.34) · [安装方法](#安装)
 
 ## 设计思路
 
@@ -39,15 +41,20 @@
 | ![豆仓界面](docs/images/05-beans.png) | ![蒸汽界面](docs/images/06-steam.png) |
 | 咖啡豆可以直接称，也可以连袋称，再扣掉空袋重量。关联豆子后，每做完一杯，豆仓会扣除这杯的用豆量。 | 打奶前可以调整蒸汽温度、流量和时长。打奶时，奶缸上的计时和进度环方便随时查看。 |
 
-准备、萃取和品鉴图取自较早版本的平板实机，其余三张为界面预览。
+以上为新版界面预览，使用示例数据；图片以两倍像素导出。
 
 ## 安装
 
-1. 下载皮肤包 **this-cup-0.2.33.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · This Cup」。
+1. 下载皮肤包 **this-cup-0.2.34.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
 3. 需要联动小方或 Crystal 磨豆机时，另下载 **thiscup-crystal.reaplugin-0.1.6.zip**，在 Decaid 的 **Plugins → Plugin actions → Install plugin → ZIP file** 中安装并启用。
 
-[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.33) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.34) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+
+## 0.2.34 过渡版
+
+- 英文名称统一为 OneCup，品牌标识使用矢量路径，适配平板与桌面分辨率。
+- 安装包与后续更新切换至 OneCup 新仓库；旧仓库的 0.2.34 为过渡版。
 
 ## 0.2.33
 
@@ -69,10 +76,10 @@
 - 设置增加“自动更新皮肤”，默认关闭。开启后在原生 Decaid 本机、连接健康、空闲且无未保存修改时检查和安装新版。候选版跟随同一候选频道及较新的正式版，正式版不自动转入候选版；失败不盲目重复安装，读回版本后才等待安全刷新。
 - 更新只替换本皮肤目录，不清空方案、豆仓、记录或偏好。Decaid 当前安装接口不是原子替换，复制失败可能需在 Decaid 里手动重装皮肤；软件模拟通过不能替代实际平板更新验收。
 
-风味轮界面预览（1340 × 800，本地预览）：
+风味轮界面预览（1340 × 800 可用区域，两倍像素导出）：
 
 ![风味轮：全轮与已选风味](docs/images/07-flavor-wheel.png)
 
 ![风味轮：按大类放大](docs/images/08-flavor-wheel-expanded.png)
 
-开发自检 128 项和独立离线软件回归已通过。自动更新与新风味轮尚未在真实平板上验收，浏览器模拟不代表实机结果。
+改名保留原有皮肤身份和数据存储位置，以延续已保存的设置、豆仓及评价。

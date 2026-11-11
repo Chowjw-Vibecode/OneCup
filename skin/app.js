@@ -1,17 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.33";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.33";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.33";
-import {telemetryPath} from "./chart-path.js?v=0.2.33";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.33";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.33";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.33";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.33";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.33";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.33";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.33";
-import { createSkinUpdater } from "./update.js?v=0.2.33";
-import { createUsageReporter } from "./usage.js?v=0.2.33";
+import {stageLabel} from "./stage-labels.js?v=0.2.34";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.34";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.34";
+import {telemetryPath} from "./chart-path.js?v=0.2.34";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.34";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.34";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.34";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.34";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.34";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.34";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.34";
+import { createSkinUpdater } from "./update.js?v=0.2.34";
+import { createUsageReporter } from "./usage.js?v=0.2.34";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -56,7 +56,7 @@ let client;
 let displayManager;
 let usageReporter;
 let skinUpdater;
-const SKIN_VERSION = "0.2.33";
+const SKIN_VERSION = "0.2.34";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -308,7 +308,7 @@ const strings = {
     saveCurrent: "更新方案",
   },
   en: {
-    brand: "This Cup",
+    brand: "OneCup",
     history: "History",
     currentRecipe: "CURRENT RECIPE",
     chooseProfile: "Change profile ↗",

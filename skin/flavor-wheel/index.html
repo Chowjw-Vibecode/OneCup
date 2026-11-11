@@ -7,10 +7,10 @@
   <link rel="icon" href="data:,">
   <title>这一杯 · 风味轮交互原型</title>
   <style>
-    @font-face{font-family:'This Cup Noto Serif SC';src:url('../assets/fonts/notoserifsc/NotoSerifSC-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
-    @font-face{font-family:'This Cup Source Serif 4';src:url('../assets/fonts/sourceserif4/SourceSerif4-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
-    @font-face{font-family:'This Cup Noto Sans SC';src:url('../assets/fonts/notosanssc/NotoSansSC-Variable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
-    :root{--paper:#faf9f6;--raised:#fffdfa;--input:#f5f3ef;--ink:#10334a;--muted:#526c7e;--line:#12334b26;--accent:#f5a77c;--serif:'This Cup Noto Serif SC','This Cup Source Serif 4','Songti SC',serif;--sans:'This Cup Noto Sans SC','PingFang SC',sans-serif;--number:'This Cup Source Serif 4',Georgia,serif;font-family:var(--serif);font-synthesis:none;color:var(--ink);background:var(--paper)}
+    @font-face{font-family:'OneCup Noto Serif SC';src:url('../assets/fonts/notoserifsc/NotoSerifSC-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
+    @font-face{font-family:'OneCup Source Serif 4';src:url('../assets/fonts/sourceserif4/SourceSerif4-Variable.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
+    @font-face{font-family:'OneCup Noto Sans SC';src:url('../assets/fonts/notosanssc/NotoSansSC-Variable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+    :root{--paper:#faf9f6;--raised:#fffdfa;--input:#f5f3ef;--ink:#10334a;--muted:#526c7e;--line:#12334b26;--accent:#f5a77c;--serif:'OneCup Noto Serif SC','OneCup Source Serif 4','Songti SC',serif;--sans:'OneCup Noto Sans SC','PingFang SC',sans-serif;--number:'OneCup Source Serif 4',Georgia,serif;font-family:var(--serif);font-synthesis:none;color:var(--ink);background:var(--paper)}
     *{box-sizing:border-box}
     body{margin:0;background:var(--paper) url('../assets/ceramic/paper.webp') center/cover;color:var(--ink)}
     button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border:0;background:none;min-height:44px}
@@ -22,7 +22,7 @@
     .app:focus{outline:none}
     .topbar{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:24px;z-index:2}
     .brand{width:clamp(210px,21.3vw,352px);aspect-ratio:352/63;display:block;overflow:hidden}
-    .brand image{width:1586px;height:992px}
+    .brand{height:auto;object-fit:contain}
     .stage-title{text-align:center;font-size:clamp(18px,1.7vw,28px);font-weight:600;letter-spacing:.08em}
     .picker{min-height:0;display:grid;grid-template-rows:12.5% minmax(0,1fr) 82px;position:relative}
     .intro{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 .4vw 1vh}
@@ -144,7 +144,7 @@
 <body>
   <div class="app" tabindex="-1">
     <header class="topbar">
-      <svg class="brand" viewBox="48 26 352 63" role="img" aria-label="这一杯 · THIS CUP"><defs><filter id="brand-ink" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.0314  0 0 0 0 0.1725  0 0 0 0 0.2745  -1.2 0 0 0 1.08"/></filter></defs><image href="../assets/ceramic/cup-reference.png" width="1586" height="992" filter="url(#brand-ink)"/></svg>
+      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.34" alt="这一杯 · OneCup" width="352" height="63">
       <div class="stage-title" id="stageTitle">品鉴 · 选风味</div>
     </header>
 
@@ -157,7 +157,7 @@
         <section class="wheel-region" aria-label="风味轮">
           <div class="wheel-tools"><button id="zoomWheel" type="button" aria-pressed="false">放大</button></div>
           <div class="wheel-window" id="wheelWindow"><div class="wheel-content" id="wheel">
-<svg id="wheelArt" class="official-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1160" role="group" aria-labelledby="title desc"><title id="title">咖啡风味轮 · 矢量交互原型</title><desc id="desc">依据SCA及WCR风味轮分类重绘；完整9大类、28中层、73外层。并非SCA官方图文件。</desc><style>text{font-family:"This Cup Noto Sans SC","Noto Sans SC","PingFang SC",sans-serif;font-weight:500}</style>
+<svg id="wheelArt" class="official-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1160" role="group" aria-labelledby="title desc"><title id="title">咖啡风味轮 · 矢量交互原型</title><desc id="desc">依据SCA及WCR风味轮分类重绘；完整9大类、28中层、73外层。并非SCA官方图文件。</desc><style>text{font-family:"OneCup Noto Sans SC","Noto Sans SC","PingFang SC",sans-serif;font-weight:500}</style>
 <g data-node="floral"><title>花香 · Floral</title><path d="M559.212,364.057 A205,205 0 0,1 620.590,367.059 L600.592,466.059 A104,104 0 0,0 569.454,464.536 Z" fill="#ed008c" stroke="#faf9f6" stroke-width="1.6"/>
 <text transform="translate(580 568) rotate(-87.200)" x="154.50" y="0" fill="#142c39" font-size="23" text-anchor="middle" dominant-baseline="central">花香</text></g>
 <g data-node="floral:0"><title>红茶 · Black Tea</title><path d="M526.053,38.742 A532,532 0 0,1 563.475,36.257 L573.632,363.099 A205,205 0 0,0 559.212,364.057 Z" fill="#ae667e" stroke="#faf9f6" stroke-width="1.6"/>

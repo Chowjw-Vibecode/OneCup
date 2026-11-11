@@ -1,5 +1,5 @@
-import {stageLabel} from "./stage-labels.js?v=0.2.33";
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.33';
+import {stageLabel} from "./stage-labels.js?v=0.2.34";
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.34';
 
 const numeric = value => value === null || value === undefined || value === '' || typeof value === 'boolean' || !Number.isFinite(Number(value)) ? null : Number(value);
 const format = value => numeric(value) === null ? '—' : String(Math.round(Number(value) * 100) / 100);

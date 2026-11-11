@@ -52,4 +52,4 @@ Downloaded from Google Fonts’ official font repository:
 - [Source Serif 4 variable TTF](https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4%5Bopsz,wght%5D.ttf)
 - [Source Serif 4 OFL](https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/OFL.txt)
 
-The TTF files were converted to WOFF2 with FontTools and Brotli. No glyphs were edited or removed. The resulting files were reopened and checked against the source character maps and glyph orders. Embedded names and notices are preserved; the `This Cup …` CSS names are local aliases only.
+The TTF files were converted to WOFF2 with FontTools and Brotli. No glyphs were edited or removed. The resulting files were reopened and checked against the source character maps and glyph orders. Embedded names and notices are preserved; the `OneCup …` CSS names are local aliases only.

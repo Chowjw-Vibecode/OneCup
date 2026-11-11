@@ -1,14 +1,14 @@
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.33';
+import {isUsageEnvironment} from './usage.js?v=0.2.34';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
-export const RELEASES_URL='https://api.github.com/repos/Chowjw-Vibecode/This-Cup/releases?per_page=100';
+export const RELEASES_URL='https://api.github.com/repos/Chowjw-Vibecode/OneCup/releases?per_page=100';
 const HOUR=3_600_000, CHECK_INTERVAL=HOUR, START_DELAY=60_000, RECHECK=30_000;
 const versionPattern=/^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(alpha|beta|rc)\.(0|[1-9]\d*))?$/;
 function version(value){const m=typeof value==='string'&&value.match(versionPattern);return m?{value:value.replace(/^v/,''),base:m.slice(1,4).map(Number),channel:m[4]??null,sequence:Number(m[5]??0)}:null;}
 function compare(a,b){for(let i=0;i<3;i++)if(a.base[i]!==b.base[i])return a.base[i]-b.base[i];if(a.channel===b.channel)return a.sequence-b.sequence;if(!a.channel)return 1;if(!b.channel)return -1;return ['alpha','beta','rc'].indexOf(a.channel)-['alpha','beta','rc'].indexOf(b.channel);}
-function trustedAsset(url,tag,asset){try{const u=new URL(url);return u.protocol==='https:'&&u.hostname==='github.com'&&!u.username&&!u.password&&!u.search&&!u.hash&&u.pathname===`/Chowjw-Vibecode/This-Cup/releases/download/${tag}/${asset}`;}catch{return false;}}
+function trustedAsset(url,tag,asset,legacy=false){try{const u=new URL(url);return u.protocol==='https:'&&u.hostname==='github.com'&&!u.username&&!u.password&&!u.search&&!u.hash&&(u.pathname===`/Chowjw-Vibecode/OneCup/releases/download/${tag}/${asset}`||(legacy&&u.pathname===`/Chowjw-Vibecode/This-Cup/releases/download/${tag}/${asset}`));}catch{return false;}}
 export function selectSkinUpdate(releases,currentVersion){
  const current=version(currentVersion);if(!current||!Array.isArray(releases))return null;
  const options=[];
@@ -18,7 +18,7 @@ export function selectSkinUpdate(releases,currentVersion){
   // A stable install never moves to prereleases.
   if(current.channel){if(next.channel&&next.channel!==current.channel)continue;}
   else if(next.channel)continue;
-  const name=`this-cup-${next.value}.zip`;
+  const name=`onecup-${next.value}.zip`;
   const asset=release.assets?.find(a=>a?.name===name&&a.state==='uploaded'&&Number.isSafeInteger(a.size)&&a.size>0&&a.size<=150*1024*1024&&trustedAsset(a.browser_download_url,release.tag_name,name));
   if(asset)options.push({version:next.value,url:asset.browser_download_url,parsed:next});
  }
@@ -34,7 +34,7 @@ export function canAutoInstall(context){
 }
 function decode(raw){
  const v=JSON.parse(raw);if(!v||typeof v.enabled!=='boolean'||!Number.isFinite(v.nextCheck)||v.nextCheck<0||Object.keys(v).sort().join(',')!=='enabled,nextCheck,pending')throw Error('invalid preference');
- if(v.pending!==null){const p=v.pending;if(!p||Object.keys(p).sort().join(',')!=='apiOrigin,url,version'||!version(p.version)||!trustedAsset(p.url,'v'+p.version,`this-cup-${p.version}.zip`))throw Error('invalid pending update');const u=new URL(p.apiOrigin);if(u.origin!==p.apiOrigin||!['localhost','127.0.0.1','[::1]'].includes(u.hostname)||!['http:','https:'].includes(u.protocol))throw Error('invalid pending origin');}
+ if(v.pending!==null){const p=v.pending;if(!p||Object.keys(p).sort().join(',')!=='apiOrigin,url,version'||!version(p.version)||![`onecup-${p.version}.zip`,`this-cup-${p.version}.zip`].some(name=>trustedAsset(p.url,'v'+p.version,name,true)))throw Error('invalid pending update');const u=new URL(p.apiOrigin);if(u.origin!==p.apiOrigin||!['localhost','127.0.0.1','[::1]'].includes(u.hostname)||!['http:','https:'].includes(u.protocol))throw Error('invalid pending origin');}
  return v;
 }
 export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,currentVersion,

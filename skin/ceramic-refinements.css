@@ -43,7 +43,7 @@ body[data-ceramic-screen=ready] .ceramic-recipe-title:hover{text-decoration:unde
 .prototype-intro>header{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;padding:0 1.8vw}
 .prototype-intro>header h2{text-align:center;font:650 2.5vw var(--font-ui);margin:0}
 .prototype-intro>header .brand{width:25vw}
-.prototype-intro>header .brand .thiscup-brand-art{width:100%}
+.prototype-intro>header .brand .onecup-brand-art{width:100%}
 .prototype-intro>header small{text-align:right;font:1.2vw var(--font-caption);color:var(--muted)}
 .prototype-intro-main{display:grid;grid-template-columns:39% minmax(0,1fr);gap:3vw;padding:3vh 1.8vw 4vh;min-height:0;position:relative;isolation:isolate}
 .prototype-intro-main::before{content:'';position:absolute;z-index:-1;inset:2vh 54% 6vh -5vw;border-radius:0 50% 45% 0 / 0 20% 24% 0;background:#dff1f7}
@@ -165,7 +165,7 @@ body[data-ceramic-screen=ready] #stateDetail.ghc-start-hint > span { white-space
 
 /* Keep tasting text inside its existing name column and summary height. */
 body[data-ceramic-screen=taste] .recipe-head{padding-top:.6vh}
-body[data-ceramic-screen=taste] #recipeName{box-sizing:content-box;line-height:1.45!important;max-height:none;padding-bottom:.12em}
+body[data-ceramic-screen=taste] #recipeName{box-sizing:content-box;font-size:clamp(19px,2.15vw,35px)!important;display:block;white-space:nowrap;line-height:1.45!important;max-height:none;padding-bottom:.12em}
 body[data-ceramic-screen=taste] #ceramicBeans{width:calc(24% - 1.968vw);bottom:.9vh;min-width:0}
 body[data-ceramic-screen=taste] #ceramicBeanName{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow:hidden;overflow-wrap:anywhere;text-overflow:ellipsis;line-height:1.45;max-width:100%;max-height:2.9em}
 

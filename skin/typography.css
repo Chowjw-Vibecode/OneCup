@@ -2,31 +2,31 @@
    Load after the skin styles. Geometry and long-name handling remain in the
    page styles; this file only owns families, weights and measured type sizes. */
 @font-face {
-  font-family: 'This Cup Noto Serif SC';
+  font-family: 'OneCup Noto Serif SC';
   src: url('./assets/fonts/notoserifsc/NotoSerifSC-Variable.woff2') format('woff2');
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
 }
 @font-face {
-  font-family: 'This Cup Source Serif 4';
+  font-family: 'OneCup Source Serif 4';
   src: url('./assets/fonts/sourceserif4/SourceSerif4-Variable.woff2') format('woff2');
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
 }
 @font-face {
-  font-family: 'This Cup Noto Sans SC';
+  font-family: 'OneCup Noto Sans SC';
   src: url('./assets/fonts/notosanssc/NotoSansSC-Variable.woff2') format('woff2');
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
 }
 :root {
-  --font-ui: 'This Cup Noto Serif SC', 'This Cup Source Serif 4', serif;
-  --font-number: 'This Cup Noto Serif SC', 'This Cup Source Serif 4', serif;
-  --font-caption: 'This Cup Noto Sans SC', sans-serif;
-  --font-wordmark: 'This Cup Source Serif 4', 'This Cup Noto Serif SC', serif;
+  --font-ui: 'OneCup Noto Serif SC', 'OneCup Source Serif 4', serif;
+  --font-number: 'OneCup Noto Serif SC', 'OneCup Source Serif 4', serif;
+  --font-caption: 'OneCup Noto Sans SC', sans-serif;
+  --font-wordmark: 'OneCup Source Serif 4', 'OneCup Noto Serif SC', serif;
   font-family: var(--font-ui);
   font-synthesis: none;
   font-optical-sizing: auto;
