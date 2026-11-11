@@ -1,9 +1,10 @@
 // Anonymous country/region check-in. This module never uses DecaidClient.
-export const USAGE_ENDPOINT = 'https://decent-remote-usage.decent-remote-stats.workers.dev/v1/check-in';
+export const USAGE_ENDPOINT = 'https://home.zhouchenxing.com/usage-stats/api/v1/check-in';
 export const USAGE_STORAGE_KEY = 'thiscup.usage.v1';
 export const USAGE_COOKIE_NAME = 'thiscup_usage_v1';
 const DAY = 24 * 60 * 60 * 1000;
 const WEEK = 7 * DAY;
+const RETRY = 15 * 60 * 1000;
 const START_DELAY = 60_000;
 const IDLE_RECHECK = 30_000;
 const REQUEST_TIMEOUT = 4_000;
@@ -147,6 +148,14 @@ export function createUsageReporter({
         ...('attempt_version' in value ? {attempt_version:value.attempt_version} : {}),
         ...('retry_at' in value ? {retry_at:value.retry_at} : {}),
       };
+      // Shorten a previous transport failure's one-day reservation after an
+      // upgrade. Preserve the ID, opt-out and successful weekly schedule.
+      if (state.retry_at > now() + RETRY) {
+        const previousRetry = state.retry_at;
+        state.retry_at = now() + RETRY;
+        if (state.next_at === previousRetry) state.next_at = state.retry_at;
+        return persist();
+      }
       return true;
     } catch { return false; }
   }
@@ -194,7 +203,7 @@ export function createUsageReporter({
     }
     // Persist the ID and reserve the failure interval BEFORE any transport.
     // A reload or another tab must not turn a failed request into a retry loop.
-    state.next_at = now() + DAY;
+    state.next_at = now() + RETRY;
     state.retry_at = state.next_at;
     if (version) state.attempt_version = version;
     if (!persist()) { blockedUntil = now() + DAY; schedule(DAY); return; }
@@ -225,7 +234,7 @@ export function createUsageReporter({
         requestTimer = null; controller = null;
         // Re-read the shared preference so an opt-out in another tab wins.
         if (read() && state.enabled && state.install_id === installId && (!version || state.attempt_version === version)) {
-          state.next_at = now() + (accepted ? WEEK : DAY);
+          state.next_at = now() + (accepted ? WEEK : RETRY);
           state.retry_at = accepted ? 0 : state.next_at;
           if (!persist()) blockedUntil = state.next_at;
         }

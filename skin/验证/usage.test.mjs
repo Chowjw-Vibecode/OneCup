@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createUsageReporter, createUsageCookieStorage, isUsageEnvironment, USAGE_ENDPOINT, USAGE_STORAGE_KEY, USAGE_COOKIE_NAME} from '../usage.js';
 
-const DAY = 86_400_000, WEEK = 7 * DAY;
+const DAY = 86_400_000, WEEK = 7 * DAY, RETRY = 15 * 60_000;
 const flush = async () => { for (let i=0;i<20;i++) await Promise.resolve(); };
 function clock() {
   let time = 1_000_000, sequence = 0;
@@ -124,12 +124,12 @@ for(const [name,fetch] of [
   ['HTTP failure',async()=>({ok:false})],
   ['invalid JSON',async()=>({ok:true,json:async()=>{throw Error('bad json');}})],
   ['negative acknowledgement',async()=>({ok:true,json:async()=>({accepted:false})})],
-]) test(`${name} is silent and retries after one day, not each page load`,async()=>{
+]) test(`${name} is silent and retries after fifteen minutes, not each page load`,async()=>{
   const f=fixture({fetch});f.reporter.start();await f.time.advance(60_000);
-  assert.equal(f.calls.length,1);assert.equal(f.stored().next_at,f.time.now()+DAY);
+  assert.equal(f.calls.length,1);assert.equal(f.stored().next_at,f.time.now()+RETRY);
   f.reporter.dispose();
   const g=fixture({fetch,time:f.time,values:f.values});g.reporter.start();
-  await g.time.advance(DAY-1);assert.equal(g.calls.length,0);
+  await g.time.advance(RETRY-1);assert.equal(g.calls.length,0);
   await g.time.advance(1);assert.equal(g.calls.length,1);assert.equal(g.generated,0);g.reporter.dispose();
 });
 
@@ -186,8 +186,8 @@ test('pagehide aborts a request without keepalive or background delivery',async(
 test('four-second timeout also handles a transport that never settles after abort',async()=>{
   const f=fixture({fetch:()=>new Promise(()=>{})});f.reporter.start();await f.time.advance(60_000);
   await f.time.advance(3_999);assert.equal(f.calls[0].init.signal.aborted,false);
-  await f.time.advance(1);assert.equal(f.calls[0].init.signal.aborted,true);assert.equal(f.stored().next_at,f.time.now()+DAY);
-  await f.time.advance(DAY-1);assert.equal(f.calls.length,1);
+  await f.time.advance(1);assert.equal(f.calls[0].init.signal.aborted,true);assert.equal(f.stored().next_at,f.time.now()+RETRY);
+  await f.time.advance(RETRY-1);assert.equal(f.calls.length,1);
   await f.time.advance(1);assert.equal(f.calls.length,2);f.reporter.dispose();
 });
 
@@ -331,11 +331,11 @@ test('version upgrade reports the same installation once before the previous wee
   g.reporter.dispose();const h=fixture({version:'0.2.32',time:g.time,values:g.values});h.reporter.start();
   await h.time.advance(60_000);assert.equal(h.calls.length,0);h.reporter.dispose();
 });
-test('legacy weekly schedule receives one version report; failed version report retains daily backoff across reload',async()=>{
+test('legacy weekly schedule receives one version report; failed version report retains bounded backoff across reload',async()=>{
   const values=new Map([[USAGE_STORAGE_KEY,JSON.stringify({enabled:true,install_id:'a'.repeat(32),next_at:99_000_000})]]);
   const f=fixture({version:'0.2.32',values,fetch:()=>Promise.reject(Error('offline'))});f.reporter.start();await f.time.advance(60_000);
   assert.equal(f.calls.length,1);assert.equal(f.generated,0);assert.equal(f.stored().attempt_version,'0.2.32');f.reporter.dispose();
-  const g=fixture({version:'0.2.32',values,time:f.time});g.reporter.start();await g.time.advance(DAY-1);assert.equal(g.calls.length,0);
+  const g=fixture({version:'0.2.32',values,time:f.time});g.reporter.start();await g.time.advance(RETRY-1);assert.equal(g.calls.length,0);
   await g.time.advance(1);assert.equal(g.calls.length,1);g.reporter.dispose();
 });
 test('version migration preserves cookie identity and disabled preference',async()=>{
@@ -351,7 +351,7 @@ test('failed version report reserves one shared retry interval across older and 
   newer.reporter.start();await time.advance(60_000);assert.equal(newer.calls.length,1);
   const older=fixture({version:'0.2.30',values,time});older.reporter.start();await time.advance(60_000);
   assert.equal(older.calls.length,0);assert.equal(newer.calls.length,1);
-  const newest=fixture({version:'0.2.32',values,time});newest.reporter.start();await time.advance(DAY-60_001);
+  const newest=fixture({version:'0.2.32',values,time});newest.reporter.start();await time.advance(RETRY-60_001);
   assert.equal(older.calls.length,0);assert.equal(newest.calls.length,0);assert.equal(newer.calls.length,1);
   assert.equal(newer.stored().install_id,'a'.repeat(32));
   for(const f of [older,newer,newest])f.reporter.dispose();
@@ -364,4 +364,17 @@ test('in-flight version report cannot be duplicated by another version; opt-out 
   second.reporter.setEnabled(false);first.reporter.refresh();await time.advance(DAY);
   assert.equal(first.calls.length,1);assert.equal(second.calls.length,0);assert.equal(first.reporter.enabled,false);
   first.reporter.dispose();second.reporter.dispose();
+});
+
+
+test('upgrading a prior one-day failure shortens the reservation once without replacing its ID',async()=>{
+  const time=clock(),id='a'.repeat(32),deadline=time.now()+DAY;
+  const values=new Map([[USAGE_STORAGE_KEY,JSON.stringify({enabled:true,install_id:id,next_at:deadline,retry_at:deadline,attempt_version:'0.2.38'})]]);
+  const f=fixture({time,values,version:'0.2.39'});f.reporter.start();
+  assert.equal(f.stored().retry_at,time.now()+RETRY);
+  await time.advance(60_000);f.reporter.dispose();
+  const g=fixture({time,values,version:'0.2.39'});g.reporter.start();
+  await time.advance(RETRY-60_001);assert.equal(g.calls.length,0);
+  await time.advance(1);assert.equal(g.calls.length,1);assert.equal(g.generated,0);
+  assert.equal(g.stored().install_id,id);assert.equal(g.stored().retry_at,0);g.reporter.dispose();
 });
