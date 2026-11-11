@@ -1,17 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.32";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.32";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.32";
-import {telemetryPath} from "./chart-path.js?v=0.2.32";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.32";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.32";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.32";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.32";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.32";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.32";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.32";
-import { createSkinUpdater } from "./update.js?v=0.2.32";
-import { createUsageReporter } from "./usage.js?v=0.2.32";
+import {stageLabel} from "./stage-labels.js?v=0.2.33";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.33";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.33";
+import {telemetryPath} from "./chart-path.js?v=0.2.33";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.33";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.33";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.33";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.33";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.33";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.33";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.33";
+import { createSkinUpdater } from "./update.js?v=0.2.33";
+import { createUsageReporter } from "./usage.js?v=0.2.33";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -56,7 +56,7 @@ let client;
 let displayManager;
 let usageReporter;
 let skinUpdater;
-const SKIN_VERSION = "0.2.32";
+const SKIN_VERSION = "0.2.33";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -162,7 +162,10 @@ const strings = {
     usageOn: "开启",
     usageOff: "关闭",
     updateTitle: "自动更新皮肤",
-    updateHelp: "默认关闭。开启后，在空闲且没有未保存修改时安装同一发布频道的新版本。更新失败会提示，可能需要手动重装皮肤包；不清空方案、豆仓、记录或偏好。",
+    updateHelp: "默认关闭。开启后每小时检查，在空闲且没有未保存修改时安装同一发布频道的新版本。也可随时点击「检查更新」。更新失败会提示，可能需要手动重装皮肤包；不清空方案、豆仓、记录或偏好。",
+    updateCheck: "检查更新",
+    updateAvailable: "发现新版本，等待空闲且没有未保存修改时更新",
+    updateAvailableOff: "发现新版本，开启自动更新后可安装",
     updateDisabled: "已关闭自动更新",
     updateWaiting: "等待空闲，并保留未保存的修改",
     updateChecking: "正在检查新版本…",
@@ -362,7 +365,10 @@ const strings = {
     usageOn: "On",
     usageOff: "Off",
     updateTitle: "Automatic skin updates",
-    updateHelp: "Off by default. Installs newer releases from the same channel only while idle with no unsaved edits. A failed update may require manual skin reinstallation. Profiles, beans, shots and preferences are not cleared.",
+    updateHelp: "Off by default. Checks hourly and installs newer releases from the same channel only while idle with no unsaved edits. You can also check at any time. A failed update may require manual skin reinstallation. Profiles, beans, shots and preferences are not cleared.",
+    updateCheck: "Check for updates",
+    updateAvailable: "New version found; waiting for idle with no unsaved edits",
+    updateAvailableOff: "New version found; turn on automatic updates to install",
     updateDisabled: "Automatic updates are off",
     updateWaiting: "Waiting for idle with no unsaved edits",
     updateChecking: "Checking for updates…",
@@ -2644,9 +2650,10 @@ function renderUsageSetting() {
 }
 function renderSkinUpdateSetting() {
   const value=skinUpdater?.status ?? {phase:'disabled',enabled:false};
-  const labels={disabled:'updateDisabled',waiting:'updateWaiting',checking:'updateChecking',installing:'updateInstalling',awaiting_confirmation:'updateConfirming',reload_pending:'updateReload',current:'updateCurrent',error:'updateError',unsupported:'updateUnsupported',storage_error:'updateStorageError'};
+  const labels={available:value.enabled?'updateAvailable':'updateAvailableOff',disabled:'updateDisabled',waiting:'updateWaiting',checking:'updateChecking',installing:'updateInstalling',awaiting_confirmation:'updateConfirming',reload_pending:'updateReload',current:'updateCurrent',error:'updateError',unsupported:'updateUnsupported',storage_error:'updateStorageError'};
   $('skinUpdateEnabled').setAttribute('aria-checked',String(value.enabled));
   $('skinUpdateEnabled').textContent=t(value.enabled?'usageOn':'usageOff');
+  $('skinUpdateCheck').disabled=['checking','installing','awaiting_confirmation','reload_pending'].includes(value.phase);
   $('skinUpdateStatus').textContent=t(labels[value.phase]??'updateWaiting')+(value.version?' · '+value.version:'')+(value.preferenceSaved===false&&value.phase!=='storage_error'?' '+t('updatePreferenceUnsaved'):'');
 }
 function skinUpdateContext() {
@@ -2819,6 +2826,7 @@ $("themeButton").onclick = $("settingsTheme").onclick = () =>
 $("languageButton").onclick = $("settingsLanguage").onclick = toggleLanguage;
 $("settingsButton").onclick = $("connectionButton").onclick = openSettings;
 $("skinUpdateEnabled").onclick = () => { skinUpdater?.setEnabled(!skinUpdater.enabled); renderSkinUpdateSetting(); };
+$("skinUpdateCheck").onclick = () => { void skinUpdater?.checkNow(); };
 $("usageEnabled").onclick = () => {
   usageReporter?.setEnabled(!usageReporter.enabled);
   renderUsageSetting();

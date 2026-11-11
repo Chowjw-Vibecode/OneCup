@@ -2,7 +2,7 @@
 
 「这一杯」是一套给 Decaid 平板用的横屏皮肤。从选豆、调整配方，到看萃取、记口感，屏幕始终围绕正在做的这杯咖啡。
 
-[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.32) · [安装方法](#安装)
+[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.33) · [安装方法](#安装)
 
 ## 设计思路
 
@@ -43,11 +43,16 @@
 
 ## 安装
 
-1. 下载皮肤包 **this-cup-0.2.32.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · This Cup」。
+1. 下载皮肤包 **this-cup-0.2.33.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · This Cup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
 3. 需要联动小方或 Crystal 磨豆机时，另下载 **thiscup-crystal.reaplugin-0.1.6.zip**，在 Decaid 的 **Plugins → Plugin actions → Install plugin → ZIP file** 中安装并启用。
 
-[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.32) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.33) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+
+## 0.2.33
+
+- 自动更新改为每小时检查一次，已有六小时等待时间会缩短。
+- 设置页增加「检查更新」，自动更新关闭时也能立即检查；安装和刷新仍等待空闲且没有未保存修改。
 
 ## 0.2.32
 

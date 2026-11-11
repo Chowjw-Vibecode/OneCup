@@ -1,11 +1,11 @@
-import {openFlavorWheel} from './flavor-wheel.js?v=0.2.32';
-import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.32';
-import {stageLabel} from './stage-labels.js?v=0.2.32';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.32';
-import {mountBeans} from './beans.js?v=0.2.32';
-import {paintGauge} from './instruments.js?v=0.2.32';
-import {setGroupHeadHint} from './ghc-icons.js?v=0.2.32';
-import {mountProfileEditor} from './profile-editor.js?v=0.2.32';
+import {openFlavorWheel} from './flavor-wheel.js?v=0.2.33';
+import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.33';
+import {stageLabel} from './stage-labels.js?v=0.2.33';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.33';
+import {mountBeans} from './beans.js?v=0.2.33';
+import {paintGauge} from './instruments.js?v=0.2.33';
+import {setGroupHeadHint} from './ghc-icons.js?v=0.2.33';
+import {mountProfileEditor} from './profile-editor.js?v=0.2.33';
 export function mountCeramic(api){
  const $=id=>document.getElementById(id),s=api.state;
  const pitcherPrompt=mountSteamPitcher(api);

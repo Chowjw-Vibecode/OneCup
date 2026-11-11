@@ -132,3 +132,58 @@ test('successful readback does not clear a newer pending update submitted by ano
 test('an unavailable or forbidden native installer releases pending state without replay or reload',async()=>{
  for(const status of [401,403,404,405]){const f=fixture({install:async()=>{throw Object.assign(new Error('rejected'),{status})}});f.updater.start();f.updater.setEnabled(true);await f.advance(60_000);assert.equal(f.updater.status.phase,'unsupported');assert.equal(JSON.parse(f.values.get(UPDATE_STORAGE_KEY)).pending,null);assert.equal(f.reloads,0);assert.equal(f.calls.filter(c=>c[0]==='post').length,1);f.updater.dispose();}
 });
+
+
+test('release checks repeat hourly without installing when no newer release exists',async()=>{
+ const f=fixture({fetch:async()=>({ok:true,json:async()=>[]})});f.updater.start();f.updater.setEnabled(true);
+ await f.advance(60_000);assert.equal(f.checks,1);
+ await f.advance(3_599_999);assert.equal(f.checks,1);
+ await f.advance(1);assert.equal(f.checks,2);
+ await f.advance(3_600_000);assert.equal(f.checks,3);
+ assert.equal(f.calls.some(c=>c[0]==='post'),false);f.updater.dispose();
+});
+
+test('legacy six-hour wait is shortened and persisted without changing the preference or pending state',async()=>{
+ const values=new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:1_000_000+6*3_600_000,pending:null})]]);
+ const f=fixture({values,fetch:async()=>({ok:true,json:async()=>[]})});f.updater.start();
+ assert.deepEqual(JSON.parse(values.get(UPDATE_STORAGE_KEY)),{enabled:true,nextCheck:1_000_000+3_600_000,pending:null});
+ await f.advance(3_599_999);assert.equal(f.checks,0);await f.advance(1);assert.equal(f.checks,1);
+ assert.equal(f.calls.some(c=>c[0]==='post'),false);f.updater.dispose();
+});
+
+
+test('manual check works immediately with automatic updates off and keeps the switch off',async()=>{
+ const f=fixture();f.context.canInstall=false;f.updater.start();await f.updater.checkNow();
+ assert.equal(f.checks,1);assert.equal(f.updater.enabled,false);assert.equal(f.updater.status.phase,'available');
+ assert.equal(f.updater.status.version,'0.2.29-rc.13');assert.equal(f.reloads,0);assert.equal(f.calls.some(c=>c[0]==='post'),false);
+ await f.advance(60_000);assert.equal(f.checks,1);f.updater.dispose();
+});
+
+test('manual check bypasses the hourly wait while an open settings dialog still blocks installation',async()=>{
+ const f=fixture({values:new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:true,nextCheck:1_000_000+3_600_000,pending:null})]])});
+ f.context.canInstall=false;f.updater.start();await f.updater.checkNow();
+ assert.equal(f.checks,1);assert.equal(f.updater.status.phase,'available');assert.equal(f.calls.some(c=>c[0]==='post'),false);
+ await f.advance(60_000);assert.equal(f.checks,1);assert.equal(f.reloads,0);
+ f.context.canInstall=true;await f.advance(30_000);assert.equal(f.checks,1);assert.equal(f.reloads,1);f.updater.dispose();
+});
+
+test('manual check reports current or an error without enabling automatic updates',async()=>{
+ for(const failure of [false,true]){const f=fixture({fetch:async()=>{if(failure)throw Error('offline');return{ok:true,json:async()=>[]}}});
+ f.updater.start();await f.updater.checkNow();assert.equal(f.checks,1);assert.equal(f.updater.status.phase,failure?'error':'current');
+ assert.equal(f.updater.enabled,false);assert.equal(f.calls.some(c=>c[0]==='post'),false);f.updater.dispose();}
+});
+
+test('repeated manual clicks during a check and a stopped page never duplicate work',async()=>{
+ let resolve;const f=fixture({fetch:()=>new Promise(done=>resolve=done)});f.updater.start();const checking=f.updater.checkNow();
+ await flush();await f.updater.checkNow();assert.equal(f.checks,1);f.updater.stop();
+ resolve({ok:true,json:async()=>[release('0.2.29-rc.13')]});await checking;assert.equal(f.calls.some(c=>c[0]==='post'),false);assert.equal(f.reloads,0);f.updater.dispose();
+});
+
+
+test('enabling a previously disabled installation also caps an old six-hour reservation',async()=>{
+ const values=new Map([[UPDATE_STORAGE_KEY,JSON.stringify({enabled:false,nextCheck:1_000_000+6*3_600_000,pending:null})]]);
+ const f=fixture({values,fetch:async()=>({ok:true,json:async()=>[]})});f.updater.start();
+ assert.equal(JSON.parse(values.get(UPDATE_STORAGE_KEY)).nextCheck,1_000_000+6*3_600_000);
+ f.updater.setEnabled(true);assert.equal(JSON.parse(values.get(UPDATE_STORAGE_KEY)).nextCheck,1_000_000+3_600_000);
+ await f.advance(3_600_000);assert.equal(f.checks,1);f.updater.dispose();
+});

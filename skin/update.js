@@ -1,10 +1,10 @@
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.32';
+import {isUsageEnvironment} from './usage.js?v=0.2.33';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
 export const RELEASES_URL='https://api.github.com/repos/Chowjw-Vibecode/This-Cup/releases?per_page=100';
-const HOUR=3_600_000, CHECK_INTERVAL=6*HOUR, START_DELAY=60_000, RECHECK=30_000;
+const HOUR=3_600_000, CHECK_INTERVAL=HOUR, START_DELAY=60_000, RECHECK=30_000;
 const versionPattern=/^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(alpha|beta|rc)\.(0|[1-9]\d*))?$/;
 function version(value){const m=typeof value==='string'&&value.match(versionPattern);return m?{value:value.replace(/^v/,''),base:m.slice(1,4).map(Number),channel:m[4]??null,sequence:Number(m[5]??0)}:null;}
 function compare(a,b){for(let i=0;i<3;i++)if(a.base[i]!==b.base[i])return a.base[i]-b.base[i];if(a.channel===b.channel)return a.sequence-b.sequence;if(!a.channel)return 1;if(!b.channel)return -1;return ['alpha','beta','rc'].indexOf(a.channel)-['alpha','beta','rc'].indexOf(b.channel);}
@@ -41,7 +41,7 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
  storage,fetchImpl=globalThis.fetch?.bind(globalThis),
  now=()=>Date.now(),setTimer=(fn,ms)=>setTimeout(fn,ms),clearTimer=id=>clearTimeout(id),
  reload=()=>globalThis.location.reload(),onStatus=()=>{},events=globalThis.window}={}){
- let saved={enabled:false,nextCheck:0,pending:null},preferenceSaved=true,storageBlocked=false,active=false,disposed=false,timer=null,readyAt=0,working=false,installedVersion=null;
+ let saved={enabled:false,nextCheck:0,pending:null},preferenceSaved=true,storageBlocked=false,active=false,disposed=false,timer=null,readyAt=0,working=false,installedVersion=null,availableTarget=null;
  let state={phase:'disabled',version:null};
  try{if(storage===undefined)storage=globalThis.localStorage;}catch{storageBlocked=true;preferenceSaved=false;}
  const context=()=>{try{return getContext()??{}}catch{return {}}};
@@ -93,19 +93,21 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
   }
   await verify(owner,saved.pending??{...target,apiOrigin:origin(context())});
  }
- async function tick(){
+ async function tick(manual=false){
   if(!active||disposed||working)return;
-  if(!saved.pending&&!saved.enabled)return;
+  if(!saved.pending&&!saved.enabled&&!manual)return;
   working=true;
   try{
    if(installedVersion){emit('reload_pending');if(saved.enabled&&canAutoInstall(context())){try{reload();}catch{}}else schedule(RECHECK);return;}
    const owner=getClient();
    if(saved.pending){if(owner?.get)await verify(owner,saved.pending);else{emit('awaiting_confirmation');schedule(60_000);}return;}
    if(!read()||!preferenceSaved){emit('storage_error');return;}
-   if(!saved.enabled){emit('disabled');return;}
-   if(now()<readyAt){schedule(readyAt-now());return;}
-   if(!canAutoInstall(context())||!owner?.get||!owner?.post){emit('waiting');schedule(RECHECK);return;}
-   if(now()<saved.nextCheck){emit('current');schedule(saved.nextCheck-now());return;}
+   if(!saved.enabled&&!manual){emit('disabled');return;}
+   if(manual&&!isUsageEnvironment(context())){emit('unsupported');return;}
+   if(!manual&&now()<readyAt){schedule(readyAt-now());return;}
+   if(!manual&&(!canAutoInstall(context())||!owner?.get||!owner?.post)){emit(availableTarget?'available':'waiting',availableTarget?{version:availableTarget.version}:{});schedule(RECHECK);return;}
+   if(!manual&&availableTarget){const target=availableTarget;if(typeof owner.exclusive==='function')await owner.exclusive(()=>install(owner,target));else await install(owner,target);return;}
+   if(!manual&&now()<saved.nextCheck){emit('current');schedule(saved.nextCheck-now());return;}
    saved.nextCheck=now()+CHECK_INTERVAL;if(!persist()){emit('storage_error');return;}
    emit('checking');
    const response=await fetchImpl(RELEASES_URL,{headers:{Accept:'application/vnd.github+json'},credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15_000)});
@@ -113,19 +115,23 @@ export function createSkinUpdater({getContext=()=>({}),getClient=()=>null,curren
    const target=selectSkinUpdate(await response.json(),currentVersion);
    if(!active||disposed)return;
    if(!read()||!preferenceSaved){emit('storage_error');return;}
-   if(!saved.enabled){emit('disabled');return;}
+   availableTarget=target;
+   if(!saved.enabled){emit(manual?(target?'available':'current'):'disabled',{version:target?.version??null});return;}
    if(!target){emit('current');schedule(CHECK_INTERVAL);return;}
-   if(getClient()!==owner||!canAutoInstall(context())){saved.nextCheck=0;persist();emit('waiting');schedule(RECHECK);return;}
+   if(getClient()!==owner||!canAutoInstall(context())){emit('available',{version:target.version});schedule(RECHECK);return;}
    if(typeof owner.exclusive==='function')await owner.exclusive(()=>install(owner,target));else await install(owner,target);
   }catch{emit(saved.pending?'awaiting_confirmation':'error');schedule(saved.pending?60_000:CHECK_INTERVAL);}
   finally{working=false;}
  }
- function start(){if(disposed||active)return;active=true;readyAt=now()+START_DELAY;read();if(!preferenceSaved)emit('storage_error');else{emit(saved.pending?'awaiting_confirmation':saved.enabled?'waiting':'disabled');schedule(START_DELAY);}}
+ function start(){if(disposed||active)return;active=true;readyAt=now()+START_DELAY;read();
+  // Shorten a previous six-hour reservation once, without extending it on reopen.
+  if(preferenceSaved&&saved.enabled&&!saved.pending&&saved.nextCheck>now()+CHECK_INTERVAL){saved.nextCheck=now()+CHECK_INTERVAL;persist();}
+  if(!preferenceSaved)emit('storage_error');else{emit(saved.pending?'awaiting_confirmation':saved.enabled?'waiting':'disabled');schedule(START_DELAY);}}
  function stop(){active=false;cancel();}
  function refresh(){if(!active||disposed||working)return;if(saved.pending){schedule(0);return;}if(!saved.enabled)return;schedule(Math.max(0,readyAt-now()));}
- function setEnabled(value){saved.enabled=value===true;persist();cancel();if(saved.pending){emit('awaiting_confirmation');schedule(0);}else if(!preferenceSaved)emit('storage_error');else{emit(saved.enabled?'waiting':'disabled');if(saved.enabled)refresh();}return saved.enabled;}
+ function setEnabled(value){saved.enabled=value===true;if(saved.enabled&&!saved.pending)saved.nextCheck=Math.min(saved.nextCheck,now()+CHECK_INTERVAL);persist();cancel();if(saved.pending){emit('awaiting_confirmation');schedule(0);}else if(!preferenceSaved)emit('storage_error');else{emit(saved.enabled?'waiting':'disabled');if(saved.enabled)refresh();}return saved.enabled;}
  const pageShow=event=>{if(event.persisted)start();};
  read();events?.addEventListener('pagehide',stop);events?.addEventListener('pageshow',pageShow);
- return{get enabled(){return saved.enabled;},get preferenceSaved(){return preferenceSaved;},get status(){return {...state,enabled:saved.enabled,preferenceSaved};},start,stop,refresh,setEnabled,
+ return{get enabled(){return saved.enabled;},get preferenceSaved(){return preferenceSaved;},get status(){return {...state,enabled:saved.enabled,preferenceSaved};},start,stop,refresh,setEnabled,checkNow:()=>tick(true),
   dispose(){stop();disposed=true;events?.removeEventListener('pagehide',stop);events?.removeEventListener('pageshow',pageShow);}};
 }
