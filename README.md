@@ -2,7 +2,7 @@
 
 「这一杯」是一套给 Decaid 平板用的横屏皮肤。从选豆、调整配方，到看萃取、记口感，屏幕始终围绕正在做的这杯咖啡。
 
-[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.31) · [安装方法](#安装)
+[下载安装包](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.32) · [安装方法](#安装)
 
 ## 设计思路
 
@@ -43,11 +43,16 @@
 
 ## 安装
 
-1. 下载皮肤包 **this-cup-0.2.31.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · This Cup」。
+1. 下载皮肤包 **this-cup-0.2.32.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · This Cup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
 3. 需要联动小方或 Crystal 磨豆机时，另下载 **thiscup-crystal.reaplugin-0.1.6.zip**，在 Decaid 的 **Plugins → Plugin actions → Install plugin → ZIP file** 中安装并启用。
 
-[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.31) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+[本版更新说明](https://github.com/Chowjw-Vibecode/This-Cup/releases/tag/v0.2.32) · [皮肤源码](skin) · [磨豆机插件源码](plugins/thiscup-crystal)
+
+## 0.2.32
+
+- 风味轮适配平板实际可用高度，底部按钮完整显示；放大镜按钮、双指缩放和拖动，已选扇区与标签使用蒂芙尼蓝，对勾位于外圈。
+- 品鉴页修复字母下沿裁切；豆名限制在方案名栏内，最多两行、超出省略。利用内部空白加高坐标图。
 
 ## 0.2.31
 

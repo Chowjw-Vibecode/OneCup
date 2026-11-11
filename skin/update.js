@@ -1,7 +1,7 @@
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.31';
+import {isUsageEnvironment} from './usage.js?v=0.2.32';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
 export const RELEASES_URL='https://api.github.com/repos/Chowjw-Vibecode/This-Cup/releases?per_page=100';
 const HOUR=3_600_000, CHECK_INTERVAL=6*HOUR, START_DELAY=60_000, RECHECK=30_000;

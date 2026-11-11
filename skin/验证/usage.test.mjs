@@ -50,7 +50,7 @@ function fixture(options={}) {
   let generated=0;
   const crypto=options.crypto===undefined?{getRandomValues(bytes){generated++;bytes.set(Array.from({length:16},(_,i)=>i+generated));return bytes;}}:options.crypto;
   const reporter=createUsageReporter({
-    getContext:options.getContext??(()=>state), storage, events,
+    getContext:options.getContext??(()=>state), currentVersion:options.version, storage, events,
     now:time.now,setTimer:time.setTimer,clearTimer:time.clearTimer,cryptoImpl:crypto,
     fetchImpl:(url,init)=>{
       calls.push({url,init,at:time.now()});
@@ -318,4 +318,50 @@ test('real cookie adapter stays unavailable until page reopen and opt-out then p
   reopened.reporter.setEnabled(false);assert.equal(reopened.reporter.preferenceSaved,true);
   const saved=fixture({storage:jar.storage(26777)});assert.equal(saved.reporter.enabled,false);
   for(const r of [f,reopened,saved])r.reporter.dispose();
+});
+
+
+test('version upgrade reports the same installation once before the previous weekly interval',async()=>{
+  const f=fixture({version:'0.2.31'});f.reporter.start();await f.time.advance(60_000);
+  const prior=f.stored();assert.equal(JSON.parse(f.calls[0].init.body).version,'0.2.31');f.reporter.dispose();
+  const g=fixture({version:'0.2.32',time:f.time,values:f.values});g.reporter.start();
+  await g.time.advance(59_999);assert.equal(g.calls.length,0);await g.time.advance(1);
+  assert.equal(g.calls.length,1);assert.equal(g.stored().install_id,prior.install_id);assert.equal(g.generated,0);
+  assert.deepEqual(Object.keys(JSON.parse(g.calls[0].init.body)).sort(),['install_id','product','version']);
+  g.reporter.dispose();const h=fixture({version:'0.2.32',time:g.time,values:g.values});h.reporter.start();
+  await h.time.advance(60_000);assert.equal(h.calls.length,0);h.reporter.dispose();
+});
+test('legacy weekly schedule receives one version report; failed version report retains daily backoff across reload',async()=>{
+  const values=new Map([[USAGE_STORAGE_KEY,JSON.stringify({enabled:true,install_id:'a'.repeat(32),next_at:99_000_000})]]);
+  const f=fixture({version:'0.2.32',values,fetch:()=>Promise.reject(Error('offline'))});f.reporter.start();await f.time.advance(60_000);
+  assert.equal(f.calls.length,1);assert.equal(f.generated,0);assert.equal(f.stored().attempt_version,'0.2.32');f.reporter.dispose();
+  const g=fixture({version:'0.2.32',values,time:f.time});g.reporter.start();await g.time.advance(DAY-1);assert.equal(g.calls.length,0);
+  await g.time.advance(1);assert.equal(g.calls.length,1);g.reporter.dispose();
+});
+test('version migration preserves cookie identity and disabled preference',async()=>{
+  const jar=cookieJar(),legacy=new Map([[USAGE_STORAGE_KEY,JSON.stringify({enabled:false,install_id:'a'.repeat(32),next_at:9_000_000})]]);
+  const f=fixture({version:'0.2.32',storage:jar.storage(25123,legacy)});f.reporter.start();await f.time.advance(WEEK);
+  assert.equal(f.calls.length,0);assert.equal(f.stored().install_id,'a'.repeat(32));assert.equal(f.reporter.enabled,false);f.reporter.dispose();
+});
+
+
+test('failed version report reserves one shared retry interval across older and newer pages',async()=>{
+  const values=new Map([[USAGE_STORAGE_KEY,JSON.stringify({enabled:true,install_id:'a'.repeat(32),next_at:90000000,attempt_version:'0.2.30'})]]);
+  const time=clock(),newer=fixture({version:'0.2.31',values,time,fetch:()=>Promise.reject(Error('offline'))});
+  newer.reporter.start();await time.advance(60_000);assert.equal(newer.calls.length,1);
+  const older=fixture({version:'0.2.30',values,time});older.reporter.start();await time.advance(60_000);
+  assert.equal(older.calls.length,0);assert.equal(newer.calls.length,1);
+  const newest=fixture({version:'0.2.32',values,time});newest.reporter.start();await time.advance(DAY-60_001);
+  assert.equal(older.calls.length,0);assert.equal(newest.calls.length,0);assert.equal(newer.calls.length,1);
+  assert.equal(newer.stored().install_id,'a'.repeat(32));
+  for(const f of [older,newer,newest])f.reporter.dispose();
+});
+test('in-flight version report cannot be duplicated by another version; opt-out wins across versions',async()=>{
+  const values=new Map(),time=clock(),first=fixture({version:'0.2.30',values,time,fetch:()=>new Promise(()=>{})});
+  first.reporter.start();await time.advance(60_000);
+  const second=fixture({version:'0.2.31',values,time});second.reporter.start();await time.advance(60_000);
+  assert.equal(first.calls.length,1);assert.equal(second.calls.length,0);
+  second.reporter.setEnabled(false);first.reporter.refresh();await time.advance(DAY);
+  assert.equal(first.calls.length,1);assert.equal(second.calls.length,0);assert.equal(first.reporter.enabled,false);
+  first.reporter.dispose();second.reporter.dispose();
 });

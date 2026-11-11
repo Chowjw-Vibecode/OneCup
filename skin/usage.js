@@ -8,6 +8,8 @@ const START_DELAY = 60_000;
 const IDLE_RECHECK = 30_000;
 const REQUEST_TIMEOUT = 4_000;
 const ID = /^[0-9a-f]{32}$/;
+const VERSION = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/;
+const validVersion = value => typeof value === 'string' && value.length <= 64 && VERSION.test(value);
 const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
 const IDLE = new Set(['idle', 'schedidle', 'sleeping']);
 const PREVIEW = /(?:^|[\/_.-])(?:scene|mock|preview|prototype|test|tests|验证)(?:$|[\/_.-])/i;
@@ -15,7 +17,10 @@ const PREVIEW = /(?:^|[\/_.-])(?:scene|mock|preview|prototype|test|tests|验证)
 function storedState(raw) {
   const value = JSON.parse(raw);
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
-      Object.keys(value).sort().join(',') !== 'enabled,install_id,next_at' ||
+      Object.keys(value).some(key=>!['enabled','install_id','next_at','attempt_version','retry_at'].includes(key)) ||
+      !['enabled','install_id','next_at'].every(key=>Object.hasOwn(value,key)) ||
+      ('retry_at' in value && (!Number.isFinite(value.retry_at) || value.retry_at < 0)) ||
+      ('attempt_version' in value && value.attempt_version !== null && !validVersion(value.attempt_version)) ||
       typeof value.enabled !== 'boolean' ||
       (value.install_id !== null && (typeof value.install_id !== 'string' || !ID.test(value.install_id))) ||
       !Number.isFinite(value.next_at) || value.next_at < 0) throw Error('Invalid statistics preference');
@@ -111,6 +116,7 @@ function isIdleConnection(context) {
 
 export function createUsageReporter({
   getContext = () => ({}),
+  currentVersion,
   storage,
   fetchImpl = globalThis.fetch?.bind(globalThis),
   cryptoImpl = globalThis.crypto,
@@ -120,6 +126,7 @@ export function createUsageReporter({
   events = globalThis.window,
 } = {}) {
   if (storage === undefined) storage = createUsageCookieStorage();
+  const version = validVersion(currentVersion) ? currentVersion : null;
   let state = {enabled:true, install_id:null, next_at:0};
   let preferenceOverride = null;
   let hasStoredState = false;
@@ -137,6 +144,8 @@ export function createUsageReporter({
         enabled:preferenceOverride ?? value.enabled,
         install_id:value.install_id,
         next_at:value.next_at,
+        ...('attempt_version' in value ? {attempt_version:value.attempt_version} : {}),
+        ...('retry_at' in value ? {retry_at:value.retry_at} : {}),
       };
       return true;
     } catch { return false; }
@@ -163,11 +172,13 @@ export function createUsageReporter({
     if (!active || disposed || !state.enabled) return;
     timer = setTimer(() => { timer = null; void tick(); }, Math.max(0, Math.min(delay, WEEK)));
   }
+  // Failure/in-flight reservation is shared by every version, including old open pages.
+  function dueAt() { return Math.max(state.retry_at ?? 0, version && state.attempt_version !== version ? 0 : state.next_at); }
   async function tick() {
     if (!active || disposed || !state.enabled || controller) return;
     if (!read()) { blockedUntil = now() + DAY; schedule(DAY); return; }
     if (!state.enabled) return;
-    const wait = Math.max(readyAt, blockedUntil, state.next_at) - now();
+    const wait = Math.max(readyAt, blockedUntil, dueAt()) - now();
     if (wait > 0) { schedule(wait); return; }
     const current = context();
     if (!isUsageEnvironment(current)) return;
@@ -184,6 +195,8 @@ export function createUsageReporter({
     // Persist the ID and reserve the failure interval BEFORE any transport.
     // A reload or another tab must not turn a failed request into a retry loop.
     state.next_at = now() + DAY;
+    state.retry_at = state.next_at;
+    if (version) state.attempt_version = version;
     if (!persist()) { blockedUntil = now() + DAY; schedule(DAY); return; }
 
     const installId = state.install_id, attempt = ++revision;
@@ -197,7 +210,7 @@ export function createUsageReporter({
       const request = Promise.resolve().then(() => fetchImpl(USAGE_ENDPOINT, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({install_id:installId, product:'this_cup'}),
+        body:JSON.stringify({install_id:installId, product:'this_cup', ...(version ? {version} : {})}),
         credentials:'omit', referrerPolicy:'no-referrer', redirect:'error', cache:'no-store',
         signal:aborter.signal,
       })).then(async response => {
@@ -211,11 +224,12 @@ export function createUsageReporter({
         if (requestTimer !== null) clearTimer(requestTimer);
         requestTimer = null; controller = null;
         // Re-read the shared preference so an opt-out in another tab wins.
-        if (read() && state.enabled && state.install_id === installId) {
+        if (read() && state.enabled && state.install_id === installId && (!version || state.attempt_version === version)) {
           state.next_at = now() + (accepted ? WEEK : DAY);
+          state.retry_at = accepted ? 0 : state.next_at;
           if (!persist()) blockedUntil = state.next_at;
         }
-        if (active && state.enabled) schedule(Math.max(readyAt, blockedUntil, state.next_at) - now());
+        if (active && state.enabled) schedule(Math.max(readyAt, blockedUntil, dueAt()) - now());
       }
     }
   }
@@ -230,7 +244,7 @@ export function createUsageReporter({
     if (!active || disposed) return;
     read();
     if (!state.enabled) { cancelTimer(); cancelRequest(); return; }
-    if (!controller && isUsageEnvironment(context())) schedule(Math.max(readyAt, blockedUntil, state.next_at) - now());
+    if (!controller && isUsageEnvironment(context())) schedule(Math.max(readyAt, blockedUntil, dueAt()) - now());
   }
   function setEnabled(enabled) {
     const readable=read();

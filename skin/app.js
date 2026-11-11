@@ -1,17 +1,17 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.31";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.31";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.31";
-import {telemetryPath} from "./chart-path.js?v=0.2.31";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.31";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.31";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.31";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.31";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.31";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.31";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.31";
-import { createSkinUpdater } from "./update.js?v=0.2.31";
-import { createUsageReporter } from "./usage.js?v=0.2.31";
+import {stageLabel} from "./stage-labels.js?v=0.2.32";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.32";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.32";
+import {telemetryPath} from "./chart-path.js?v=0.2.32";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.32";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.32";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.32";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.32";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.32";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.32";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.32";
+import { createSkinUpdater } from "./update.js?v=0.2.32";
+import { createUsageReporter } from "./usage.js?v=0.2.32";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -56,7 +56,7 @@ let client;
 let displayManager;
 let usageReporter;
 let skinUpdater;
-const SKIN_VERSION = "0.2.31";
+const SKIN_VERSION = "0.2.32";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -158,7 +158,7 @@ const strings = {
     profileName: "方案名称",
     settings: "设置",
     usageTitle: "匿名国家 / 地区统计",
-    usageHelp: "发送随机编号和产品名称，由网络出口判断国家 / 地区；不含出杯记录、配方或设备编号。关闭后停止后续上报。",
+    usageHelp: "发送随机编号、产品名称和版本号，由网络出口判断国家 / 地区；不含出杯记录、配方或设备编号。关闭后停止后续上报。",
     usageOn: "开启",
     usageOff: "关闭",
     updateTitle: "自动更新皮肤",
@@ -358,7 +358,7 @@ const strings = {
     profileName: "Profile name",
     settings: "Settings",
     usageTitle: "Anonymous country / region statistics",
-    usageHelp: "Sends a random ID and product name; the network exit determines the country / region. No shots, recipes or device IDs are sent. Turn off to stop future check-ins.",
+    usageHelp: "Sends a random ID, product name and version; the network exit determines the country / region. No shots, recipes or device IDs are sent. Turn off to stop future check-ins.",
     usageOn: "On",
     usageOff: "Off",
     updateTitle: "Automatic skin updates",
@@ -2908,7 +2908,7 @@ new ResizeObserver(() => {
 }).observe($("chartWrap"));
 setTheme(s.theme);
 localize();
-usageReporter = createUsageReporter({getContext:() => ({
+usageReporter = createUsageReporter({currentVersion:SKIN_VERSION,getContext:() => ({
   pageUrl:location.href, apiUrl:s.baseUrl, host:window.__DECENT_HOST__,
   settings:s.settings, connection:s.connection, machineState:machineState(),
   busy:s.busy || Boolean(s.awaiting) || running(),
