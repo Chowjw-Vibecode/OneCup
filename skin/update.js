@@ -1,8 +1,8 @@
-import {mirrorReleasesUrl,trustedMirrorAsset,normalizeMirrorReleases,confirmedMirrorDownloadFailure} from './china-mirror.js?v=0.2.39';
+import {mirrorReleasesUrl,trustedMirrorAsset,normalizeMirrorReleases,confirmedMirrorDownloadFailure} from './china-mirror.js?v=0.2.40';
 // Skin-only updates via Decaid's documented installer. No machine command or data reset.
 // Native installer behavior: decentespresso/decaid lib/src/services/webserver/webui_handler.dart
 // and lib/src/webui_support/webui_storage.dart (installFromUrl / _installFromDirectory).
-import {isUsageEnvironment} from './usage.js?v=0.2.39';
+import {isUsageEnvironment} from './usage.js?v=0.2.40';
 export const UPDATE_STORAGE_KEY='thiscup.autoUpdate.v1';
 export const CHINA_MIRROR_STORAGE_KEY='onecup.chinaMirror.v1';
 export const CHINA_MIRROR_REPOSITORY='chowjw/OneCup';

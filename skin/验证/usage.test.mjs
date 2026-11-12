@@ -378,3 +378,8 @@ test('upgrading a prior one-day failure shortens the reservation once without re
   await time.advance(1);assert.equal(g.calls.length,1);assert.equal(g.generated,0);
   assert.equal(g.stored().install_id,id);assert.equal(g.stored().retry_at,0);g.reporter.dispose();
 });
+
+test('cup events obtain the existing persistent installation identity without a second identity',async()=>{
+ const f=fixture({version:'0.2.39'});const id=f.reporter.getInstallationId();assert.match(id,/^[a-f0-9]{32}$/);assert.equal(f.generated,1);assert.equal(f.reporter.getInstallationId(),id);assert.equal(f.generated,1);
+ f.reporter.start();await f.time.advance(60_000);assert.equal(JSON.parse(f.calls[0].init.body).install_id,id);assert.equal(f.generated,1);f.reporter.dispose();
+});

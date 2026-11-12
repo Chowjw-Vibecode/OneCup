@@ -242,6 +242,17 @@ export function createUsageReporter({
       }
     }
   }
+  function getInstallationId() {
+    if (!read() || !state.enabled || !isUsageEnvironment(context())) return null;
+    if (!state.install_id) {
+      try {
+        const bytes=new Uint8Array(16);cryptoImpl.getRandomValues(bytes);
+        state.install_id=[...bytes].map(value=>value.toString(16).padStart(2,'0')).join('');
+        if (!persist()) return null;
+      } catch { return null; }
+    }
+    return state.install_id;
+  }
   function start() {
     if (disposed || active) return;
     active = true; readyAt = now() + START_DELAY;
@@ -273,7 +284,7 @@ export function createUsageReporter({
   return {
     get enabled() { return state.enabled; },
     get preferenceSaved() { return preferenceOverride === null; },
-    start, stop, refresh, setEnabled,
+    start, stop, refresh, setEnabled, getInstallationId,
     dispose() {
       stop(); disposed = true;
       events?.removeEventListener('pagehide', stop);

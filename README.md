@@ -8,7 +8,7 @@
 
 | 下载内容 | 国内下载 | GitHub 下载 | 安装说明 |
 | --- | --- | --- | --- |
-| **OneCup 皮肤 0.2.39** | [发行页](https://gitee.com/chowjw/OneCup/releases/tag/v0.2.39) · [皮肤 ZIP](https://gitee.com/chowjw/OneCup/releases/download/v0.2.39/onecup-0.2.39.zip) | [皮肤 ZIP](https://github.com/Chowjw-Vibecode/OneCup/releases/download/v0.2.39/onecup-0.2.39.zip) | [皮肤安装](#安装) |
+| **OneCup 皮肤 0.2.40** | [发行页](https://gitee.com/chowjw/OneCup/releases/tag/v0.2.40) · [皮肤 ZIP](https://gitee.com/chowjw/OneCup/releases/download/v0.2.40/onecup-0.2.40.zip) | [皮肤 ZIP](https://github.com/Chowjw-Vibecode/OneCup/releases/download/v0.2.40/onecup-0.2.40.zip) | [皮肤安装](#安装) |
 | **小方 · CRYSTAL 磨豆机插件 0.2.0** | [发行页](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [发行页](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [插件安装与入口](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装) |
 
 ## 设计思路
@@ -50,11 +50,19 @@
 
 ## 安装
 
-1. 下载皮肤包 **onecup-0.2.39.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
+1. 下载皮肤包 **onecup-0.2.40.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
 3. 需要联动小方或 Crystal 磨豆机时，请安装[独立磨豆机插件 0.2.0](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装)。推荐 **Plugins → Plugin actions → Install plugin → GitHub Release**：Repository 填 `Chowjw-Vibecode/decaid-plugin-crystal-grinder`，Asset name 填 `thiscup-crystal.reaplugin.zip` 或留空，并开启 Decaid 自动检查更新。国内 ZIP 手装方式见插件说明；皮肤更新不替换控制器。
 
 [本版更新说明](https://gitee.com/chowjw/OneCup/releases) · [皮肤源码](skin) · [磨豆机插件独立仓库](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder)
+
+## 0.2.40
+
+- 萃取与品鉴图表利用左右空间，两行图例和读数居中；末端数值放在曲线内侧，减少刻度干扰。
+- 压力和流量默认显示 0–10，超过范围时自动扩大坐标轴；切页和调整窗口后保持完整宽度。
+- 预热结束后平滑收拢预热段，保留正式萃取数据及温度线的真实连接。
+- 右上角统一显示「预热中／萃取制作／结束」，圆点分别为暖橙、蓝、绿；连接异常仍优先提示。
+- 完善制作完成后的记录保存、评价关联及断网恢复。
 
 ## 0.2.39
 

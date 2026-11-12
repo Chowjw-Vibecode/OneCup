@@ -1,11 +1,12 @@
-import {openFlavorWheel} from './flavor-wheel.js?v=0.2.39';
-import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.39';
-import {stageLabel} from './stage-labels.js?v=0.2.39';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.39';
-import {mountBeans} from './beans.js?v=0.2.39';
-import {paintGauge} from './instruments.js?v=0.2.39';
-import {setGroupHeadHint} from './ghc-icons.js?v=0.2.39';
-import {mountProfileEditor} from './profile-editor.js?v=0.2.39';
+import {beanSnapshot} from './cup-telemetry.js?v=0.2.40';
+import {openFlavorWheel} from './flavor-wheel.js?v=0.2.40';
+import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.40';
+import {stageLabel} from './stage-labels.js?v=0.2.40';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.40';
+import {mountBeans} from './beans.js?v=0.2.40';
+import {paintGauge} from './instruments.js?v=0.2.40';
+import {setGroupHeadHint} from './ghc-icons.js?v=0.2.40';
+import {mountProfileEditor} from './profile-editor.js?v=0.2.40';
 export function mountCeramic(api){
  const $=id=>document.getElementById(id),s=api.state;
  const pitcherPrompt=mountSteamPitcher(api);
@@ -93,6 +94,7 @@ export function mountCeramic(api){
   pendingFeedbackStore=copy(payload);
   await client.post(path,payload);
   const read=await client.get(path);if(!current())return false;if(JSON.stringify(read)!==JSON.stringify(payload))throw Error(text('读回不一致，评价尚未确认保存','Notes could not be verified'));
+  void api.onAssessmentSaved?.(shot,read,client);
   if(feedbackId===id&&api.client===client){feedbackBaseline=copy(read);nativeBaseline=copy(shot.annotations??{});pendingFeedbackStore=null;}
   if(feedbackId===id&&s.runId===id&&api.client===client&&JSON.stringify(feedback)===original){feedback=copy(payload);$('ceramicNote').value=feedback.note;feedbackDirty=false;feedbackDraftOwned=false;try{sessionStorage.removeItem(feedbackDraftKey(id,client))}catch{}api.notice(text('评价已保存','Notes saved'));}return true;
  }catch(e){if(feedbackId===id&&s.runId===id&&feedbackClient===client&&api.client===client)error(e);return false}finally{if(feedbackId===id&&feedbackClient===client&&api.client===client){feedbackBusy=false;renderFeedback()}}}
@@ -139,7 +141,7 @@ export function mountCeramic(api){
  $('ceramicBeans').onclick=()=>{if(api.running()||feedbackBusy)return;beansPanel=mountBeans(document.body,{client:api.client,locale:s.language,selectedId:s.mode==='finished'?feedback.bean?.id:s.workflow?.context?.extras?.thisCupBeanId??null,getScale:()=>({connected:s.connection.scaleConnected,stale:s.connection.scaleStale,weight:s.snapshot.scale?.weight,tare:()=>api.client.tare()}),onSelect:async b=>{
    if(feedbackBusy)throw Error(text('评价保存中，请稍候','Notes are being saved. Please wait.'));
    if(s.mode==='finished'){feedback.bean=b;changedFeedback()}
-   else {const base=await api.client.get('/workflow');const read=await api.client.saveWorkflow({context:{...base.context,coffeeName:b?.name||'',coffeeRoaster:'',extras:{...base.context?.extras,thisCupBeanId:b?.id??null}}},base);s.ceramicBean=b;api.updateAux(read)}
+   else {const base=await api.client.get('/workflow');const read=await api.client.saveWorkflow({context:{...base.context,coffeeName:b?.name||'',coffeeRoaster:'',extras:{...base.context?.extras,thisCupBeanId:b?.id??null,thisCupBeanSnapshot:beanSnapshot(b)}}},base);s.ceramicBean=b;api.updateAux(read)}
    api.render();
   },onError:m=>api.notice(m,true)})};
  const steamKeys={temperature:'targetTemperature',flow:'flow',duration:'duration'};
@@ -261,10 +263,13 @@ export function mountCeramic(api){
   const workflow=screen==='taste'?(s.runWorkflow||s.workflow):s.draft,r=api.viewOf(workflow);
   $('recipeName').textContent=r.name;
   const recipeLabel=document.querySelector('.recipe-head [data-i18n="currentRecipe"]');if(recipeLabel)recipeLabel.textContent=screen==='taste'?text('本杯方案','This shot’s profile'):text('当前方案','Current profile');
-  if(screen==='taste'){$('stageTitle').textContent=text('第 3/3 步 · 品鉴','Step 3/3 · Taste');$('phaseName').textContent='';}
-  if(screen==='brew'){$('stageTitle').textContent=s.preparing?text('预热中','Preheating'):text('第 2/3 步 · 萃取','Step 2/3 · Brew');if(s.preparing)$('phaseName').textContent='';}
+  const cupPhase=screen==='taste'?'finished':screen==='brew'?(s.preparing?'preheating':'brewing'):null;
+  const cupPhaseLabel=cupPhase==='preheating'?text('预热中','Preheating'):cupPhase==='brewing'?text('萃取制作','Brewing'):text('结束','Finished');
+  if(cupPhase){$('stageTitle').textContent='';if(screen==='taste'||s.preparing)$('phaseName').textContent='';}
   if(operation){$('stageTitle').textContent=text(...operation);$('phaseName').textContent='';}
-  if(!s.connection.stale&&s.connection.machineConnected)$('connectionText').textContent=operation?text(...operation):screen==='taste'?text('已完成','Finished'):screen==='brew'?text('萃取中','Brewing'):state==='idle'?text('已就绪','Ready'):$('connectionText').textContent;
+  const phaseFresh=s.connection.connected&&!s.connection.stale&&s.connection.machineConnected;
+  $('connectionDot').dataset.cupPhase=phaseFresh?(cupPhase??''):'';
+  if(phaseFresh)$('connectionText').textContent=operation?text(...operation):cupPhase?cupPhaseLabel:state==='idle'?text('已就绪','Ready'):$('connectionText').textContent;
 
   $('ceramicDose').textContent=fmt(r.dose);$('ceramicYield').textContent=fmt(r.target);$('ceramicTemp').textContent=fmt(r.temperature);
   $('ceramicRecipeSummary').textContent=`${fmt(r.dose)} g → ${fmt(r.target)} g · 1:${r.dose>0?ratioFmt(r.target/r.dose):'—'}`;
@@ -289,7 +294,7 @@ export function mountCeramic(api){
   $('profileDetails').querySelector('span').textContent=text('编辑曲线','Edit profile');
   let ratio=$('ceramicAdjustRatio');if(!ratio){ratio=document.createElement('p');ratio.id='ceramicAdjustRatio';$('parameters').after(ratio)}ratio.textContent=text('粉液比　','Ratio  ')+(r.dose>0?'1:'+ratioFmt(r.target/r.dose):'—');
   const step=s.snapshot.machine?.profileFrame;
-  if(screen==='brew'&&Number.isInteger(step))$('phaseName').textContent=text('第 ','Stage ')+(step+1)+' / '+(s.workflow?.profile?.steps?.length||'—')+' · '+stageLabel(s.workflow?.profile?.steps?.[step]?.name,s.language);
+  if(screen==='brew'&&!s.preparing&&Number.isInteger(step))$('phaseName').textContent=text('第 ','Stage ')+(step+1)+' / '+(s.workflow?.profile?.steps?.length||'—')+' · '+stageLabel(s.workflow?.profile?.steps?.[step]?.name,s.language);
   $('phaseName').title=$('phaseName').textContent;
   for(const id of ['recipeName','ceramicAdjustName']){$(id).title=r.name||'';$(id).dataset.longName=String(/[\u3400-\u9fff]/.test(r.name)?String(r.name).length>5:String(r.name||'').length>9)}
   document.querySelector('[data-command=steam] span').textContent=text('蒸汽','Steam');

@@ -3,6 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {beanSnapshot} from '../cup-telemetry.js';
 import {stageLabel} from '../stage-labels.js';
 import {isPreparation,isProfileSample} from '../brew-timeline.js';
 import {readFile} from 'node:fs/promises';
@@ -50,7 +51,7 @@ function fixture({language='en',mode='ready',canStart=false}={}){
  let ui,beansOptions;const panels=[];
  const currentMachine=()=>s.snapshot.machine.state.state;
  const annotations=new Map();
- const client={async get(path){calls.push(['get',path]);return path==='/workflow'?copy(s.workflow):copy(storage.get(path)??null);},
+ const client={async get(path){calls.push(['get',path]);return path==='/workflow'?copy(s.workflow):path==='/machine/info'?copy(s.machineInfo??null):copy(storage.get(path)??null);},
   async post(path,payload){calls.push(['post',path,copy(payload)]);storage.set(path,copy(payload));},
   async put(path,payload){calls.push(['put',path,copy(payload)]);annotations.set(path,copy(payload.annotations));},
   async shot(id){return {annotations:copy(annotations.get('/shots/'+id)??{})};},
@@ -62,18 +63,18 @@ function fixture({language='en',mode='ready',canStart=false}={}){
   setWorkflow:read=>{s.workflow=copy(read);s.draft=copy(read);},updateAux:read=>{s.workflow=copy(read);api.render();},
   openProfiles:()=>calls.push(['openProfiles']),command:action=>client.command(action)};
  const panel=kind=>{const handle={kind,closed:false,close(){handle.closed=true;},dismiss(){handle.closed=true;}};panels.push(handle);return handle;};
- const context=vm.createContext({stageLabel,mountSteamPitcher:()=>({render(){}}),document:d.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;return panel('beans');},mountProfileEditor:()=>panel('editor')});
+ const context=vm.createContext({stageLabel,beanSnapshot,mountSteamPitcher:()=>({render(){}}),document:d.document,structuredClone,guardDismissClick(){},location:{search:"?api=fixture"},sessionStorage:{getItem(){return null},setItem(){},removeItem(){}},paintGauge(){},setGroupHeadHint(){},mountBeans:(_host,options)=>{beansOptions=options;return panel('beans');},mountProfileEditor:()=>panel('editor')});
  vm.runInContext(ceramicSource.replace(/^import .*;\n/gm,'').replace('export function mountCeramic','function mountCeramic'),context);ui=context.mountCeramic(api);
  return {...d,s,ui,api,client,calls,storage,notices,panels,setMachine(value){s.snapshot.machine.state.state=value;},get beansOptions(){return beansOptions;}};
 }
 
 function machineDispatch(f){
- const context=vm.createContext({s:f.s,$:f.get,isPreparation,isProfileSample,document:f.document,window:{ceramicUI:f.ui},client:f.client,clone:copy,
+ const context=vm.createContext({runTelemetryMetadata:null,runTelemetryBean:null,telemetryFinishedMarker:null,runTelemetryShotId:null,cupEnvironmentMetadata:()=>({machineInfo:copy(f.s.machineInfo)}),machineIdentity:async info=>({machine_id:info?.serialNumber??null,identity_status:info?.serialNumber?'known':'unknown'}),beanSnapshot,cupReporter:null,s:f.s,$:f.get,isPreparation,isProfileSample,document:f.document,window:{ceramicUI:f.ui},client:f.client,clone:copy,
   num:value=>Number.isFinite(value)?value:null,machineState:f.api.machineState,render:f.api.render,scheduleRender:f.api.render,persistRunDraft(){},requestAnimationFrame(){},setTimeout(){},
   displayManager:{machineChanged(){}},commandConfirmed(){},sampleOf:()=>({time:0,weight:0}),loadFinishedShot(){},refreshHistory(){}});
  const start=appSource.indexOf('const activeStates = '),end=appSource.indexOf('const running = ',start);assert(start>=0&&end>start);
  vm.runInContext(appSource.slice(start,end)+'\n'+['openDialog','closeDialog','alignedScale','onSnapshot'].map(productionFunction).join('\n'),context);
- return state=>context.onSnapshot({machine:{state:{state},timestamp:'2026-10-31T06:00:00.000Z'},shotState:{state:state==='espresso'?'pouring':'idle',shotId:'shot-new'},scale:{weight:0}});
+ const dispatch=state=>context.onSnapshot({machine:{state:{state},timestamp:'2026-10-31T06:00:00.000Z'},shotState:{state:state==='espresso'?'pouring':'idle',shotId:'shot-new'},scale:{weight:0}});dispatch.snapshot=value=>context.onSnapshot(value);dispatch.context=context;return dispatch;
 }
 
 for(const language of ['zh','en'])test(`non-coffee machine operations never render as a brewing shot (${language})`,()=>{
@@ -181,7 +182,7 @@ test('Repeat this cup restores the shot recipe without starting or replacing unr
 function appFixture(names){
  const d=dom(),calls=[],timers=[];
  const s={modal:null,language:'en',workflow:{profile:{title:'Recipe'},hotWaterData:{targetTemperature:80,volume:100}},draft:{profile:{title:'Recipe'},hotWaterData:{targetTemperature:80,volume:100}},settings:{},connection:{scaleConnected:false},snapshot:{machine:{state:{state:'idle'}}},busy:false};
- const context=vm.createContext({document:d.document,$:d.get,s,window:{},clone:copy,t:key=>key,fmt:v=>String(v),num:v=>typeof v==='number'?v:null,explainError:error=>error.message,
+ const context=vm.createContext({cupReporter:null,document:d.document,$:d.get,s,window:{},clone:copy,t:key=>key,fmt:v=>String(v),num:v=>typeof v==='number'?v:null,explainError:error=>error.message,
   client:{async get(path){calls.push(['get',path]);return {};},async command(action){calls.push(['command',action]);}},
   running:()=>false,editable:()=>true,connected:()=>false,machineState:()=>s.snapshot.machine.state.state,canStartFromScreen:()=>false,
   render(){},renderHotWater(){},renderKeypad(){},requestAnimationFrame(){},setTimeout:(fn,delay)=>{const timer={fn,delay};timers.push(timer);return timer;},clearTimeout:timer=>{if(timer)timer.cleared=true;},
@@ -255,7 +256,7 @@ test('sleep art rotates at the configured interval, restores on wake, and keeps 
 for(const state of ['espresso','hotwater','hotwater_rinse'])for(const modal of ['ceramicAdjustDialog','ceramicSteamDialog'])test(`physical ${state} start leaves ${modal} so Stop is reachable`,()=>{
  const f=fixture();f.s.modal=modal;machineDispatch(f)(state);
  if(state==='espresso')assert.equal(f.s.mode,'running');
- assert.equal(f.s.modal,null,'Full-screen editor must not cover live controls after a physical start');assert.deepEqual(f.calls,[]);
+ assert.equal(f.s.modal,null,'Full-screen editor must not cover live controls after a physical start');assert.deepEqual(f.calls,state==='espresso'?[['get','/machine/info']]:[]);
 });
 
 test('physical steam start retains its own page and Stop, while a keypad cannot jump back over a new operation',()=>{
@@ -355,4 +356,29 @@ test('automatic skin installation context preserves drafts, dialogs, grinder wor
  f.context.window.ceramicUI.canAutoUpdate=()=>false;assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.window.ceramicUI.canAutoUpdate=()=>true;
  f.context.client.grinder={cachedState:{available:true,connected:true,state:'grinding',busy:true}};assert.equal(f.context.skinUpdateContext().canInstall,false);f.context.client.grinder.cachedState={available:false};
  f.context.document.querySelectorAll=()=>[{getClientRects:()=>[{}]}];f.context.getComputedStyle=()=>({visibility:'visible'});assert.equal(f.context.skinUpdateContext().canInstall,false);
+});
+
+test('a new shot ID refreezes telemetry machine and beans even when the idle frame was missed',async()=>{
+ const f=fixture(),dispatch=machineDispatch(f),recorded=[];
+ dispatch.context.cupReporter={remember:(id,options)=>{recorded.push({id,metadata:copy(options.metadata),bean:copy(options.bean)});return true},flush:async()=>{}};
+ const frame=(state,id,phase,second)=>({machine:{state:{state},timestamp:'2026-10-31T06:00:'+String(second).padStart(2,'0')+'.000Z'},shotState:{state:phase,shotId:id},scale:{weight:0}});
+ f.s.workflow.context.extras={thisCupBeanId:'bean-A'};f.s.ceramicBean={id:'bean-A',name:'Coffee A'};f.s.machineInfo={model:'DE1Pro',serialNumber:'machine-A'};
+ dispatch.snapshot(frame('espresso','cup-A','pouring',0));await flush();assert.equal(dispatch.context.runTelemetryMetadata.machine.machine_id,'machine-A');assert.equal(dispatch.context.runTelemetryBean.name,'Coffee A');
+ f.s.workflow.context.extras={thisCupBeanId:'bean-B'};f.s.ceramicBean={id:'bean-B',name:'Coffee B'};f.s.machineInfo={model:'DE1XL',serialNumber:'machine-B'};
+ dispatch.snapshot(frame('espresso','cup-B','pouring',1));await flush();assert.equal(dispatch.context.runTelemetryMetadata.machine.machine_id,'machine-B');
+ dispatch.snapshot(frame('idle','cup-B','stopping',2));await flush();assert.equal(recorded.length,0);
+ dispatch.snapshot(frame('idle','cup-B','finished',3));await flush();assert.equal(recorded.length,1);assert.equal(recorded[0].id,'cup-B');assert.equal(recorded[0].metadata.machine.machine_id,'machine-B');assert.equal(recorded[0].bean.name,'Coffee B');
+});
+
+test('new cup identity reads machine info instead of reusing a stale cached serial',async()=>{
+ const f=fixture(),dispatch=machineDispatch(f);f.s.machineInfo={model:'Old model',serialNumber:'old-machine'};
+ f.client.get=async path=>path==='/machine/info'?{model:'New model',serialNumber:'new-machine',version:'1358'}:null;
+ dispatch.snapshot({machine:{state:{state:'espresso'},timestamp:'2026-10-31T06:00:00.000Z'},shotState:{state:'pouring',shotId:'fresh-cup'},scale:{weight:0}});await flush();
+ assert.equal(dispatch.context.runTelemetryMetadata.machine.machine_id,'new-machine');assert.equal(dispatch.context.runTelemetryMetadata.machineInfo.model,'New model');
+});
+
+test('local cup persistence gates skin installation through busy while native network outbox does not',()=>{
+ const f=appFixture(['skinUpdateContext']);f.context.location={href:'http://localhost:25123/'};f.context.dirty=()=>false;f.context.hotWaterDirty=()=>false;f.context.window.ceramicUI={canAutoUpdate:()=>true};
+ f.context.cupReporter={hasPendingLocal:true};assert.equal(f.context.skinUpdateContext().busy,true);assert.equal(f.context.skinUpdateContext().canInstall,true);
+ f.context.cupReporter={hasPendingLocal:false};assert.equal(f.context.skinUpdateContext().busy,false);assert.equal(f.context.skinUpdateContext().canInstall,true);
 });

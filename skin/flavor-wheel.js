@@ -14,7 +14,7 @@ export function openFlavorWheel({values=[],locale='zh',onConfirm=()=>{},onClose=
   else if(event.data?.type==='thiscup-flavor-confirm'&&Array.isArray(event.data.values)&&event.data.values.every(v=>typeof v==='string')){const chosen=[...event.data.values];close();onConfirm(chosen);}
  }
  window.addEventListener('message',receive);
- frame.src=new URL(`./flavor-wheel/index.html?lang=${locale==='en'?'en':'zh'}&v=0.2.38`,import.meta.url).href;
+ frame.src=new URL(`./flavor-wheel/index.html?lang=${locale==='en'?'en':'zh'}&v=0.2.40`,import.meta.url).href;
  box.append(frame);document.body.append(box);frame.focus();
  return {close};
 }

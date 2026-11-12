@@ -1,17 +1,18 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.39";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.39";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.39";
-import {telemetryPath} from "./chart-path.js?v=0.2.39";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.39";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.39";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.39";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.39";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.39";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.39";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.39";
-import { createSkinUpdater } from "./update.js?v=0.2.39";
-import { createUsageReporter } from "./usage.js?v=0.2.39";
+import {stageLabel} from "./stage-labels.js?v=0.2.40";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.40";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.40";
+import {telemetryPath} from "./chart-path.js?v=0.2.40";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.40";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.40";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.40";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.40";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.40";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.40";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.40";
+import { createSkinUpdater } from "./update.js?v=0.2.40";
+import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.40';
+import { createUsageReporter } from "./usage.js?v=0.2.40";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -55,8 +56,14 @@ const DEFAULT_BASE = `http://${location.hostname || "127.0.0.1"}:8080`;
 let client;
 let displayManager;
 let usageReporter;
+let cupReporter;
+let runTelemetryMetadata=null,runTelemetryBean=null;
+let telemetryFinishedMarker=null;
+let runTelemetryIdentity=null;
+let runTelemetryShotId=null;
+let cupPersistenceWarningAt=0;
 let skinUpdater;
-const SKIN_VERSION = "0.2.39";
+const SKIN_VERSION = "0.2.40";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -1243,6 +1250,17 @@ function onSnapshot(snapshot) {
         closeDialog();
       }
     }
+    const observedShotId=s.snapshot.shotState?.state!=='finished'?s.snapshot.shotState?.shotId:null;
+    if(espresso&&(previousState!=='espresso'||observedShotId&&observedShotId!==runTelemetryShotId)){
+      runTelemetryShotId=observedShotId??null;
+      runTelemetryMetadata=clone(cupEnvironmentMetadata());
+      const frozenMetadata=runTelemetryMetadata,sourceClient=client;
+      frozenMetadata.machineInfo=null;frozenMetadata.machine={machine_id:null,identity_status:'unknown'};
+      runTelemetryIdentity=sourceClient.get('/machine/info').then(info=>{
+        frozenMetadata.machineInfo=clone(info);return machineIdentity(info);
+      }).catch(()=>{frozenMetadata.machineInfo=null;return {machine_id:null,identity_status:'unknown'}}).then(value=>{frozenMetadata.machine=value;return value;});
+      runTelemetryBean=s.ceramicBean?.id===s.workflow?.context?.extras?.thisCupBeanId?beanSnapshot(s.ceramicBean):null;
+    }
     if (espresso && previousState !== "espresso") {
       s.restoredRunId = null;
       s.runGeneration = (s.runGeneration ?? 0) + 1;
@@ -1251,7 +1269,7 @@ function onSnapshot(snapshot) {
       s.finishedReadFailure = null;
       s.mode = "running";
       s.trace = [];
-      s.preheatTrace = []; s.preparing = isPreparation(m); s.collapseStarted = null;
+      s.preheatTrace = []; s.preparing = isPreparation(m); s.collapseStarted = null; s.chartCursorTime = null;
       s.runOrigin = Number.isFinite(ts) ? ts : null;
       s.runOriginKnown = !!previousState && !s.connection.stale;
       s.runWorkflow = clone(s.workflow);
@@ -1309,7 +1327,9 @@ function onSnapshot(snapshot) {
       persistRunDraft(true);
       // A stale finished event may still describe the preceding cup.
       s.runId = s.runId ?? (s.snapshot.shotState?.state !== "finished" ? s.snapshot.shotState?.shotId : null);
-      if (s.runId) loadFinishedShot(s.runId);
+      if (s.runId) {
+        loadFinishedShot(s.runId);
+      }
       else refreshHistory(false);
     }
     if (espresso) { s.mode = "running"; if (s.snapshot.shotState?.shotId && s.snapshot.shotState.state !== "finished") s.runId = s.snapshot.shotState.shotId; }
@@ -1322,6 +1342,19 @@ function onSnapshot(snapshot) {
     s.loadedFinishedId !== s.snapshot.shotState.shotId
   )
     loadFinishedShot(s.snapshot.shotState.shotId);
+  // Telemetry follows the host's confirmed finished signal independently of
+  // the UI history cache, which may already hold a stopping-phase snapshot.
+  if(s.snapshot.shotState?.state==='finished'&&s.snapshot.shotState.shotId===s.runId&&s.mode==='finished'&&runTelemetryMetadata&&
+      (telemetryFinishedMarker?.id!==s.runId||telemetryFinishedMarker?.client!==client)){
+    const marker={id:s.runId,client},metadata=runTelemetryMetadata,bean=runTelemetryBean;
+    telemetryFinishedMarker=marker;
+    try{
+      if(cupReporter?.remember(marker.id,{metadata,bean,identityPromise:runTelemetryIdentity}))void cupReporter.flush();
+    }catch{
+      if(telemetryFinishedMarker===marker)telemetryFinishedMarker=null;
+      toast(s.language==='zh'?'本杯待上报标记未保存，请保留此页':'Pending cup marker could not be saved. Keep this page open.',true);
+    }
+  }
   scheduleRender();
 }
 async function loadFinishedShot(id, { retry = false } = {}) {
@@ -1373,6 +1406,7 @@ async function loadFinishedShot(id, { retry = false } = {}) {
       status("");
       render();
       void syncFinishedInventory(shot, sourceClient);
+
       await refreshHistory(false);
     }
   } catch (error) {
@@ -1479,6 +1513,7 @@ async function connect(base) {
   window.thisCupGrinderPanel?.closeProtection();
   s.grinderObserverStop?.();
   client?.close();
+  runTelemetryMetadata=null;runTelemetryBean=null;runTelemetryIdentity=null;runTelemetryShotId=null;telemetryFinishedMarker=null;
   s.historySequence++;
   s.runGeneration = (s.runGeneration ?? 0) + 1;
   s.snapshot = {};
@@ -1788,10 +1823,11 @@ function pathFor(points, key, x, y, options = {}) {
   return telemetryPath(points, key, x, y, options);
 }
 function plot(svg, points, { preview = false, comparison = null, live = false, transition = null, stageLabels = true } = {}) {
+  const mainChart = svg.id === "chart";
   const width = Math.max(220, svg.clientWidth || 700),
     height = Math.max(90, svg.clientHeight || 180),
-    left = preview ? 34 : 78,
-    right = preview ? 48 : live ? 35 : 78,
+    left = preview ? 34 : mainChart ? 42 : 78,
+    right = preview ? 48 : mainChart ? 40 : live ? 35 : 78,
     top = 28,
     bottom = live ? 10 : 23;
   const lastTime = Math.max(
@@ -1801,8 +1837,8 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   );
   const baseInterval = lastTime > 120 ? 30 : lastTime > 60 ? 20 : lastTime > 40 ? 10 : 5;
   const interval = Math.max(baseInterval, Math.ceil(lastTime / Math.max(2, Math.floor((width-left-right)/65)) / 5)*5);
-  // Leave a small amount of room for the live endpoint labels.
-  const maxTime = preview || !live ? lastTime : Math.max(10, lastTime * 1.06);
+  // Endpoint labels sit inside the plot; the final sample reaches the edge.
+  const maxTime = preview || !live ? lastTime : Math.max(10, lastTime);
   // Show the measured range more clearly while retaining explicit axis values.
   let magnitude = 0;
   for (const series of [points, comparison || []]) {
@@ -1817,8 +1853,8 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
     }
   }
   const requiredMax = live ? Math.max(6, magnitude * 1.1) : Math.max(10, magnitude);
-  const axisStep = Math.max(2, Math.ceil(requiredMax / 20) * 2);
-  const ymax = Math.ceil(requiredMax / axisStep) * axisStep;
+  const axisStep = mainChart && !preview ? 1 : Math.max(2, Math.ceil(requiredMax / 20) * 2);
+  const ymax = mainChart && !preview ? Math.max(10,Math.ceil(magnitude/2)*2) : Math.ceil(requiredMax / axisStep) * axisStep;
   const seam = transition ? transition.startFraction * (1-transition.progress) : 0;
   const x = (time) => left + (width-left-right) * (seam + (1-seam)*time/maxTime),
     y = (value) => top + (height - top - bottom) * (1 - value / ymax);
@@ -1828,22 +1864,22 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   const yt = value => top + (height - top - bottom) * (1 - value / 100);
   const yw=v=>top+(height-top-bottom)*(1-v/weightMax);
   let content = "";
-  for(let i=0;i<=4;i++){let yy=top+(height-top-bottom)*i/4;content+=`<text class="chart-temperature-tick" x="${width-right+8}" y="${yy+6}">${fmt(tempMax-(tempMax-tempMin)*i/4,0)}</text>`;}
+  if(!mainChart||preview)for(let i=0;i<=4;i++){let yy=top+(height-top-bottom)*i/4;content+=`<text class="chart-temperature-tick" x="${width-right+8}" y="${yy+6}">${fmt(tempMax-(tempMax-tempMin)*i/4,0)}</text>`;}
   if(!preview){
     const weightStep=weightMax<=80?20:Math.ceil(weightMax/80)*20;
-    for(let value=0;value<=weightMax;value+=weightStep)content+=`<text x="23" y="${yw(value)+6}" text-anchor="end" fill="var(--purple)">${fmt(value,0)}</text>`;
-    content+=`<path d="M27 ${top}V${height-bottom}" stroke="var(--purple)" stroke-width="1"/>`;
+    for(let value=mainChart?weightStep:0;value<=weightMax;value+=weightStep)content+=`<text class="chart-weight-tick" x="${mainChart?width-right+8:23}" y="${yw(value)+6}" text-anchor="${mainChart?'start':'end'}" fill="var(--purple)">${fmt(value,0)}</text>`;
+    if(!mainChart)content+=`<path d="M27 ${top}V${height-bottom}" stroke="var(--purple)" stroke-width="1"/>`;
   }
   for (let value = 0; value <= ymax; value += axisStep) {
-    content += `<path d="M${left} ${y(value)}H${width - right}" stroke="var(--line)" stroke-width=".7" opacity=".7"/><text x="${left - 8}" y="${y(value) + 3}" text-anchor="end">${fmt(value, 0)}</text>`;
+    content += `<path d="M${left} ${y(value)}H${width - right}" stroke="var(--line)" stroke-width=".7" opacity=".7"/><text class="chart-main-tick" x="${left - 8}" y="${y(value) + 3}" text-anchor="end">${fmt(value, 0)}</text>`;
   }
   const timeLabelY = live ? top - 8 : height - 5;
-  for (let time = 0; time <= maxTime; time += interval) {
+  for (let time = mainChart && !preview ? interval : 0; time <= maxTime; time += interval) {
     content += `<path d="M${x(time)} ${top}V${height - bottom}" stroke="var(--line)" stroke-width=".7" opacity=".55"/><text class="chart-time-tick" x="${x(time)}" y="${timeLabelY}" text-anchor="middle">${fmt(time, 0)}${live&&time===0?' s':''}</text>`;
   }
   if(maxTime%interval>interval*.35)content+=`<text class="chart-time-tick" x="${x(maxTime)}" y="${timeLabelY}" text-anchor="middle">${fmt(maxTime)}</text>`;
-  content += `${live?'':`<text x="${width - 5}" y="${height - 5}" text-anchor="end">s</text>`}${!preview?'<text x="23" y="14" text-anchor="end" fill="var(--purple)">g</text>':""}`;
-  content += `<path d="M${left} ${top}V${height-bottom}H${width-right}M${width-right} ${top}V${height-bottom}" stroke="var(--muted)" stroke-width="1"/>`;
+  content += `${(!mainChart||preview)&&!live?`<text x="${width - 5}" y="${height - 5}" text-anchor="end">s</text>`:''}${!mainChart&&!preview?'<text x="23" y="14" text-anchor="end" fill="var(--purple)">g</text>':''}`;
+  content += `<path d="M${left} ${top}V${height-bottom}H${width-right}" stroke="var(--muted)" stroke-width="1"/><path d="M${width-right} ${top}V${height-bottom}" stroke="${mainChart&&!preview?'var(--purple)':'var(--muted)'}" stroke-width="1"/>`;
   const lines = [
     ["pressure", "var(--green)"],
     ["flow", "var(--blue)"],
@@ -1854,7 +1890,7 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
   for (const [key, color] of lines) {
     if (comparison?.length)
       content += `<path d="${pathFor(comparison, key, x, key==="temperature"?yt:key==="weight"?yw:y)}" stroke="${color}" stroke-width="1.4" stroke-dasharray="5 5" opacity=".5"/>`;
-    content += `<path d="${pathFor(points, key, x, key==="temperature"?yt:key==="weight"?yw:y, {smooth: !preview})}" stroke="${color}" stroke-width="${preview ? 1.8 : 2}" ${preview ? 'stroke-dasharray="5 4"' : ""}/>`;
+    content += `<path data-chart-series="${key}" d="${pathFor(points, key, x, key==="temperature"?yt:key==="weight"?yw:y, {smooth: !preview})}" stroke="${color}" stroke-width="${preview ? 1.8 : 2}" ${preview ? 'stroke-dasharray="5 4"' : ""}/>`;
   }
   if(!preview && !(live && s.preparing)){
    for(const [key,color,scale] of [['targetPressure','var(--target-pressure)',y],['targetFlow','var(--target-flow)',y],['targetTemperature','var(--target-temperature)',yt]])content+=`<path d="${pathFor(points,key,x,scale,{smooth:false})}" stroke="${color}" stroke-width="1.2" stroke-dasharray="5 5"/>`;
@@ -1866,10 +1902,9 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
    const last=points.at(-1);
    if(last){
     const labels=lines.filter(([key])=>num(last[key])!==null).map(([key,color])=>({key,color,position:(key==='temperature'?yt:key==='weight'?yw:y)(last[key])}));
-    for(const label of labels)content+=`<g class="chart-end-label" data-point-x="${x(last.time)}" data-point-y="${label.position}"><path stroke="${label.color}" stroke-width=".7" opacity=".6"/><circle cx="${x(last.time)}" cy="${label.position}" r="2.5" fill="${label.color}" stroke="none"/><text x="0" y="0" fill="${label.color}">${Number(last[label.key]).toFixed(1)}${label.key==='weight'?' g':''}</text></g>`;
+    for(const label of labels)content+=`<g class="chart-end-label" data-series="${label.key}" data-point-x="${x(last.time)}" data-point-y="${label.position}"><path stroke="${label.color}" stroke-width=".7" opacity=".6"/><circle cx="${x(last.time)}" cy="${label.position}" r="2.5" fill="${label.color}" stroke="none"/><text x="0" y="0" fill="${label.color}">${Number(last[label.key]).toFixed(1)}${label.key==='weight'?' g':mainChart&&label.key==='temperature'?' °C':''}</text></g>`;
    }
   }
-  if(live && s.preparing) content+=`<text x="${left+10}" y="${top+20}">${s.language==='zh'?'预热中':'Preheating'}</text>`;
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.innerHTML = `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${content}</g><g class="chart-cursor"></g>`;
   svg.querySelectorAll("text").forEach((el) => {
@@ -1892,7 +1927,7 @@ function plot(svg, points, { preview = false, comparison = null, live = false, t
     for(let i=endLabels.length-1;i>=0;i--){const label=endLabels[i];label.center=Math.min(label.center,edge-label.box.height/2);edge=label.center-label.box.height/2-gap;}
     // Keep the complete label box clear of the endpoint/cursor markers.
     const pointX=endLabels[0].pointX;
-    const labelOnLeft=live && pointX-left>100;
+    const labelOnLeft=(mainChart||live) && pointX-left>100;
     const labelX=labelOnLeft?pointX-12:pointX+14;
     const labelLayer=document.createElementNS('http://www.w3.org/2000/svg','g');
     labelLayer.setAttribute('class','chart-end-label-layer');
@@ -1978,8 +2013,15 @@ function renderChart() {
   $("chartEmpty").hidden = points.length > 0;
   const progress=collapsing?collapseProgress(now,s.collapseStarted):1;
   const oldBox=s.preheatChartBox;
-  const oldMaxTime=oldBox?.maxTime || Math.max(1,s.preheatTrace?.at(-1)?.time || 1);
-  const startFraction=Math.min(1,(s.preheatTrace?.at(-1)?.time || 0)/oldMaxTime);
+  const lastPreheat=s.preheatTrace?.at(-1);
+  // Keep the measured interval between the last preheat sample and the first
+  // extraction sample. Collapsing that interval to zero made temperature drops
+  // look like a vertical axis instead of a connected telemetry segment.
+  const beforeTime=num(lastPreheat?.timestamp),afterTime=num(points[0]?.timestamp);
+  const boundaryGap=beforeTime!==null&&afterTime!==null?Math.max(0,(afterTime-beforeTime)/1000):0;
+  const boundaryTime=(lastPreheat?.time || 0)+boundaryGap;
+  const oldMaxTime=Math.max(oldBox?.maxTime || 1,boundaryTime);
+  const startFraction=Math.min(1,boundaryTime/oldMaxTime);
   s.chartBox = plot($("chart"), points, { preview: !s.trace.length, live:s.mode==='running', transition:collapsing?{progress,startFraction}:null });
   if(collapsing && s.preheatTrace?.length){
     const b=s.chartBox;
@@ -1987,8 +2029,20 @@ function renderChart() {
     for(const [key,color,scale] of [['pressure','var(--green)',b.y],['flow','var(--blue)',b.y],['scaleFlow','var(--brown)',b.y],['temperature','var(--red)',b.yt],['weight','var(--purple)',b.yw]]){
       const overlay=document.createElementNS('http://www.w3.org/2000/svg','path');
       overlay.setAttribute('d',pathFor(s.preheatTrace,key,x,scale,{smooth:true}));
+      overlay.dataset.chartPhase='preheat';overlay.dataset.chartSeries=key;
       overlay.setAttribute('fill','none');overlay.setAttribute('stroke',color);overlay.setAttribute('stroke-width','2');
-      overlay.setAttribute('opacity',String(Math.min(1,(1-progress)*5)));el.append(overlay);
+      const opacity=String(Math.min(1,(1-progress)*5));
+      overlay.setAttribute('opacity',opacity);el.append(overlay);
+      // The two boundary samples can have different measured values. Join
+      // their exact projections instead of shifting either sample to match.
+      const before=s.preheatTrace.at(-1),after=points[0];
+      if(num(before?.[key])!==null&&num(after?.[key])!==null){
+       const join=document.createElementNS('http://www.w3.org/2000/svg','path');
+       join.dataset.chartPhase='preheat-boundary';join.dataset.chartSeries=key;
+       join.setAttribute('d',`M${x(before.time)} ${scale(before[key])}L${b.x(after.time)} ${scale(after[key])}`);
+       join.setAttribute('fill','none');join.setAttribute('stroke',color);join.setAttribute('stroke-width','2');
+       join.setAttribute('opacity',opacity);el.append(join);
+      }
     }
     if(collapseAnimationFrame===null) collapseAnimationFrame=requestAnimationFrame(()=>{collapseAnimationFrame=null;chartCache=null;renderChart();});
   }
@@ -2015,7 +2069,7 @@ function drawChartReading(p){
  const reading=v=>num(v)===null?'—':Number(v).toFixed(1);
  readout.innerHTML=`<strong>${reading(p.time)} s</strong>`+series.map(([key,label,unit,color])=>`<span><i style="background:${color}"></i>${label} ${reading(p[key])} ${unit}</span>`).join('');
  const b=s.chartBox;
- $('chart').querySelector('.chart-cursor').innerHTML=`<path d="M${b.x(p.time)} ${b.top}V${b.height-b.bottom}" stroke="var(--red)" stroke-dasharray="5 5" stroke-width="1"/>`+series.filter(([k])=>num(p[k])!==null).map(([key,,,color])=>`<circle cx="${b.x(p.time)}" cy="${(key==='weight'?b.yw:key==='temperature'?b.yt:b.y)(p[key])}" r="5" fill="${color}" stroke="none"/>`).join('');
+ $('chart').querySelector('.chart-cursor').innerHTML=(Math.abs(b.x(p.time)-(b.width-b.right))>1?`<path d="M${b.x(p.time)} ${b.top}V${b.height-b.bottom}" stroke="var(--muted)" stroke-dasharray="5 5" stroke-width="1" opacity=".65"/>`:'')+series.filter(([k])=>num(p[k])!==null).map(([key,,,color])=>`<circle cx="${b.x(p.time)}" cy="${(key==='weight'?b.yw:key==='temperature'?b.yt:b.y)(p[key])}" r="5" fill="${color}" stroke="none"/>`).join('');
 }
 
 function profileType(p) {
@@ -2388,6 +2442,7 @@ async function saveReview() {
     const read=await sourceClient.shot(shot.id);
     if(sourceClient!==client || s.selectedShot?.id!==shot.id)return;
     s.selectedShot=read;
+    void cupReporter?.enqueue(read,{type:'assessment_saved',client:sourceClient}).catch(()=>{});
     renderShotDetail();
     toast(t("ratingSaved"));
   } catch (error) {
@@ -2660,7 +2715,7 @@ function skinUpdateContext() {
   const grinderBusy=grinder?.available!==false&&Boolean(s.grinderOperationPending||grinder?.busy||grinder?.operation||grinder?.state==='grinding'||['checking','unknown'].includes(grinder?.observation)||(grinder?.connected&&grinder.state!=='idle'));
   const dialog=[...document.querySelectorAll('.overlay:not([hidden]),[role="dialog"],[aria-modal="true"]')].some(el=>el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden');
   return {pageUrl:location.href,apiUrl:s.baseUrl,host:window.__DECENT_HOST__,connection:s.connection,settings:s.settings,machineState:machineState(),nativeCommit:s.info?.commit,
-    busy:s.busy||Boolean(s.awaiting)||running(),
+    busy:s.busy||Boolean(s.awaiting)||running()||cupReporter?.hasPendingLocal===true,
     canInstall:!s.skinUpdating&&!s.modal&&!dialog&&!s.stopPending&&!s.stopAwaiting&&!s.displayDirty&&!s.favoriteBusy&&!s.scaleBusy&&!s.scaleTimerBusy&&!s.workflowConflict&&s.inventorySync?.status!=='pending'&&!grinderBusy&&!dirty()&&!hotWaterDirty()&&window.ceramicUI?.canAutoUpdate?.()===true};
 }
 function openSettings() {
@@ -2920,6 +2975,14 @@ usageReporter = createUsageReporter({currentVersion:SKIN_VERSION,getContext:() =
 // Reporting is enabled on startup; retain the existing ID and retry schedule.
 usageReporter.setEnabled(true);
 usageReporter.start();
+function cupEnvironmentMetadata(){
+  let iana=null;try{iana=Intl.DateTimeFormat().resolvedOptions().timeZone??null}catch{}
+  return {machineInfo:s.machineInfo,info:s.info,host:window.__DECENT_HOST__,onecupVersion:SKIN_VERSION,timezone:{iana,utc_offset_minutes:-new Date().getTimezoneOffset()}};
+}
+cupReporter=createCupReporter({getClient:()=>client,getInstallationId:()=>usageReporter.getInstallationId(),getContext:()=>({
+  pageUrl:location.href,apiUrl:s.baseUrl,host:window.__DECENT_HOST__,settings:s.settings,connection:s.connection,machineState:machineState(),busy:s.busy||Boolean(s.awaiting)||running()
+}),getMetadata:cupEnvironmentMetadata,onError:(_error,detail)=>{if((detail.persisted===false||detail.permanent===true)&&Date.now()-cupPersistenceWarningAt>60000){cupPersistenceWarningAt=Date.now();toast(detail.permanent?(s.language==='zh'?'本杯统计尚未送达，数据已保留待处理':'Cup upload needs attention; the saved data is retained.'):(s.language==='zh'?'本杯待上报数据未确认保存，请保留此页':'Pending cup data could not be verified. Keep this page open.'),true);}}});
+cupReporter.start();
 connect(s.baseUrl);
 startWorkflowPolling();
 window.addEventListener("pagehide", () => {
@@ -3768,6 +3831,7 @@ function openGallery(preserve = false) {
 }
 
 window.ceramicUI=mountCeramic({state:s,get client(){return client},render,notice:toast,explainError,viewOf,shotYield,machineState,running,editable,canStart:canStartFromScreen,openDialog,closeDialog,openProfiles,command:sendCommand,
+onAssessmentSaved:(shot,feedback,sourceClient)=>cupReporter?.enqueue(shot,{type:'assessment_saved',feedback,client:sourceClient}).catch(()=>{}),
 retryInventory:()=>s.mode==="finished"&&s.lastShot?.id===s.runId?syncFinishedInventory(s.lastShot):Promise.resolve(),
 retryFinishedShot:()=>s.mode==="finished"&&s.runId?loadFinishedShot(s.runId,{retry:true}):Promise.resolve(),
 setWorkflow:w=>setWorkflow(w,{force:true}),
@@ -3789,3 +3853,17 @@ skinUpdater=createSkinUpdater({currentVersion:SKIN_VERSION,getClient:()=>client,
   if(value.phase==='awaiting_confirmation')status(t('updateConfirming'),true);
 }});
 skinUpdater.start();
+
+// Scene changes and the readout can resize the chart after its first draw.
+// A fresh projection prevents SVG aspect fitting from adding horizontal space.
+if(typeof ResizeObserver==='function'){
+ const chart=$('chart');
+ const observer=new ResizeObserver(()=>{
+  if(!chart.clientWidth||!chart.clientHeight)return;
+  const box=chart.viewBox.baseVal;
+  if(Math.abs(box.width-chart.clientWidth)>.5||Math.abs(box.height-chart.clientHeight)>.5){
+   chartCache=null;renderChart();
+  }
+ });
+ observer.observe(chart);
+}

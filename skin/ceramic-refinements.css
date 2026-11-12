@@ -138,6 +138,12 @@ body:is([data-ceramic-screen=ready],[data-ceramic-screen=taste]) .overlay{inset:
 
 /* Stage titles share the header; long names must not spill onto the light dial art. */
 .ceramic-stage-title #phaseName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* The upper-right status is the single place for coffee phase and its color. */
+body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) #stageTitle{display:none}
+body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) #phaseName{margin-top:0}
+.connection #connectionDot.online[data-cup-phase=preheating]{background:#f7a77e}
+.connection #connectionDot.online[data-cup-phase=brewing]{background:#4b86b4}
+.connection #connectionDot.online[data-cup-phase=finished]{background:#839f7d}
 
 /* Ready-page names: leave room for Latin descenders and secondary bean text. */
 body[data-ceramic-screen=ready] #recipeName{box-sizing:content-box;line-height:1.45;max-height:none;padding-bottom:.12em}
@@ -194,3 +200,9 @@ body[data-ceramic-screen=taste] #ceramicChartReadout strong{font-size:clamp(14px
 body[data-ceramic-screen=ready] #ceramicAdjust{position:relative;justify-content:center;font:400 2vw/1.4 var(--font-caption)!important}
 body[data-ceramic-screen=ready] #ceramicAdjust>span{font-family:inherit;text-align:center;flex:1;padding-inline:2.5vw;white-space:nowrap}
 body[data-ceramic-screen=ready] #ceramicAdjust>svg{position:absolute;right:2.2vw;top:50%;transform:translateY(-50%);width:2.4vw;height:2.4vw}
+
+/* Approved chart layout: keep legends centered and use the complete plot width. */
+body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) .chart-header{justify-content:center}
+body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) .legend{justify-content:center;margin-inline:0}
+body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) #ceramicChartReadout{justify-content:center;column-gap:.9vw}
+body[data-ceramic-screen=brew] .chart-wrap{margin-left:-2.4vw;width:calc(100% + 2.4vw)}
