@@ -1,4 +1,4 @@
-import {isUsageEnvironment} from './usage.js?v=0.2.40';
+import {isUsageEnvironment} from './usage.js?v=0.2.41';
 export const CUP_ENDPOINT='https://home.zhouchenxing.com/usage-stats/api/v1/cup-events';
 const ROOT='/store/onecup-cup-outbox',RECEIPTS='/store/onecup-cup-receipts';
 const RETRY=15*60*1000;

@@ -377,6 +377,38 @@ test('new cup identity reads machine info instead of reusing a stale cached seri
  assert.equal(dispatch.context.runTelemetryMetadata.machine.machine_id,'new-machine');assert.equal(dispatch.context.runTelemetryMetadata.machineInfo.model,'New model');
 });
 
+for(const order of ['shot-first','machine-first','shot-reset-before-machine'])test(`cup completion persists independently of machine/UI finish ordering (${order})`,async()=>{
+ const f=fixture(),dispatch=machineDispatch(f),recorded=[];
+ dispatch.context.cupReporter={remember:(id,options)=>{recorded.push({id,metadata:copy(options.metadata)});return true},flush:async()=>{}};
+ const machine=(state,second)=>({machine:{state:{state},timestamp:`2026-10-31T06:00:0${second}.000Z`}});
+ dispatch.snapshot({...machine('espresso',0),shotState:{state:'pouring',shotId:'cup-A'}});await flush();
+ if(order==='machine-first')dispatch.snapshot(machine('idle',1));
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-A'}});
+ // The finished stream is authoritative even while the machine stream still
+ // says espresso. It may reset to idle before that stream catches up.
+ assert.equal(recorded.length,1);assert.equal(recorded[0].id,'cup-A');
+ if(order==='shot-reset-before-machine')dispatch.snapshot({shotState:{state:'idle',shotId:null}});
+ dispatch.snapshot(machine('idle',2));
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-A'}});
+ assert.equal(recorded.length,1);
+});
+
+test('a preceding cup finish cannot be attached to a new run after runId is cleared',async()=>{
+ const f=fixture(),dispatch=machineDispatch(f),recorded=[];
+ dispatch.context.cupReporter={remember:id=>{recorded.push(id);return true},flush:async()=>{}};
+ const machine=(state,second)=>({machine:{state:{state},timestamp:`2026-10-31T06:00:0${second}.000Z`}});
+ dispatch.snapshot({...machine('espresso',0),shotState:{state:'pouring',shotId:'cup-A'}});
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-A'}});
+ dispatch.snapshot(machine('idle',1));
+ f.s.runId=null;
+ dispatch.snapshot(machine('espresso',2));assert.equal(f.s.runId,null);
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-A'}});assert.deepEqual(recorded,['cup-A']);
+ dispatch.snapshot({shotState:{state:'pouring',shotId:'cup-B'}});
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-A'}});assert.deepEqual(recorded,['cup-A']);
+ dispatch.snapshot({shotState:{state:'finished',shotId:'cup-B'}});
+ dispatch.snapshot(machine('idle',3));assert.deepEqual(recorded,['cup-A','cup-B']);
+});
+
 test('local cup persistence gates skin installation through busy while native network outbox does not',()=>{
  const f=appFixture(['skinUpdateContext']);f.context.location={href:'http://localhost:25123/'};f.context.dirty=()=>false;f.context.hotWaterDirty=()=>false;f.context.window.ceramicUI={canAutoUpdate:()=>true};
  f.context.cupReporter={hasPendingLocal:true};assert.equal(f.context.skinUpdateContext().busy,true);assert.equal(f.context.skinUpdateContext().canInstall,true);

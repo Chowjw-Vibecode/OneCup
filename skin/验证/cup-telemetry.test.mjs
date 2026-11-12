@@ -52,6 +52,19 @@ test('confirmed finished marker rereads changing early history until stable; nev
  f.reporter.start();await f.reporter.flush();assert.equal(reads,3);assert.equal(f.calls.length,1);assert.equal(f.calls[0].event.payload.measurements.length,2);f.reporter.dispose();
 });
 
+test('finished received while espresso persists immediately, waits for idle and recovers after a history 404',async()=>{
+ const f=fixture();let reads=0;
+ f.client.shot=async id=>{reads++;if(reads===1)throw Object.assign(Error('not persisted yet'),{status:404});return {...copy(shot),id}};
+ f.context.machineState='espresso';f.reporter.start();f.reporter.remember(shot.id);
+ assert.equal(f.reporter.hasPendingLocal,true);await f.reporter.flush();assert.equal(reads,0);assert.equal(f.calls.length,0);
+ f.context.machineState='idle';await f.reporter.flush();assert.equal(reads,1);assert.equal(f.calls.length,0);assert.equal(f.reporter.hasPendingLocal,true);
+ // Restart recovers only this observed cup marker, after native persistence
+ // catches up. No history listing or synthetic completion is needed.
+ f.reporter.dispose();const g=fixture({values:f.values,pending:f.pending});let recoveredReads=0;
+ g.client.shot=async id=>{recoveredReads++;assert.equal(id,shot.id);return {...copy(shot),id}};
+ g.advance(900001);g.reporter.start();await g.reporter.flush();assert.equal(recoveredReads,2);assert.equal(g.calls.length,1);assert.equal(g.calls[0].event.payload.measurements.length,2);assert.equal(g.reporter.hasPendingLocal,false);g.reporter.dispose();
+});
+
 test('timezone provenance and host-local shot timestamps are retained without inventing UTC',()=>{
  const p=cupPayload({...shot,timestamp:'2026-11-12T09:02:03'},{timezone:{iana:'Asia/Shanghai',utc_offset_minutes:480}});
  assert.equal(p.result.timestamp,'2026-11-12T09:02:03');assert.deepEqual(p.result.timezone,{iana:'Asia/Shanghai',utc_offset_minutes:480});assert.equal(p.result.measurement_span_seconds,30);assert.equal(p.result.duration,null);

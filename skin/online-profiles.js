@@ -1,15 +1,15 @@
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.40';
-import {brandMarkup} from './brand.js?v=0.2.40';
-import {stageLabel} from './stage-labels.js?v=0.2.40';
-import {profileIntroChart,profileIntroModel} from './profile-intro.js?v=0.2.40';
-import seed from './online-profile-seed.js?v=0.2.40';
-import {normalizeOnlineProfile,onlineExecutionKey,findDownloaded,readOnlineRecord,readOfficialCatalog,readCommunityPage,saveOnlineRecord} from './online-profile-service.js?v=0.2.40';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.41';
+import {brandMarkup} from './brand.js?v=0.2.41';
+import {stageLabel} from './stage-labels.js?v=0.2.41';
+import {profileIntroChart,profileIntroModel} from './profile-intro.js?v=0.2.41';
+import seed from './online-profile-seed.js?v=0.2.41';
+import {normalizeOnlineProfile,onlineExecutionKey,findDownloaded,readOnlineRecord,readOfficialCatalog,readCommunityPage,saveOnlineRecord} from './online-profile-service.js?v=0.2.41';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function mountOnlineProfiles({getClient,getLanguage,getProfiles,onLibrary,onBrowseLocal,isAllowed,notice,explainError}){
  const host=document.createElement('div');host.id='onlineProfileHost';host.hidden=true;host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');document.body.append(host);
  const root=host.attachShadow({mode:'open'}),$=id=>root.getElementById(id);
  // Keep the loaded stylesheet connected while tabs rebuild their content.
- const stylesheet=document.createElement('link');stylesheet.rel='stylesheet';stylesheet.href=new URL('./online-profiles.css?v=0.2.40',import.meta.url);
+ const stylesheet=document.createElement('link');stylesheet.rel='stylesheet';stylesheet.href=new URL('./online-profiles.css?v=0.2.41',import.meta.url);
  const content=document.createElement('div');root.append(stylesheet,content);
  let language='zh',mode='official',selected=null,official=seed.map(r=>({...r,profile:normalizeOnlineProfile(r.profile)})),community=[];
  let session=0,modalEpoch=0,saveBusy=false,catalogBusy=false,modalAction=null,previousFocus,controller=null,toastTimer,libraryRef=null,activeApi=null,catalogLoaded=false;

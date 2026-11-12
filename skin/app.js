@@ -1,18 +1,18 @@
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.40";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.40";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.40";
-import {telemetryPath} from "./chart-path.js?v=0.2.40";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.40";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.40";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.40";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.40";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.40";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.40";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.40";
-import { createSkinUpdater } from "./update.js?v=0.2.40";
-import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.40';
-import { createUsageReporter } from "./usage.js?v=0.2.40";
+import {stageLabel} from "./stage-labels.js?v=0.2.41";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.41";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.41";
+import {telemetryPath} from "./chart-path.js?v=0.2.41";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.41";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.41";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.41";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.41";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.41";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.41";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.41";
+import { createSkinUpdater } from "./update.js?v=0.2.41";
+import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.41';
+import { createUsageReporter } from "./usage.js?v=0.2.41";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -63,7 +63,7 @@ let runTelemetryIdentity=null;
 let runTelemetryShotId=null;
 let cupPersistenceWarningAt=0;
 let skinUpdater;
-const SKIN_VERSION = "0.2.40";
+const SKIN_VERSION = "0.2.41";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -1342,9 +1342,10 @@ function onSnapshot(snapshot) {
     s.loadedFinishedId !== s.snapshot.shotState.shotId
   )
     loadFinishedShot(s.snapshot.shotState.shotId);
-  // Telemetry follows the host's confirmed finished signal independently of
-  // the UI history cache, which may already hold a stopping-phase snapshot.
-  if(s.snapshot.shotState?.state==='finished'&&s.snapshot.shotState.shotId===s.runId&&s.mode==='finished'&&runTelemetryMetadata&&
+  // The host's finished stream can arrive before the machine/UI leaves
+  // running, then reset to idle. Persist it immediately; the reporter waits
+  // for an idle machine before reading history or sending the queued event.
+  if(s.snapshot.shotState?.state==='finished'&&s.snapshot.shotState.shotId===s.runId&&runTelemetryMetadata&&
       (telemetryFinishedMarker?.id!==s.runId||telemetryFinishedMarker?.client!==client)){
     const marker={id:s.runId,client},metadata=runTelemetryMetadata,bean=runTelemetryBean;
     telemetryFinishedMarker=marker;
