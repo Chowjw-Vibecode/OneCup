@@ -9,7 +9,7 @@
 | 下载内容 | 国内下载 | GitHub 下载 | 安装说明 |
 | --- | --- | --- | --- |
 | **OneCup 皮肤 0.2.42** | [发行页](https://gitee.com/chowjw/OneCup/releases/tag/v0.2.42) · [皮肤 ZIP](https://gitee.com/chowjw/OneCup/releases/download/v0.2.42/onecup-0.2.42.zip) | [皮肤 ZIP](https://github.com/Chowjw-Vibecode/OneCup/releases/download/v0.2.42/onecup-0.2.42.zip) | [皮肤安装](#安装) |
-| **小方 · CRYSTAL 磨豆机插件 0.2.0** | [发行页](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [发行页](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [插件安装与入口](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装) |
+| **小方 · CRYSTAL 磨豆机插件 0.2.1** | [发行页](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/tag/v0.2.1) · [插件 ZIP](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/download/v0.2.1/thiscup-crystal.reaplugin.zip) | [发行页](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/tag/v0.2.1) · [插件 ZIP](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/download/v0.2.1/thiscup-crystal.reaplugin.zip) | [插件安装与入口](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装) |
 
 ## 设计思路
 
@@ -46,13 +46,13 @@
 | ![豆仓界面](docs/images/05-beans.png) | ![蒸汽界面](docs/images/06-steam.png) |
 | 咖啡豆可以直接称，也可以连袋称，再扣掉空袋重量。关联豆子后，每做完一杯，豆仓会扣除这杯的用豆量。 | 打奶前可以调整蒸汽温度、流量和时长。打奶时，奶缸上的计时和进度环方便随时查看。 |
 
-以上为新版界面预览，使用示例数据；图片以两倍像素导出。
+以上界面预览使用示例数据。新版方案库、水位和方案介绍的截图见发行页。
 
 ## 安装
 
 1. 下载皮肤包 **onecup-0.2.42.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
-3. 需要联动小方或 Crystal 磨豆机时，请安装[独立磨豆机插件 0.2.0](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装)。推荐 **Plugins → Plugin actions → Install plugin → GitHub Release**：Repository 填 `Chowjw-Vibecode/decaid-plugin-crystal-grinder`，Asset name 填 `thiscup-crystal.reaplugin.zip` 或留空，并开启 Decaid 自动检查更新。国内 ZIP 手装方式见插件说明；皮肤更新不替换控制器。
+3. 需要联动小方或 Crystal 磨豆机时，请安装[独立磨豆机插件 0.2.1](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装)。推荐 **Plugins → Plugin actions → Install plugin → GitHub Release**：Repository 填 `Chowjw-Vibecode/decaid-plugin-crystal-grinder`，Asset name 填 `thiscup-crystal.reaplugin.zip` 或留空，并开启 Decaid 自动检查更新。国内 ZIP 手装方式见插件说明；皮肤更新不替换控制器。
 
 [本版更新说明](https://gitee.com/chowjw/OneCup/releases) · [皮肤源码](skin) · [磨豆机插件独立仓库](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder)
 
