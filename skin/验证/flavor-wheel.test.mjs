@@ -19,7 +19,7 @@ test('flavor frame initializes only from its own same-origin ready message and p
  const f=fixture(t);const values=['Stone fruit','sca:other:0:4'];const h=openFlavorWheel({values,locale:'en'});
  f.emit({type:'thiscup-flavor-ready'},{source:{}});f.emit({type:'thiscup-flavor-ready'},{origin:'https://other.invalid'});assert.equal(f.messages.length,0);
  f.emit({type:'thiscup-flavor-ready'});assert.deepEqual(f.messages,[{data:{type:'thiscup-flavor-init',values},origin:location.origin}]);
- const frameUrl=new URL(f.elements[0].children[0].src);assert(frameUrl.pathname.endsWith('/flavor-wheel/index.html'));assert.equal(frameUrl.searchParams.toString(),`lang=en&v=${version}`);h.close();assert.equal(f.listeners.size,0);
+ const frameUrl=new URL(f.elements[0].children[0].src);assert(frameUrl.pathname.endsWith('/flavor-wheel/index.html'));assert.equal(frameUrl.searchParams.get('lang'),'en');assert.equal(frameUrl.searchParams.get('v'),version);h.close();assert.equal(f.listeners.size,0);
 });
 
 test('flavor confirmation rejects malformed or foreign messages and accepts its own result only once',t=>{

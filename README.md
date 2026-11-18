@@ -8,7 +8,7 @@
 
 | 下载内容 | 国内下载 | GitHub 下载 | 安装说明 |
 | --- | --- | --- | --- |
-| **OneCup 皮肤 0.2.41** | [发行页](https://gitee.com/chowjw/OneCup/releases/tag/v0.2.41) · [皮肤 ZIP](https://gitee.com/chowjw/OneCup/releases/download/v0.2.41/onecup-0.2.41.zip) | [皮肤 ZIP](https://github.com/Chowjw-Vibecode/OneCup/releases/download/v0.2.41/onecup-0.2.41.zip) | [皮肤安装](#安装) |
+| **OneCup 皮肤 0.2.42** | [发行页](https://gitee.com/chowjw/OneCup/releases/tag/v0.2.42) · [皮肤 ZIP](https://gitee.com/chowjw/OneCup/releases/download/v0.2.42/onecup-0.2.42.zip) | [皮肤 ZIP](https://github.com/Chowjw-Vibecode/OneCup/releases/download/v0.2.42/onecup-0.2.42.zip) | [皮肤安装](#安装) |
 | **小方 · CRYSTAL 磨豆机插件 0.2.0** | [发行页](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://gitee.com/chowjw/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [发行页](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/tag/v0.2.0) · [插件 ZIP](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder/releases/download/v0.2.0/thiscup-crystal.reaplugin.zip) | [插件安装与入口](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装) |
 
 ## 设计思路
@@ -23,7 +23,7 @@
 
 ![准备页，白瓷杯右侧依次列出方案、咖啡豆和冲煮参数](docs/images/01-ready.png)
 
-想沿用方案，只改这一杯的用量或温度，可以点「调整这一杯」。粉量和目标出液并排，调整时能一起看粉液比。要找新方案，从「换方案 → 更多」进入官方或社区目录，预览后下载到本地。
+想沿用方案，只改这一杯的用量或温度，可以点「调整这一杯」。粉量和目标出液并排，调整时能一起看粉液比。要找新方案，点「换方案」进入方案库，按分类浏览或切换列表与小图。社区方案可预览后下载到本地。
 
 ![微调页，粉量与目标出液下方显示对应的粉液比](docs/images/02-adjust.png)
 
@@ -50,11 +50,17 @@
 
 ## 安装
 
-1. 下载皮肤包 **onecup-0.2.41.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
+1. 下载皮肤包 **onecup-0.2.42.zip**，保留 ZIP 格式，在 Decaid 的皮肤管理中安装并选用「这一杯 · OneCup」。
 2. 使用蓝牙秤时，在准备页打开「蓝牙秤」，选择要连接的秤。连接成功后会记住主秤。
 3. 需要联动小方或 Crystal 磨豆机时，请安装[独立磨豆机插件 0.2.0](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder#下载与安装)。推荐 **Plugins → Plugin actions → Install plugin → GitHub Release**：Repository 填 `Chowjw-Vibecode/decaid-plugin-crystal-grinder`，Asset name 填 `thiscup-crystal.reaplugin.zip` 或留空，并开启 Decaid 自动检查更新。国内 ZIP 手装方式见插件说明；皮肤更新不替换控制器。
 
 [本版更新说明](https://gitee.com/chowjw/OneCup/releases) · [皮肤源码](skin) · [磨豆机插件独立仓库](https://github.com/Chowjw-Vibecode/decaid-plugin-crystal-grinder)
+
+## 0.2.42
+
+- 方案库支持分类、紧凑列表和小图，显示配方曲线、来源与使用提示。首页「换方案」直接进入常用。
+- 页面显示水箱水位，检测到自动上水时显示绿色图标。
+- 改善磨豆机切换入口和历史研磨方案读取。旧数据暂时不可读时，新保存的方案仍可正常使用。
 
 ## 0.2.41
 

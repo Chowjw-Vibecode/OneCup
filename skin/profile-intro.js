@@ -1,5 +1,6 @@
-import {stageLabel} from "./stage-labels.js?v=0.2.41";
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.41';
+import {profileLibraryData} from './profile-library-data.js';
+import {stageLabel} from "./stage-labels.js?v=0.2.42";
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.42';
 
 const numeric = value => value === null || value === undefined || value === '' || typeof value === 'boolean' || !Number.isFinite(Number(value)) ? null : Number(value);
 const format = value => numeric(value) === null ? '—' : String(Math.round(Number(value) * 100) / 100);
@@ -26,14 +27,24 @@ export function profileIntroModel(workflow = {}, language = 'zh') {
       temperature: numeric(s.temperature), sensor: s.sensor,
       exit: s.exit && typeof s.exit === 'object' ? s.exit : null};
   });
-  let description = notes;
+  const summaries = {
+    'HyperEx 2.1': '超萃 2.1。先润湿粉层，再泄压暂停，之后用高、低两段流量完成萃取。观察累计杯重节点和秤上实际杯流。',
+  };
+  const title = typeof p.title === 'string' && p.title.trim() ? p.title : words(language, '未命名方案', 'Untitled profile');
+  const library = Object.hasOwn(profileLibraryData, title) ? profileLibraryData[title] : null;
+  // The current profile retains its saved title, parameters and reference chart.
+  const summary = library?.guide?.summary ??
+    (Object.hasOwn(summaries, title) && stages.map(s => s.kind).join(',') === 'flow,pressure,flow,flow' ? summaries[title] : '');
+  let description = language === 'zh' ? summary || (/\p{Script=Han}/u.test(notes) ? notes : '') : notes;
   if (!description) {
     if (stages.length === 2 && stages[0].kind === 'pressure' && stages[1].kind === 'flow') {
       description = words(language, '前段以压力控制，后段转为流量控制。', 'Pressure control first, followed by flow control.');
-    } else description = words(language, stages.length ? '按下方分段目标运行。' : '此方案没有可显示的分段数据。', stages.length ? 'The stage settings are shown below.' : 'Stage data is not available for this profile.');
+    } else if (stages.length) {
+      description = words(language, `当前方案有 ${stages.length} 个阶段。各段控制方式和目标见右侧。`, 'The stage settings are shown on the right.');
+    } else description = words(language, '此方案没有可显示的分段数据。', 'Stage data is not available for this profile.');
   }
-  return {title: typeof p.title === 'string' && p.title.trim() ? p.title : words(language, '未命名方案', 'Untitled profile'),
-    dose, target, ratio: dose > 0 && target > 0 ? target / dose : null, description, stages};
+  return {title, dose, target, ratio: dose > 0 && target > 0 ? target / dose : null,
+    description, originalNotes: notes === description ? '' : notes, stages};
 }
 
 export function profileIntroChart(stages = [], language = 'zh') {
@@ -73,7 +84,7 @@ function exitText(exit, language) {
 
 export function profileIntroMarkup(workflow, language = 'zh') {
   const m = profileIntroModel(workflow, language), text = (zh, en) => words(language, zh, en);
-  return `<header><div class="intro-brand"></div><h2>${text('方案介绍','About this profile')}</h2><small>${text('当前方案','Current profile')}</small></header><div class="prototype-intro-main"><section class="prototype-intro-summary"><small>${text('当前方案','Current profile')}</small><h1>${escape(m.title)}</h1><p>${escape(m.description)}</p><div class="prototype-intro-values"><div><strong>${format(m.dose)}</strong><small> g</small><span>${text('粉量','Dose')}</span></div><div><strong>${format(m.target)}</strong><small> g</small><span>${text('目标出液','Target yield')}</span></div><div><strong>${m.ratio === null ? '—' : '1:' + format(m.ratio)}</strong><span>${text('粉液比','Ratio')}</span></div></div></section><section class="prototype-intro-targets"><div class="intro-target-visual"><h3>${text('分段目标','Stage targets')}</h3>${profileIntroChart(m.stages, language)}${m.stages.length ? `<p class="intro-chart-note">${text('压力','Pressure')}　<span style="color:var(--green)">━</span>　${text('流量','Flow')}　<span style="color:var(--blue)">━</span>　${text('虚线为上限 · 按最大时长预览','Dashed: limits · maximum stage durations')}</p>` : ''}</div><div class="prototype-intro-steps">${m.stages.map(s => {
+  return `<header><div class="intro-brand"></div><h2>${text('方案介绍','About this profile')}</h2><div class="water-header-actions"><small>${text('当前方案','Current profile')}</small><onecup-water></onecup-water></div></header><div class="prototype-intro-main"><section class="prototype-intro-summary"><small>${text('当前方案','Current profile')}</small><h1>${escape(m.title)}</h1><p>${escape(m.description)}</p><div class="prototype-intro-values"><div><strong>${format(m.dose)}</strong><small> g</small><span>${text('粉量','Dose')}</span></div><div><strong>${format(m.target)}</strong><small> g</small><span>${text('目标出液','Target yield')}</span></div><div><strong>${m.ratio === null ? '—' : '1:' + format(m.ratio)}</strong><span>${text('粉液比','Ratio')}</span></div></div></section><section class="prototype-intro-targets"><div class="intro-target-visual"><h3>${text('分段目标','Stage targets')}</h3>${profileIntroChart(m.stages, language)}${m.stages.length ? `<p class="intro-chart-note">${text('压力','Pressure')}　<span style="color:var(--green)">━</span>　${text('流量','Flow')}　<span style="color:var(--blue)">━</span>　${text('虚线为上限 · 按最大时长预览','Dashed: limits · maximum stage durations')}</p>` : ''}</div><div class="prototype-intro-steps">${m.stages.map(s => {
     const kind = s.kind === 'pressure' ? text('压力','Pressure') : s.kind === 'flow' ? text('流量','Flow') : text('控制模式未识别','Unknown control mode');
     const unit = s.kind === 'pressure' ? 'bar' : s.kind === 'flow' ? 'mL/s' : '';
     const details = [`${kind} ${format(s.value)} ${unit}`, `${text('最多','Up to')} ${format(s.seconds)} s`];
@@ -83,7 +94,7 @@ export function profileIntroMarkup(workflow, language = 'zh') {
     if (s.exit) extra.push(exitText(s.exit, language));
     if (s.sensor === 'water' || s.sensor === 'coffee') extra.push(s.sensor === 'water' ? text('水温探头','Water sensor') : text('咖啡探头','Coffee sensor'));
     return `<article class="prototype-intro-step"><b>${s.index + 1}</b><div><h4>${escape(s.name)}</h4><p>${escape(details.join(' · '))}${extra.length ? '<br>' + escape(extra.join(' · ')) : ''}</p></div><strong>${format(s.temperature)} °C</strong></article>`;
-  }).join('')}</div></section></div><footer><button type="button" data-intro-back>‹　${text('返回','Back')}</button><button type="button" data-intro-adjust class="button primary">${text('微调这杯','Adjust this cup')}</button></footer>`;
+  }).join('')}</div>${m.originalNotes ? `<details class="intro-original-notes"><summary>${text('配方原始备注','Original profile notes')}</summary><p>${escape(m.originalNotes)}</p></details>` : ''}</section></div><footer><button type="button" data-intro-back>‹　${text('返回','Back')}</button><button type="button" data-intro-adjust class="button primary">${text('微调这杯','Adjust this cup')}</button></footer>`;
 }
 
 export function mountProfileIntro(api) {

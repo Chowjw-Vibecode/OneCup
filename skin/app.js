@@ -1,18 +1,20 @@
+import {registerWaterStatus,updateWaterStatus} from "./water-status.js?v=0.2.42";
+import {mountProfileLibrary,libraryHistoryIdentity} from "./profile-library.js?v=0.2.42";
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.41";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.41";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.41";
-import {telemetryPath} from "./chart-path.js?v=0.2.41";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.41";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.41";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.41";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.41";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.41";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.41";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.41";
-import { createSkinUpdater } from "./update.js?v=0.2.41";
-import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.41';
-import { createUsageReporter } from "./usage.js?v=0.2.41";
+import {stageLabel} from "./stage-labels.js?v=0.2.42";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.42";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.42";
+import {telemetryPath} from "./chart-path.js?v=0.2.42";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.42";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.42";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.42";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.42";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.42";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.42";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.42";
+import { createSkinUpdater } from "./update.js?v=0.2.42";
+import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.42';
+import { createUsageReporter } from "./usage.js?v=0.2.42";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -63,7 +65,9 @@ let runTelemetryIdentity=null;
 let runTelemetryShotId=null;
 let cupPersistenceWarningAt=0;
 let skinUpdater;
-const SKIN_VERSION = "0.2.41";
+registerWaterStatus();
+
+const SKIN_VERSION = "0.2.42";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),
@@ -758,6 +762,7 @@ function openDialog(id) {
   );
 }
 function closeDialog() {
+  globalThis.window?.profileLibrary?.close();
   const guard=document.createElement("div");guard.className="dismiss-guard";document.body.append(guard);setTimeout(()=>guard.remove(),350);
   s.customNumber=null;
   const returnTo = s.modal === "keypadDialog" ? s.keyReturn : null;
@@ -1589,6 +1594,7 @@ function scheduleRender() {
   requestAnimationFrame(() => { renderPending = false; render(); });
 }
 function render() {
+  updateWaterStatus(s.snapshot, s.connection, s.language);
   const current = viewOf(s.draft),
     base = viewOf(s.workflow),
     m = s.snapshot.machine ?? {},
@@ -2104,9 +2110,10 @@ async function openProfiles() {
   s.favoriteOnly = false;
   $("profileSearch").value = "";
   openDialog("profileDialog");
+  globalThis.window?.profileLibrary?.open();
   renderProfiles();
   scrollSelectedProfile(sequence);
-  const results = await Promise.allSettled([loadFavorites(), refreshProfileLibrary()]);
+  const results = await Promise.allSettled([loadFavorites(), refreshProfileLibrary(), refreshHistory(false)]);
   if (s.modal === "profileDialog" && sequence === s.profileDialogSequence) {
     const untouched = (s.profileSelectionRevision ?? 0) === selectionRevision && s.selectedProfile === initialSelection;
     if (untouched) s.selectedProfile = currentEntry();
@@ -2127,6 +2134,7 @@ function scrollSelectedProfile(sequence) {
   });
 }
 function renderProfiles() {
+  if (globalThis.window?.profileLibrary && s.modal === "profileDialog") { window.profileLibrary.refresh(); return; }
   const search = $("profileSearch").value.trim().toLocaleLowerCase();
   const entries = s.profiles.filter(
     (e) =>
@@ -2147,6 +2155,7 @@ function renderProfiles() {
   renderProfilePreview();
 }
 function renderProfilePreview() {
+  if (globalThis.window?.profileLibrary && s.modal === "profileDialog") { window.profileLibrary.refresh(); return; }
   const entry = s.selectedProfile,
     p = profileOf(entry);
   $("applyProfile").disabled = !p?.steps?.length || !editable() || dirty() || hotWaterDirty() || !!s.workflowConflict;
@@ -2215,6 +2224,11 @@ async function toggleFavorite(id) {
   } finally {
     s.favoriteBusy = false;
   }
+}
+async function applyLibraryProfile(entry) {
+  const latest=s.profiles.find(e=>e.id===entry?.id&&e.visibility!=="hidden");
+  if(!latest||!editable()||dirty()||hotWaterDirty()||s.workflowConflict){toast(s.language==='zh'?'当前无法切换，请先核对连接、制作状态和未保存调整。':'Cannot switch profiles. Check connection, machine state and unsaved edits.',true);return;}
+  s.selectedProfile=latest;await applyProfile();
 }
 async function applyProfile() {
   if (!s.selectedProfile) return;
@@ -2998,6 +3012,7 @@ window.addEventListener("pagehide", () => {
 });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
+    client?.refreshRefillSetting(true);
     client?.grinder.refreshObservation?.().catch(() => {});
     displayManager?.refresh();
   }
@@ -3223,7 +3238,7 @@ function setupExtraPanels() {
   scale.hidden = true;
   scale.setAttribute("role", "dialog");
   scale.setAttribute("aria-modal", "true");
-  scale.innerHTML = `<section class="dialog scale-dialog"><header class="dialog-header"><h2 id="scaleDialogTitle">${t("scaleDialog")}</h2><button id="scanScales" class="text-button">${t("scan")}</button><button id="closeScale" class="close-button" aria-label="${t("back")}">×</button></header><div class="dialog-content"><div id="scaleList" class="scale-list"></div><div class="scale-controls"><strong id="scalePanelWeight">— g</strong><span id="scalePanelTimer" hidden></span><button id="scalePanelTare" class="button secondary">${t("tare")}</button></div><div id="scaleTimerControls" class="scale-controls"><button data-timer="start" class="button secondary">${t("timerStart")}</button><button data-timer="stop" class="button secondary">${t("timerStop")}</button><button data-timer="reset" class="button secondary">${t("timerReset")}</button></div><div class="scale-mode"><label for="scalePowerMode">${t("scalePower")}</label><select id="scalePowerMode"><option value="displayOff">${t("displayOff")}</option><option value="disconnect">${t("disconnectMode")}</option><option value="disabled">${t("disabledMode")}</option></select></div><p id="scalePowerHint" class="scale-power-hint"></p><p id="scalePanelMessage" class="error-text" role="status"></p></div><footer class="dialog-footer"><button id="scaleBack" class="button secondary">${t("back")}</button></footer></section>`;
+  scale.innerHTML = `<section class="dialog scale-dialog"><header class="dialog-header"><h2 id="scaleDialogTitle">${t("scaleDialog")}</h2><button id="scanScales" class="text-button">${t("scan")}</button><onecup-water></onecup-water><button id="closeScale" class="close-button" aria-label="${t("back")}">×</button></header><div class="dialog-content"><div id="scaleList" class="scale-list"></div><div class="scale-controls"><strong id="scalePanelWeight">— g</strong><span id="scalePanelTimer" hidden></span><button id="scalePanelTare" class="button secondary">${t("tare")}</button></div><div id="scaleTimerControls" class="scale-controls"><button data-timer="start" class="button secondary">${t("timerStart")}</button><button data-timer="stop" class="button secondary">${t("timerStop")}</button><button data-timer="reset" class="button secondary">${t("timerReset")}</button></div><div class="scale-mode"><label for="scalePowerMode">${t("scalePower")}</label><select id="scalePowerMode"><option value="displayOff">${t("displayOff")}</option><option value="disconnect">${t("disconnectMode")}</option><option value="disabled">${t("disabledMode")}</option></select></div><p id="scalePowerHint" class="scale-power-hint"></p><p id="scalePanelMessage" class="error-text" role="status"></p></div><footer class="dialog-footer"><button id="scaleBack" class="button secondary">${t("back")}</button></footer></section>`;
   document.body.append(scale);
   $("closeScale").onclick = $("scaleBack").onclick = closeDialog;
   $("scanScales").onclick = scanScales;
@@ -3245,7 +3260,7 @@ function setupExtraPanels() {
   ambient.className = "ambient-screen";
   ambient.hidden = true;
   ambient.innerHTML =
-    '<img id="ambientImage" alt=""><div class="ambient-shade"></div><div class="ambient-top"><span id="ambientClock" class="ambient-clock"></span><button id="ambientBack"></button></div><div class="ambient-content"><h2 id="ambientTitle"></h2><p id="ambientMessage"></p></div>';
+    '<img id="ambientImage" alt=""><div class="ambient-shade"></div><div class="ambient-top"><span id="ambientClock" class="ambient-clock"></span><div class="water-header-actions"><onecup-water></onecup-water><button id="ambientBack"></button></div></div><div class="ambient-content"><h2 id="ambientTitle"></h2><p id="ambientMessage"></p></div>';
   document.body.append(ambient);
   $("ambientBack").onclick = () => {
     s.ambientDismissed = machineState();
@@ -3750,7 +3765,7 @@ function openGallery(preserve = false) {
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
     dialog.innerHTML =
-      '<section class="dialog gallery-dialog"><header class="dialog-header"><h2 id="galleryTitle"></h2><button id="gallerySlideshow" class="button secondary"></button><button id="galleryClear" class="text-button"></button><button id="closeGallery" class="close-button">×</button></header><div id="galleryGrid" class="gallery-grid"></div><footer class="dialog-footer"><span id="galleryHint"></span><button id="galleryBack" class="button secondary"></button><button id="gallerySave" class="button primary"></button></footer></section>';
+      '<section class="dialog gallery-dialog"><header class="dialog-header"><h2 id="galleryTitle"></h2><button id="gallerySlideshow" class="button secondary"></button><button id="galleryClear" class="text-button"></button><onecup-water></onecup-water><button id="closeGallery" class="close-button">×</button></header><div id="galleryGrid" class="gallery-grid"></div><footer class="dialog-footer"><span id="galleryHint"></span><button id="galleryBack" class="button secondary"></button><button id="gallerySave" class="button primary"></button></footer></section>';
     document.body.append(dialog);
     $("closeGallery").onclick = $("galleryBack").onclick = openSettings;
     $("gallerySlideshow").onclick = () => {
@@ -3841,11 +3856,36 @@ setProfileDraft:p=>{s.draft.profile=p;render()},
 openCustomNumber:({value,key,onSave})=>{const back=s.modal;openKeypad(key);if(s.modal==='keypadDialog'){s.customNumber=onSave;s.keyText=String(value??'');s.keyReturn=back;renderKeypad();}}
 });
 
+let profileLibraryHistoryCache;
+function profileLibraryHistory(){
+ if(profileLibraryHistoryCache?.shots===s.history&&profileLibraryHistoryCache.count===s.history.length&&profileLibraryHistoryCache.entries===s.profiles)
+  return profileLibraryHistoryCache.rows;
+ const rows=s.history.map(shot=>({
+  name:shot.workflow?.profile?.title??shot.workflow?.name,
+  profileId:libraryHistoryIdentity(shot,s.profiles),
+  hasProfileIdentity:Boolean(shot.workflow?.context?.extras?.thisCupProfileBinding?.id),
+  dose:shot.workflow?.context?.targetDoseWeight,
+  yield:shotYield(shot),
+  timestamp:shot.timestamp,
+ }));
+ profileLibraryHistoryCache={shots:s.history,count:s.history.length,entries:s.profiles,rows};
+ return rows;
+}
+
+window.profileLibrary = mountProfileLibrary({
+ getEntries:()=>s.profiles, getFavorites:()=>s.favorites, getLanguage:()=>s.language,
+ getHistory:profileLibraryHistory,
+ onSelect:entry=>{s.selectedProfile=entry;s.selectedProfileUnavailable=false;s.profileSelectionRevision=(s.profileSelectionRevision??0)+1;},
+ onFavorite:entry=>toggleFavorite(entry.id),
+ canApply:()=>editable()&&!dirty()&&!hotWaterDirty()&&!s.workflowConflict,
+ onApply:applyLibraryProfile,
+ onCommunity:()=>window.onlineProfiles?.open('community'), onClose:()=>closeDialog()
+});
 window.profileIntro = mountProfileIntro(window.thisCup);
 window.onlineProfiles = mountOnlineProfiles({getClient:()=>client,getLanguage:()=>s.language,getProfiles:()=>s.profiles,
  isAllowed:()=>s.modal==='profileDialog'&&!running()&&!s.busy,
  onLibrary:entries=>{s.profiles=entries;renderProfiles();},
- onBrowseLocal:entry=>{if(entry){s.selectedProfile=entry;s.selectedProfileUnavailable=false;s.profileSelectionRevision=(s.profileSelectionRevision??0)+1;s.favoriteOnly=false;$("profileSearch").value='';}renderProfiles();scrollSelectedProfile(s.profileDialogSequence);},notice:toast,explainError});
+ onBrowseLocal:entry=>{if(entry){window.profileLibrary?.open(entry);s.selectedProfile=entry;s.selectedProfileUnavailable=false;s.profileSelectionRevision=(s.profileSelectionRevision??0)+1;s.favoriteOnly=false;$("profileSearch").value='';}renderProfiles();scrollSelectedProfile(s.profileDialogSequence);},notice:toast,explainError});
 
 // This module is created after the tasting UI so pending drafts can block reloads.
 skinUpdater=createSkinUpdater({currentVersion:SKIN_VERSION,getClient:()=>client,getContext:skinUpdateContext,onStatus:value=>{

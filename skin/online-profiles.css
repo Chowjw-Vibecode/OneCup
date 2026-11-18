@@ -15,3 +15,5 @@
 
 /* Share the document's bundled typefaces across the shadow boundary. */
 :host{font-synthesis:none;font-optical-sizing:auto}.chart svg text{font-family:var(--font-number);font-weight:400}.tab{font-weight:500}.tab.active{font-weight:700}
+
+.top .water-header-actions{display:flex;align-items:center;gap:clamp(4px,1vw,14px)}

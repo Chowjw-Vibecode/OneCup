@@ -206,3 +206,7 @@ body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) .chart-header{ju
 body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) .legend{justify-content:center;margin-inline:0}
 body:is([data-ceramic-screen=brew],[data-ceramic-screen=taste]) #ceramicChartReadout{justify-content:center;column-gap:.9vw}
 body[data-ceramic-screen=brew] .chart-wrap{margin-left:-2.4vw;width:calc(100% + 2.4vw)}
+
+.intro-original-notes{margin-top:1.3vh;color:var(--muted);font:500 clamp(12px,1.24vw,16px)/1.6 var(--font-caption)}
+.intro-original-notes summary{cursor:pointer;min-height:44px;padding-block:10px}
+.intro-original-notes p{margin:0 0 1.3vh;white-space:pre-wrap;overflow-wrap:anywhere}

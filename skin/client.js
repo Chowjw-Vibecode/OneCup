@@ -1,5 +1,6 @@
 // Decaid 0.9 REST/WS adapter. Commands are never replayed after a timeout.
-import {createGrinderClient} from './grinder.js?v=0.2.41';
+import {validWaterHeight} from './water-status.js?v=0.2.42';
+import {createGrinderClient} from './grinder.js?v=0.2.42';
 // Shared by the library preview and the actual selection write.
 export function selectedProfileContext(entry,currentContext={}) {
   const profile=entry?.profile||entry||{},context={...currentContext};
@@ -65,7 +66,7 @@ export class DecaidClient {
     this.fetcher = options.fetch || globalThis.fetch.bind(globalThis);
     this.grinder = createGrinderClient({baseUrl:this.baseUrl,fetchImpl:this.fetcher});
     this.Socket = options.WebSocket || globalThis.WebSocket;
-    this.snapshot = {machine:null, scale:null, shotState:null, water:null, devices:[]};
+    this.snapshot = {machine:null, scale:null, shotState:null, water:null, waterMachine:null, devices:[]};
     this.connection = {connected:false,machineConnected:false,scaleConnected:false,stale:true,error:null};
     this.sockets = new Map(); this.reconnectTimers = new Set(); this.closed = true;
     this.lastPrimaryScaleId = null;
@@ -74,6 +75,10 @@ export class DecaidClient {
     // A new client (explicit connection) establishes a new host-clock epoch.
     this.lastMachineTimestamp = null;
     this.devicesRevision = 0; this.devicesRequest = 0;
+    this.waterMachineKey = null;
+    this.waterEpoch = 0;
+    this.waterRequest = 0;
+    this.refillRead = null;
     this.lastMachineAt = 0; this.lastScaleAt = 0; this.writeBusy = false;
     this.streamDiagnostics = {}; this.loopDelayMs = 0;
   }
@@ -191,6 +196,8 @@ export class DecaidClient {
     if(!profile.title || !Array.isArray(profile.steps) || !profile.steps.length) throw new ApiError('该方案缺少可执行步骤',0,null,'apiInvalidProfile');
     const current=expectedWorkflow || await this.get('/workflow');
     const context=selectedProfileContext(entry,current.context);
+    // Replace the previous source identity, including when the native context is deep-merged.
+    context.extras={...context.extras,thisCupProfileBinding:entry.id?{id:entry.id,execution:profileExecutionKey(profile)}:null};
     return this.saveWorkflow({profile:clone(profile),context},current);
   }
   saveProfile(entry){
@@ -226,7 +233,20 @@ export class DecaidClient {
     if(!Array.isArray(devices))return;
     this.devicesRevision++;
     this.snapshot.devices=devices;
-    this.connection.machineConnected=devices.some(d=>d.type==='machine'&&d.state==='connected');
+    const machine=devices.find(d=>d.type==='machine'&&d.state==='connected');
+    this.connection.machineConnected=Boolean(machine);
+    const key=machine ? (machine.id ?? machine.name ?? '') : null;
+    if(key!==this.waterMachineKey){
+      this.waterMachineKey=key;
+      this.waterEpoch++;
+      this.refillRead=null;
+      this.snapshot.water=null;
+      this.snapshot.waterMachine=null;
+      if(key!==null && !this.closed){
+        this.refreshWaterMachine();
+        this.readWaterLevels();
+      }
+    }
     const primary=devices.find(d=>d.type==='scale'&&d.state==='connected'&&d.connectionRole!=='auxiliary');
     const primaryId=primary?.id ?? null;
     this.connection.scaleConnected=Boolean(primary);
@@ -242,6 +262,61 @@ export class DecaidClient {
       }
       this.lastPrimaryScaleId=primaryId;
     }
+  }
+  async refreshWaterMachine(){
+    const epoch=this.waterEpoch;
+    try {
+      const info=await this.get('/machine/info');
+      if(this.closed || epoch!==this.waterEpoch || !info?.model)return;
+      const refillKit=info.extra?.refillKit === true;
+      this.snapshot.waterMachine={model:info.model,refillKit};
+      this.emit?.();
+      this.refreshRefillSetting();
+    } catch {}
+  }
+  async refreshRefillSetting(onReturn=false){
+    const machine=this.snapshot.waterMachine;
+    const state=this.snapshot.machine?.state?.state?.toLowerCase();
+    if(this.closed || !machine?.refillKit)return;
+    const read=this.refillRead??={at:-Infinity,pending:false,low:false,onReturn:false};
+    if(onReturn)read.onReturn=true;
+    // Reading the advanced settings also reads heater registers. Do not
+    // probe them during preheat, extraction, steam, or another operation.
+    if(!['idle','schedidle','needswater'].includes(state))return;
+    // Decaid exposes the connection-time kit detection separately from the
+    // current override. The override has no WebSocket notification.
+    const {currentLevel,refillLevel}=this.snapshot.water??{};
+    const low=(validWaterHeight(currentLevel) && validWaterHeight(refillLevel) && currentLevel<=refillLevel) ||
+      state==='needswater';
+    const now=Date.now();
+    // Rearm the fast read only after the sensor moves clear of the threshold.
+    if(!low && currentLevel>refillLevel+1)read.low=false;
+    const interval=read.onReturn || low&&!read.low ? 750 : low ? 10000 : 30000;
+    if(read.pending || now-read.at<interval)return;
+    read.at=now;
+    read.low=low;
+    read.onReturn=false;
+    read.pending=true;
+    try {
+      const setting=(await this.get('/machine/settings/advanced'))?.refillKitSetting;
+      if(this.closed || read!==this.refillRead || ![0,1,2].includes(setting))return;
+      const disabled=setting===0;
+      if(disabled===Boolean(this.snapshot.waterMachine.refillDisabled))return;
+      this.snapshot.waterMachine={...this.snapshot.waterMachine,refillDisabled:disabled};
+      this.emit?.();
+    } catch {}
+    finally {read.pending=false;}
+  }
+  async readWaterLevels(){
+    const epoch=this.waterEpoch, request=++this.waterRequest;
+    try {
+      const water=await this.get('/machine/waterLevels');
+      // A WebSocket update or a newer device session supersedes this readback.
+      if(this.closed || epoch!==this.waterEpoch || request!==this.waterRequest || !validWaterHeight(water?.currentLevel))return;
+      this.snapshot.water=water;
+      this.refreshRefillSetting();
+      this.emit?.();
+    } catch {}
   }
   setScaleStatus(status){
     this.devicesRevision++;
@@ -281,7 +356,9 @@ export class DecaidClient {
       const diagnostic=this.streamDiagnostics[path]??={messages:0,validMessages:0,rejectedMessages:0,parseErrors:0,reconnects:0,lastReceivedAt:0,lastValidAt:0};
       diagnostic.openedAt=Date.now();
       this.sockets.set(path,socket);
-      socket.onopen=()=>{if(this.closed||this.sockets.get(path)!==socket)return;diagnostic.openedAt=Date.now();if(path==='/machine/snapshot')this.connection.connected=true;emit();};
+      socket.onopen=()=>{if(this.closed||this.sockets.get(path)!==socket)return;diagnostic.openedAt=Date.now();if(path==='/machine/snapshot')this.connection.connected=true;
+        if(path==='/machine/waterLevels' && diagnostic.reconnects>0 && this.waterMachineKey!==null && !this.snapshot.water)this.readWaterLevels();
+        emit();};
       socket.onmessage=event=>{
         if(this.closed||this.sockets.get(path)!==socket)return;
         diagnostic.messages++;diagnostic.lastReceivedAt=Date.now();
@@ -302,6 +379,7 @@ export class DecaidClient {
         if(this.closed||this.sockets.get(path)!==socket)return;
         this.sockets.delete(path);
         if(path==='/machine/snapshot')this.connection.connected=false;
+        if(path==='/machine/waterLevels'){this.waterRequest++;this.snapshot.water=null;}
         if(path==='/scale/snapshot'){this.devicesRevision++;this.connection.scaleConnected=false;this.snapshot.scale=null;this.lastScaleAt=0;}
         emit();
         const timer=setTimeout(()=>{this.reconnectTimers.delete(timer);diagnostic.reconnects++;attach(path,handler);},2000);
@@ -369,14 +447,25 @@ export class DecaidClient {
       }
     });
     attach('/machine/shotState',s=>{if(!s.state)return false;this.snapshot.shotState=s;return true;});
-    attach('/machine/waterLevels',s=>{if(s.currentLevel===undefined)return false;this.snapshot.water=s;return true;});
+    attach('/machine/waterLevels',s=>{
+      if(this.waterMachineKey===null || !validWaterHeight(s.currentLevel))return false;
+      this.waterRequest++;this.snapshot.water=s;
+      this.refreshRefillSetting();
+      return true;
+    });
     attach('/devices',s=>{if(!Array.isArray(s.devices))return false;this.setDevices(s.devices);this.snapshot.scanning=s.scanning;this.snapshot.deviceError=s.connectionStatus?.error ?? null;return true;});
     this.refreshDevices().then(()=>{if(!this.closed)emit();}).catch(()=>{});
-    this.staleTimer=setInterval(()=>{this.checkStreamHealth();emit();},1000);
+    this.staleTimer=setInterval(()=>{
+      this.checkStreamHealth();
+      if(this.connection.connected && Date.now()-this.lastMachineAt<=5000)this.refreshRefillSetting();
+      emit();
+    },1000);
     return ()=>this.close();
   }
   close(){
     this.closed=true;
+    this.waterMachineKey=null;this.waterEpoch++;this.refillRead=null;
+    this.snapshot.water=null;this.snapshot.waterMachine=null;
     this.devicesRevision++;this.devicesRequest++;
     clearInterval(this.staleTimer);
     for(const t of this.reconnectTimers)clearTimeout(t);this.reconnectTimers.clear();

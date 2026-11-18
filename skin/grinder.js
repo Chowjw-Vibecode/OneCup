@@ -305,7 +305,14 @@ export function createGrinderClient({ baseUrl, fetchImpl = globalThis.fetch, sle
   async function readPreviousRecipes(path) {
     const source = path.startsWith(legacyRecipePath) ? legacyRecipePath : path.includes('?full=1') ? `${previousRecipeNamespace}:list` : `${previousRecipeNamespace}:item`;
     try { const value = await request(path); unavailableRecipeSources.delete(source); if(source===`${previousRecipeNamespace}:list`)unavailableRecipeSources.delete(`${previousRecipeNamespace}:item`); return value; }
-    catch (error) { if (error.code !== 'http_500') throw error; unavailableRecipeSources.add(source); return null; }
+    catch (error) {
+      // Decaid's legacy storage error can omit CORS headers. In that case
+      // the WebView rejects fetch without exposing the HTTP 500. Only the
+      // legacy reads are optional; errors from the current store still surface.
+      if (error.code !== 'http_500' && !(error instanceof TypeError)) throw error;
+      unavailableRecipeSources.add(source);
+      return null;
+    }
   }
   const isMap = value => value && typeof value==='object' && !Array.isArray(value);
   const linkedRecord = (record,identity,version) => record?.schemaVersion===version && record.profileId===identity.profileId;

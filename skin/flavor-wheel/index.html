@@ -20,6 +20,9 @@
     h1,h2,h3,p{margin:0}
     .app{width:100%;max-width:1920px;height:100dvh;min-height:0;margin:auto;display:grid;grid-template-rows:10.5% minmax(0,1fr);padding:0 3vw;overflow:hidden;position:relative;isolation:isolate}
     .app:focus{outline:none}
+    #flavorWaterTop{justify-self:end}
+    #flavorWaterZoom{display:none;align-self:center}
+    .app.expanded #flavorWaterZoom{display:inline-flex}
     .topbar{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:24px;z-index:2}
     .brand{width:clamp(250px,28.5vw,452px);height:clamp(36px,4.4vw,70px);display:block;overflow:visible}
     .brand{object-fit:contain}
@@ -145,8 +148,9 @@
 <body>
   <div class="app" tabindex="-1">
     <header class="topbar">
-      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.41" alt="这一杯 · OneCup">
+      <img class="brand" src="../assets/ceramic/onecup-brand.svg?v=0.2.42" alt="这一杯 · OneCup">
       <div class="stage-title" id="stageTitle">品鉴 · 选风味</div>
+      <span id="flavorWaterTop"></span>
     </header>
 
     <main class="picker" id="picker" aria-labelledby="pickerTitle">
@@ -156,7 +160,7 @@
       </section>
       <div class="workspace">
         <section class="wheel-region" aria-label="风味轮">
-          <div class="wheel-tools"><button id="zoomWheel" type="button" aria-pressed="false">放大</button></div>
+          <div class="wheel-tools"><span id="flavorWaterZoom"></span><button id="zoomWheel" type="button" aria-pressed="false">放大</button></div>
           <div class="wheel-window" id="wheelWindow"><div class="wheel-content" id="wheel">
 <svg id="wheelArt" class="official-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1160" role="group" aria-labelledby="title desc"><title id="title">咖啡风味轮 · 矢量交互原型</title><desc id="desc">依据SCA及WCR风味轮分类重绘；完整9大类、28中层、73外层。并非SCA官方图文件。</desc><style>text{font-family:"OneCup Noto Sans SC","Noto Sans SC","PingFang SC",sans-serif;font-weight:500}</style>
 <g data-node="floral"><title>花香 · Floral</title><path d="M559.212,364.057 A205,205 0 0,1 620.590,367.059 L600.592,466.059 A104,104 0 0,0 569.454,464.536 Z" fill="#ed008c" stroke="#faf9f6" stroke-width="1.6"/>
