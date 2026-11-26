@@ -76,6 +76,7 @@ export class DecaidClient {
     this.lastMachineTimestamp = null;
     this.devicesRevision = 0; this.devicesRequest = 0;
     this.waterMachineKey = null;
+    this.waterMachineRead = null;
     this.waterEpoch = 0;
     this.waterRequest = 0;
     this.refillRead = null;
@@ -238,6 +239,7 @@ export class DecaidClient {
     const key=machine ? (machine.id ?? machine.name ?? '') : null;
     if(key!==this.waterMachineKey){
       this.waterMachineKey=key;
+      this.waterMachineRead=null;
       this.waterEpoch++;
       this.refillRead=null;
       this.snapshot.water=null;
@@ -264,7 +266,12 @@ export class DecaidClient {
     }
   }
   async refreshWaterMachine(){
-    const epoch=this.waterEpoch;
+    if(this.closed || this.waterMachineKey===null || this.snapshot.waterMachine)return;
+    const read=this.waterMachineRead??={at:-Infinity,pending:false};
+    const now=Date.now(), epoch=this.waterEpoch;
+    if(read.pending || now-read.at<10000)return;
+    read.at=now;
+    read.pending=true;
     try {
       const info=await this.get('/machine/info');
       if(this.closed || epoch!==this.waterEpoch || !info?.model)return;
@@ -273,6 +280,7 @@ export class DecaidClient {
       this.emit?.();
       this.refreshRefillSetting();
     } catch {}
+    finally {read.pending=false;}
   }
   async refreshRefillSetting(onReturn=false){
     const machine=this.snapshot.waterMachine;
@@ -457,14 +465,17 @@ export class DecaidClient {
     this.refreshDevices().then(()=>{if(!this.closed)emit();}).catch(()=>{});
     this.staleTimer=setInterval(()=>{
       this.checkStreamHealth();
-      if(this.connection.connected && Date.now()-this.lastMachineAt<=5000)this.refreshRefillSetting();
+      if(this.connection.connected && Date.now()-this.lastMachineAt<=5000){
+        this.refreshWaterMachine();
+        this.refreshRefillSetting();
+      }
       emit();
     },1000);
     return ()=>this.close();
   }
   close(){
     this.closed=true;
-    this.waterMachineKey=null;this.waterEpoch++;this.refillRead=null;
+    this.waterMachineKey=null;this.waterMachineRead=null;this.waterEpoch++;this.refillRead=null;
     this.snapshot.water=null;this.snapshot.waterMachine=null;
     this.devicesRevision++;this.devicesRequest++;
     clearInterval(this.staleTimer);

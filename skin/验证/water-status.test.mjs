@@ -69,6 +69,51 @@ test('Water reconnect clears both prior readings and kit detection; stale REST d
   assert.equal(client.snapshot.waterMachine.refillKit, false);
 });
 
+test('Recovers the water badge after the initial machine info request fails', async t => {
+  t.mock.timers.enable({apis:['setInterval']});
+  t.mock.method(Date, 'now', () => now);
+  let now=1000, infoReads=0;
+  const sockets=new Map();
+  class Socket {
+    constructor(url) { sockets.set(new URL(url).pathname.slice(6),this); }
+    close() {}
+  }
+  const client=new DecaidClient('http://preview.invalid',{WebSocket:Socket});
+  client.get=async path=>{
+    if(path==='/devices')return [{id:'de1',type:'machine',state:'connected'}];
+    if(path==='/machine/info'){
+      if(++infoReads===1) throw new Error('Temporary machine info failure');
+      return {model:'DE1Pro',extra:{refillKit:true}};
+    }
+    if(path==='/machine/settings/advanced')return {refillKitSetting:2};
+    throw new Error('No REST water route');
+  };
+  const off=client.subscribe(()=>{});
+  const send=(path,body)=>sockets.get(path).onmessage({data:JSON.stringify(body)});
+  const tickMachine=()=>send('/machine/snapshot',{...sample.machine,timestamp:new Date(now).toISOString()});
+  try {
+    await Promise.resolve();
+    await Promise.resolve();
+    sockets.get('/machine/snapshot').onopen();
+    tickMachine();
+    send('/machine/waterLevels',{currentLevel:22.6,refillLevel:40});
+    assert.equal(infoReads,1);
+    assert.equal(waterView(client.snapshot,client.connection,'zh').ml,null);
+
+    now+=1000;
+    t.mock.timers.tick(1000);
+    assert.equal(infoReads,1);
+
+    now+=10000;
+    tickMachine();
+    t.mock.timers.tick(1000);
+    await Promise.resolve();
+    await Promise.resolve();
+    const water=waterView(client.snapshot,client.connection,'zh');
+    assert.deepEqual([infoReads,water.ml,water.refillKit],[2,592,true]);
+  } finally { off(); }
+});
+
 test('Refreshes the override without reconnecting or overlapping slow reads', async t => {
   t.mock.method(Date, 'now', () => time);
   let time=0, requests=0, complete;
