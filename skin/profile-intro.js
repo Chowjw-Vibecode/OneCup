@@ -1,6 +1,6 @@
 import {profileLibraryData} from './profile-library-data.js';
-import {stageLabel} from "./stage-labels.js?v=0.2.42";
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.42';
+import {stageLabel} from "./stage-labels.js?v=0.2.43";
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.43';
 
 const numeric = value => value === null || value === undefined || value === '' || typeof value === 'boolean' || !Number.isFinite(Number(value)) ? null : Number(value);
 const format = value => numeric(value) === null ? '—' : String(Math.round(Number(value) * 100) / 100);

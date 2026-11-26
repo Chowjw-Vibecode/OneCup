@@ -1,12 +1,12 @@
-import {beanSnapshot} from './cup-telemetry.js?v=0.2.42';
-import {openFlavorWheel} from './flavor-wheel.js?v=0.2.42';
-import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.42';
-import {stageLabel} from './stage-labels.js?v=0.2.42';
-import {guardDismissClick} from './dismiss-guard.js?v=0.2.42';
-import {mountBeans} from './beans.js?v=0.2.42';
-import {paintGauge} from './instruments.js?v=0.2.42';
-import {setGroupHeadHint} from './ghc-icons.js?v=0.2.42';
-import {mountProfileEditor} from './profile-editor.js?v=0.2.42';
+import {beanSnapshot} from './cup-telemetry.js?v=0.2.43';
+import {openFlavorWheel} from './flavor-wheel.js?v=0.2.43';
+import {mountSteamPitcher} from './steam-pitcher.js?v=0.2.43';
+import {stageLabel} from './stage-labels.js?v=0.2.43';
+import {guardDismissClick} from './dismiss-guard.js?v=0.2.43';
+import {mountBeans} from './beans.js?v=0.2.43';
+import {paintGauge} from './instruments.js?v=0.2.43';
+import {setGroupHeadHint} from './ghc-icons.js?v=0.2.43';
+import {mountProfileEditor} from './profile-editor.js?v=0.2.43';
 export function mountCeramic(api){
  const $=id=>document.getElementById(id),s=api.state;
  const pitcherPrompt=mountSteamPitcher(api);

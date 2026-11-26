@@ -1,20 +1,20 @@
-import {registerWaterStatus,updateWaterStatus} from "./water-status.js?v=0.2.42";
-import {mountProfileLibrary,libraryHistoryIdentity} from "./profile-library.js?v=0.2.42";
+import {registerWaterStatus,updateWaterStatus} from "./water-status.js?v=0.2.43";
+import {mountProfileLibrary,libraryHistoryIdentity} from "./profile-library.js?v=0.2.43";
 import {isPreparation,isProfileSample,shotMeasurements,collapseProgress} from "./brew-timeline.js";
-import {stageLabel} from "./stage-labels.js?v=0.2.42";
-import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.42";
-import {consumeSavedShot} from "./shot-inventory.js?v=0.2.42";
-import {telemetryPath} from "./chart-path.js?v=0.2.42";
-import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.42";
-import {mountProfileIntro} from "./profile-intro.js?v=0.2.42";
-import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.42";
-import {mountCeramic} from "./ceramic-ui.js?v=0.2.42";
-import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.42";
-import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.42";
-import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.42";
-import { createSkinUpdater } from "./update.js?v=0.2.42";
-import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.42';
-import { createUsageReporter } from "./usage.js?v=0.2.42";
+import {stageLabel} from "./stage-labels.js?v=0.2.43";
+import {pendingInventoryIds,pendingInventoryCursor,rememberInventoryAttempt,rememberInventoryShot,forgetInventoryShot} from "./inventory-pending.js?v=0.2.43";
+import {consumeSavedShot} from "./shot-inventory.js?v=0.2.43";
+import {telemetryPath} from "./chart-path.js?v=0.2.43";
+import {setGroupHeadHint} from "./ghc-icons.js?v=0.2.43";
+import {mountProfileIntro} from "./profile-intro.js?v=0.2.43";
+import {mountOnlineProfiles} from "./online-profiles.js?v=0.2.43";
+import {mountCeramic} from "./ceramic-ui.js?v=0.2.43";
+import {paintGauge,gaugeSpec} from "./instruments.js?v=0.2.43";
+import { DecaidClient, selectedProfileContext, profileExecutionKey, resolveProfileIdentity, rebaseWorkflowDraft } from "./client.js?v=0.2.43";
+import { createDisplayManager, DEFAULT_DISPLAY_PREFERENCES } from "./display.js?v=0.2.43";
+import { createSkinUpdater } from "./update.js?v=0.2.43";
+import {createCupReporter,beanSnapshot,machineIdentity} from './cup-telemetry.js?v=0.2.43';
+import { createUsageReporter } from "./usage.js?v=0.2.43";
 
 const $ = (id) => document.getElementById(id);
 const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
@@ -67,7 +67,7 @@ let cupPersistenceWarningAt=0;
 let skinUpdater;
 registerWaterStatus();
 
-const SKIN_VERSION = "0.2.42";
+const SKIN_VERSION = "0.2.43";
 const s = {
   language: store.get("language", "zh"),
   theme: store.get("theme", "light"),

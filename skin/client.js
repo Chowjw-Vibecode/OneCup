@@ -1,6 +1,6 @@
 // Decaid 0.9 REST/WS adapter. Commands are never replayed after a timeout.
-import {validWaterHeight} from './water-status.js?v=0.2.42';
-import {createGrinderClient} from './grinder.js?v=0.2.42';
+import {validWaterHeight} from './water-status.js?v=0.2.43';
+import {createGrinderClient} from './grinder.js?v=0.2.43';
 // Shared by the library preview and the actual selection write.
 export function selectedProfileContext(entry,currentContext={}) {
   const profile=entry?.profile||entry||{},context={...currentContext};
